@@ -38,16 +38,12 @@ export class EmployeeService {
 
         if (isEmpty(employeeInfo.euid)) {
             TE("euid not provided")
-        }
-
-        if (isNotEmpty(employeeInfo.euid)) {
+        } else {
             [err, emp] = await TO(Employee.findOne({ euid: employeeInfo.euid }))
             if (err || isEmpty(emp)) {
                 TE("Employee not found")
             }
             ;[err, emp] = await TO(Employee.remove(emp as Employee))
-        } else {
-            emp = undefined
         }
 
         if (err) {
