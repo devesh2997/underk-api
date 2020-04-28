@@ -82,6 +82,12 @@ export class Employee extends BaseEntity {
     @IsNotEmpty()
     mobileCountryCode: string
 
+    @Column({ default: false })
+    emailVerified: boolean
+
+    @Column({ default: false })
+    mobileVerified: boolean
+
     @Column()
     @IsInt()
     @IsNotEmpty()

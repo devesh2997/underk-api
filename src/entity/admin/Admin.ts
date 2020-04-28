@@ -16,11 +16,5 @@ export class Admin {
     @Column()
     password: string
 
-    @Column({ default: false })
-    emailVerified: boolean
-
-    @Column({ default: false })
-    mobileVerified: boolean
-
 
 }
