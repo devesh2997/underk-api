@@ -3,6 +3,20 @@ import { Admin } from "./Admin";
 import { EmployeeAddress } from "./EmployeeAddress";
 import { Length, IsEmail, IsInt, IsNotEmpty } from "class-validator";
 
+export interface EmployeeJSON {
+
+    euid: string
+    firstName: string
+    lastName: string
+    email: string
+    mobileCountryCode: string
+    mobileNumber: number
+    dob: number
+    gender: 'M' | 'F' | 'U' | 'N'
+    picUrl: string
+
+}
+
 @Entity()
 export class Employee extends BaseEntity {
 
@@ -16,6 +30,25 @@ export class Employee extends BaseEntity {
         this.dob = dob
         this.gender = gender
         this.picUrl = picUrl
+    }
+
+    toJSON(): EmployeeJSON {
+        return {
+            euid: this.euid,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            email: this.email,
+            mobileCountryCode: this.mobileCountryCode,
+            mobileNumber: this.mobileNumber,
+            dob: this.dob,
+            gender: this.gender,
+            picUrl: this.picUrl
+
+        }
+    }
+
+    static fromJson(json: EmployeeJSON): Employee {
+        return new Employee(json.firstName, json.lastName, json.email, json.mobileCountryCode, json.mobileNumber, json.dob, json.gender, json.picUrl)
     }
 
     @Generated("increment")

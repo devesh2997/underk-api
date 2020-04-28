@@ -1,9 +1,66 @@
-import { Employee } from "../../entity/admin/Employee"
-import { TO, TE, VE } from "../../utils/index"
+import { Employee, EmployeeJSON } from "../../entity/admin/Employee"
+import { TO, TE, VE, isEmpty } from "../../utils/index"
 import { isNotEmpty } from "class-validator"
 
 export class EmployeeService {
-    static createEmployee = async (employeeInfo: any): Promise<Employee> | never => {
+
+    static get = async (employeeInfo: any): Promise<Employee> | never => {
+        let err: any, emp: Employee | undefined
+
+        if(isEmpty(employeeInfo.euid)){
+            TE("euid not provided")
+        }
+
+        if (isNotEmpty(employeeInfo.euid)) {
+            [err, emp] = await TO(Employee.findOne({ euid: employeeInfo.euid }))
+        } else if (isNotEmpty(employeeInfo.email)) {
+            [err, emp] = await TO(Employee.findOne({ email: employeeInfo.email }))
+        } else if (isNotEmpty(employeeInfo.mobileNumber) && isNotEmpty(employeeInfo.mobileCountryCode)) {
+            [err, emp] = await TO(Employee.findOne({ mobileNumber: employeeInfo.mobileNumber, mobileCountryCode: employeeInfo.mobileCountryCode }))
+        } else {
+            emp = undefined
+        }
+
+        if (err) {
+            TE(err)
+        }
+
+        if (typeof emp === 'undefined') {
+            TE("Employee not found.")
+        }
+
+        return emp as Employee
+    }
+
+    static delete = async (employeeInfo: any): Promise<Employee> | never => {
+        let err: any, emp: Employee | undefined
+
+        if(isEmpty(employeeInfo.euid)){
+            TE("euid not provided")
+        }
+
+        if (isNotEmpty(employeeInfo.euid)) {
+            [err, emp] = await TO(Employee.findOne({euid: employeeInfo.euid}))
+            if(err || isEmpty(emp)){
+                TE("Employee not found")
+            }
+            ;[err, emp] = await TO(Employee.remove(emp as Employee))
+        } else {
+            emp = undefined
+        }
+
+        if (err) {
+            TE(err)
+        }
+
+        if (typeof emp === 'undefined') {
+            TE("Employee not found.")
+        }
+
+        return emp as Employee
+    }
+
+    static create = async (employeeInfo: EmployeeJSON): Promise<Employee> | never => {
         let err: any, emp: Employee
 
         //mobileNumber number must be number
@@ -36,19 +93,51 @@ export class EmployeeService {
         }
 
         //try to insert new employee
-        ;[err, emp] = await TO(Employee.insert(emp))
+        ;[err] = await TO(Employee.insert(emp))
+        if (err) {
+            TE(err)
+        }
+        return emp as Employee
+    }
+
+    static update = async (employeeInfo: EmployeeJSON): Promise<Employee> | never => {
+        let err: any, emp: Employee
+
+        if (isEmpty(employeeInfo) || isEmpty(employeeInfo.euid)) {
+            TE("euid not provided")
+        }
+
+        let existingEmployee: Employee
+            //check if employee exists or not
+            ;[err, existingEmployee] = await TO(Employee.findOne({ euid: employeeInfo.euid }));
+        if (err || !existingEmployee) {
+            TE("Employee does not exist")
+        }
+
+        const existingEmployeeJSON = existingEmployee.toJSON()
+
+        Object.assign(existingEmployeeJSON, employeeInfo)
+
+        //mobileNumber number must be number
+        if (isNotEmpty(existingEmployeeJSON.mobileNumber)) {
+            existingEmployeeJSON.mobileNumber = Number(existingEmployeeJSON.mobileNumber)
+        }
+
+        //dob must be number
+        if (isNotEmpty(existingEmployeeJSON.dob)) {
+            existingEmployeeJSON.dob = Number(existingEmployeeJSON.dob)
+        }
+
+        emp = Employee.fromJson(existingEmployeeJSON)
+        await VE(emp)
+
+            //try to update employee
+            ;[err] = await TO(Employee.update({ euid: emp.euid }, emp))
         if (err) {
             TE(err)
         }
 
-        //get created employee object
-        const newEmp = await Employee.findOne({ email: employeeInfo.email })
 
-        if (typeof newEmp === 'undefined') {
-            TE("Some error occurred")
-        }
-
-
-        return newEmp as Employee
+        return emp as Employee
     }
 }
