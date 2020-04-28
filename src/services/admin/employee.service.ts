@@ -58,7 +58,7 @@ export class EmployeeService {
             TE("Employee not found.")
         }
         emp = emp as Employee
-        return emp?.toJSON()
+        return emp.toJSON()
     }
 
     static create = async (employeeInfo: EmployeeJSON): Promise<EmployeeJSON> | never => {
@@ -138,7 +138,7 @@ export class EmployeeService {
         if (err) {
             TE(err)
         }
-        
+
         emp = emp as Employee
         return emp.toJSON()
     }

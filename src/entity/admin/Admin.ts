@@ -1,8 +1,15 @@
-import { Entity, Column, Generated, PrimaryColumn, OneToOne } from "typeorm"
-import { Employee } from "./Employee"
+import { Entity, Column, Generated, PrimaryColumn, OneToOne, BaseEntity } from "typeorm"
+import { Employee, EmployeeJSON } from "./Employee"
+
+export interface AdminJSON {
+    id: number
+    auid: string
+    password: string
+    employee: EmployeeJSON | undefined
+}
 
 @Entity()
-export class Admin {
+export class Admin extends BaseEntity{
     @Generated('increment')
     id: number
 
@@ -15,6 +22,15 @@ export class Admin {
 
     @Column()
     password: string
+
+    toJSON(): AdminJSON {
+        return {
+            id: this.id,
+            auid: this.auid,
+            password: this.password,
+            employee: this.employee.toJSON()
+        }
+    }
 
 
 }
