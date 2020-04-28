@@ -14,6 +14,8 @@ export interface EmployeeJSON {
     dob: number
     gender: 'M' | 'F' | 'U' | 'N'
     picUrl: string
+    mobileVerified: boolean,
+    emailVerified: boolean
 
 }
 
@@ -42,8 +44,9 @@ export class Employee extends BaseEntity {
             mobileNumber: this.mobileNumber,
             dob: this.dob,
             gender: this.gender,
-            picUrl: this.picUrl
-
+            picUrl: this.picUrl,
+            mobileVerified: this.mobileVerified,
+            emailVerified: this.emailVerified
         }
     }
 

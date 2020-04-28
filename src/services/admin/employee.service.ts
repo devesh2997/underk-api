@@ -4,10 +4,10 @@ import { isNotEmpty } from "class-validator"
 
 export class EmployeeService {
 
-    static get = async (employeeInfo: any): Promise<Employee> | never => {
+    static get = async (employeeInfo: any): Promise<EmployeeJSON> | never => {
         let err: any, emp: Employee | undefined
 
-        if(isEmpty(employeeInfo.euid)){
+        if (isEmpty(employeeInfo.euid)) {
             TE("euid not provided")
         }
 
@@ -28,20 +28,21 @@ export class EmployeeService {
         if (typeof emp === 'undefined') {
             TE("Employee not found.")
         }
+        emp = emp as Employee
 
-        return emp as Employee
+        return emp.toJSON()
     }
 
-    static delete = async (employeeInfo: any): Promise<Employee> | never => {
+    static delete = async (employeeInfo: any): Promise<EmployeeJSON> | never => {
         let err: any, emp: Employee | undefined
 
-        if(isEmpty(employeeInfo.euid)){
+        if (isEmpty(employeeInfo.euid)) {
             TE("euid not provided")
         }
 
         if (isNotEmpty(employeeInfo.euid)) {
-            [err, emp] = await TO(Employee.findOne({euid: employeeInfo.euid}))
-            if(err || isEmpty(emp)){
+            [err, emp] = await TO(Employee.findOne({ euid: employeeInfo.euid }))
+            if (err || isEmpty(emp)) {
                 TE("Employee not found")
             }
             ;[err, emp] = await TO(Employee.remove(emp as Employee))
@@ -56,11 +57,11 @@ export class EmployeeService {
         if (typeof emp === 'undefined') {
             TE("Employee not found.")
         }
-
-        return emp as Employee
+        emp = emp as Employee
+        return emp?.toJSON()
     }
 
-    static create = async (employeeInfo: EmployeeJSON): Promise<Employee> | never => {
+    static create = async (employeeInfo: EmployeeJSON): Promise<EmployeeJSON> | never => {
         let err: any, emp: Employee
 
         //mobileNumber number must be number
@@ -97,10 +98,11 @@ export class EmployeeService {
         if (err) {
             TE(err)
         }
-        return emp as Employee
+        emp = emp as Employee
+        return emp.toJSON()
     }
 
-    static update = async (employeeInfo: EmployeeJSON): Promise<Employee> | never => {
+    static update = async (employeeInfo: EmployeeJSON): Promise<EmployeeJSON> | never => {
         let err: any, emp: Employee
 
         if (isEmpty(employeeInfo) || isEmpty(employeeInfo.euid)) {
@@ -136,8 +138,8 @@ export class EmployeeService {
         if (err) {
             TE(err)
         }
-
-
-        return emp as Employee
+        
+        emp = emp as Employee
+        return emp.toJSON()
     }
 }
