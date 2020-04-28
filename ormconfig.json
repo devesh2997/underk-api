@@ -8,5 +8,5 @@
   "database": "underK",
   "synchronize": true,
   "logging": true,
-  "entities": ["src/entity/*.*"]
+  "entities": ["src/entity/**/*.ts"]
 }
