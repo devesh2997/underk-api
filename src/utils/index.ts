@@ -31,6 +31,7 @@ export const isEmpty = (o: any) => {
 
 export const ReE = (res: Response, err: any, code: number) => {
   // Error Web Response
+  console.log(err)
   if (typeof err == 'object' && typeof err.message != 'undefined') {
     err = err.message
   }

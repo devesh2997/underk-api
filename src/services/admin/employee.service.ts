@@ -49,10 +49,6 @@ export class EmployeeService {
         if (err) {
             TE(err)
         }
-
-        if (typeof emp === 'undefined') {
-            TE("Employee not found.")
-        }
         emp = emp as Employee
         return emp.toJSON()
     }

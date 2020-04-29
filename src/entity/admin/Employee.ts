@@ -61,7 +61,7 @@ export class Employee extends BaseEntity {
     @Generated("uuid")
     euid: string
 
-    @OneToOne(() => Admin)
+    @OneToOne(() => Admin, adm => adm.employee)
     admin: Admin
 
     @Column()
