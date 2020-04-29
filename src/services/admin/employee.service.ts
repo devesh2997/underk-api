@@ -64,7 +64,7 @@ export class EmployeeService {
         }
 
         //create employee object
-        emp = new Employee(employeeInfo.firstName, employeeInfo.lastName, employeeInfo.email, employeeInfo.mobileCountryCode, employeeInfo.mobileNumber, employeeInfo.dob, employeeInfo.gender, employeeInfo.picUrl)
+        emp = new Employee(employeeInfo.firstName, employeeInfo.lastName, employeeInfo.email, employeeInfo.mobileCountryCode, employeeInfo.mobileNumber, employeeInfo.dob, employeeInfo.gender, employeeInfo.picUrl, employeeInfo.address)
 
         //validate employee object
         await VE(emp)

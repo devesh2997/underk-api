@@ -1,6 +1,5 @@
-import { Entity, Generated, PrimaryColumn, OneToOne, OneToMany, Column, BaseEntity } from "typeorm";
+import { Entity, Generated, PrimaryColumn, OneToOne, Column, BaseEntity } from "typeorm";
 import { Admin } from "./Admin";
-import { EmployeeAddress } from "./EmployeeAddress";
 import { Length, IsEmail, IsInt, IsNotEmpty } from "class-validator";
 
 export interface EmployeeJSON {
@@ -15,14 +14,15 @@ export interface EmployeeJSON {
     gender: 'M' | 'F' | 'U' | 'N'
     picUrl: string
     mobileVerified: boolean,
-    emailVerified: boolean
+    emailVerified: boolean,
+    address: string
 
 }
 
 @Entity()
 export class Employee extends BaseEntity {
 
-    constructor(firstName: string, lastName: string, email: string, mobileCountryCode: string, mobileNumber: number, dob: number, gender: 'M' | 'F' | 'U' | 'N', picUrl: string) {
+    constructor(firstName: string, lastName: string, email: string, mobileCountryCode: string, mobileNumber: number, dob: number, gender: 'M' | 'F' | 'U' | 'N', picUrl: string, address: string) {
         super()
         this.firstName = firstName
         this.lastName = lastName
@@ -32,6 +32,7 @@ export class Employee extends BaseEntity {
         this.dob = dob
         this.gender = gender
         this.picUrl = picUrl
+        this.address = address
     }
 
     toJSON(): EmployeeJSON {
@@ -46,12 +47,13 @@ export class Employee extends BaseEntity {
             gender: this.gender,
             picUrl: this.picUrl,
             mobileVerified: this.mobileVerified,
-            emailVerified: this.emailVerified
+            emailVerified: this.emailVerified,
+            address: this.address
         }
     }
 
     static fromJson(json: EmployeeJSON): Employee {
-        return new Employee(json.firstName, json.lastName, json.email, json.mobileCountryCode, json.mobileNumber, json.dob, json.gender, json.picUrl)
+        return new Employee(json.firstName, json.lastName, json.email, json.mobileCountryCode, json.mobileNumber, json.dob, json.gender, json.picUrl, json.address)
     }
 
     @Generated("increment")
@@ -109,6 +111,7 @@ export class Employee extends BaseEntity {
     picUrl: string
 
 
-    @OneToMany(() => EmployeeAddress, employeeAddress => employeeAddress.employee)
-    addresses: EmployeeAddress[]
+    @Column("text")
+    @IsNotEmpty()
+    address: string
 }
