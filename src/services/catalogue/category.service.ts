@@ -23,8 +23,34 @@ export class CategoryService {
             TE(err)
         }
 
-        if(typeof category === 'undefined'){
+        if (typeof category === 'undefined') {
             TE("Category not found")
+        }
+
+        return category.toJSON()
+
+    }
+
+    static delete = async (categoryInfo: any): Promise<CategoryJSON> | never => {
+        let err, category: Category
+
+        if (isEmpty(categoryInfo.slug)) {
+            TE("Category slug not provided")
+        }
+
+        [err, category] = await TO(Category.findOne({ slug: categoryInfo.slug }))
+        if (err) {
+            TE(err)
+        }
+
+        if (typeof category === 'undefined') {
+            TE("Category not found")
+        }
+
+        [err, category] = await TO(Category.remove(category))
+
+        if (err) {
+            TE(err)
         }
 
         return category.toJSON()
