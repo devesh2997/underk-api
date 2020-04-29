@@ -7,10 +7,6 @@ export class EmployeeService {
     static get = async (employeeInfo: any): Promise<EmployeeJSON> | never => {
         let err: any, emp: Employee | undefined
 
-        if (isEmpty(employeeInfo.euid)) {
-            TE("euid not provided")
-        }
-
         if (isNotEmpty(employeeInfo.euid)) {
             [err, emp] = await TO(Employee.findOne({ euid: employeeInfo.euid }))
         } else if (isNotEmpty(employeeInfo.email)) {
@@ -18,6 +14,7 @@ export class EmployeeService {
         } else if (isNotEmpty(employeeInfo.mobileNumber) && isNotEmpty(employeeInfo.mobileCountryCode)) {
             [err, emp] = await TO(Employee.findOne({ mobileNumber: employeeInfo.mobileNumber, mobileCountryCode: employeeInfo.mobileCountryCode }))
         } else {
+            TE("Please provide euid, email or mobile number")
             emp = undefined
         }
 
