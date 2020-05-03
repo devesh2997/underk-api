@@ -13,7 +13,8 @@ export class CollectionController {
 
         return ReS(res, {
             message: "Collection found",
-            collection: collection
+            collection: collection,
+            error: err
         }, 201)
 
     }
@@ -27,7 +28,8 @@ export class CollectionController {
 
         return ReS(res, {
             message: "Collection deleted",
-            collection: collection
+            collection: collection,
+            error: err
         }, 201)
 
     }
@@ -41,7 +43,8 @@ export class CollectionController {
 
         return ReS(res, {
             message: "Collection created",
-            collection: collection
+            collection: collection,
+            error: err
         }, 201)
 
     }
@@ -55,7 +58,8 @@ export class CollectionController {
 
         return ReS(res, {
             message: "Collection updated",
-            collection: collection
+            collection: collection,
+            error: err
         }, 201)
 
     }
@@ -76,7 +80,8 @@ export class CollectionController {
 
         return ReS(res, {
             message: "Collections created",
-            collections: collections
+            collections: collections,
+            errors: errs
         }, 201)
 
     }
