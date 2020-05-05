@@ -4,6 +4,7 @@ import { AdminController } from "../../../controllers/admin/admin.controller";
 import { TypeController } from "../../../controllers/catalogue/type.controller";
 import { SubtypeController } from "../../../controllers/catalogue/subtype.controller";
 import { AttributeController } from "../../../controllers/catalogue/attribute.controller";
+import { AttributeValueController } from "../../../controllers/catalogue/attribute-value.controller";
 
 const router = Router()
 
@@ -31,6 +32,10 @@ router.post('/subtype',SubtypeController.create)
 router.get('/attribute',AttributeController.get)
 router.delete('/attribute',AttributeController.delete)
 router.post('/attribute',AttributeController.create)
+
+router.get('/attribute-value',AttributeValueController.get)
+router.delete('/attribute-value',AttributeValueController.delete)
+router.post('/attribute-value',AttributeValueController.create)
 
 
 

@@ -10,7 +10,7 @@ export class SubtypeService {
             TE("Subtype sku not provided")
         }
 
-        [err, subtype] = await TO(Subtype.findOne({ sku: subtypeInfo.sku }))
+        [err, subtype] = await TO(Subtype.findOne({ sku: subtypeInfo.sku }, { relations: ['type','attributes'] }))
         if (err) {
             TE(err)
         }
@@ -69,7 +69,7 @@ export class SubtypeService {
             TE(err)
         }
 
-        if(isEmpty(type)){
+        if (isEmpty(type)) {
             TE("Type with given not found")
         }
 

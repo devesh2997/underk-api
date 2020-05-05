@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Type, TypeJSON } from "../../entity/catalogue/Type";
+import { TypeJSON } from "../../entity/catalogue/Type";
 import { TO, ReE, ReS } from "../../utils";
 import { TypeService } from "../../services/catalogue/type.service";
 

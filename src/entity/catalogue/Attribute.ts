@@ -1,13 +1,13 @@
 import { BaseEntity, Column, ManyToOne, OneToMany, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { Subtype, SubtypeJSON } from "./Subtype";
 import { AttributeValue } from "./AttributeValue";
-import { IsLowercase } from "class-validator";
+import { IsLowercase, isNotEmpty } from "class-validator";
 
 
 export interface AttributeJSON {
     id: number,
     name: string,
-    subtype: SubtypeJSON,
+    subtype: SubtypeJSON | undefined,
     skuOrdering: number,
     variantsBasis: boolean
 }
@@ -41,10 +41,14 @@ export class Attribute extends BaseEntity {
     variantsBasis: boolean
 
     toJSON = (): AttributeJSON => {
+        let subtype: SubtypeJSON | undefined
+        if (isNotEmpty(this.subtype)) {
+            subtype = this.subtype.toJSON()
+        }
         return {
             id: this.id,
             name: this.name,
-            subtype: this.subtype.toJSON(),
+            subtype: subtype,
             skuOrdering: this.skuOrdering,
             variantsBasis: this.variantsBasis
         }

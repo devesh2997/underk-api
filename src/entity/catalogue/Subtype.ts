@@ -6,7 +6,8 @@ export interface SubtypeJSON {
     id: number,
     sku: string,
     name: string,
-    type: TypeJSON
+    type: TypeJSON,
+    attributes: Attribute[]
 }
 
 @Entity()
@@ -38,7 +39,8 @@ export class Subtype extends BaseEntity {
             id: this.id,
             sku: this.sku,
             name: this.name,
-            type: this.type.toJSON()
+            type: this.type.toJSON(),
+            attributes: this.attributes
         }
     }
 }
