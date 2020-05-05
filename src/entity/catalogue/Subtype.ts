@@ -1,9 +1,23 @@
 import { BaseEntity, Generated, PrimaryColumn, Column, ManyToOne, OneToMany, Entity } from "typeorm";
-import { Type } from "./Type";
+import { Type, TypeJSON } from "./Type";
 import { Attribute } from "./Attribute";
+
+export interface SubtypeJSON {
+    id: number,
+    sku: string,
+    name: string,
+    type: TypeJSON
+}
 
 @Entity()
 export class Subtype extends BaseEntity {
+
+    constructor(sku: string, name: string) {
+        super()
+        this.sku = sku
+        this.name = name
+    }
+
     @Generated("increment")
     id: number
 
@@ -18,4 +32,13 @@ export class Subtype extends BaseEntity {
 
     @OneToMany(() => Attribute, attribute => attribute.subtype)
     attributes: Attribute[]
+
+    toJSON = (): SubtypeJSON => {
+        return {
+            id: this.id,
+            sku: this.sku,
+            name: this.name,
+            type: this.type.toJSON()
+        }
+    }
 }

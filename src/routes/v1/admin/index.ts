@@ -2,6 +2,7 @@ import { Router } from "express";
 import { EmployeeController } from "../../../controllers/employee/employee.controller";
 import { AdminController } from "../../../controllers/admin/admin.controller";
 import { TypeController } from "../../../controllers/catalogue/type.controller";
+import { SubtypeController } from "../../../controllers/catalogue/subtype.controller";
 
 const router = Router()
 
@@ -21,6 +22,10 @@ router.delete('/emp', EmployeeController.delete)
 router.get('/type',TypeController.get)
 router.delete('/type',TypeController.delete)
 router.post('/type',TypeController.create)
+
+router.get('/subtype',SubtypeController.get)
+router.delete('/subtype',SubtypeController.delete)
+router.post('/subtype',SubtypeController.create)
 
 
 

@@ -1,6 +1,12 @@
 import { BaseEntity, Generated, PrimaryColumn, Column, OneToMany, Entity } from "typeorm";
 import { Subtype } from "./Subtype";
 
+export interface TypeJSON {
+    id: number,
+    sku: string,
+    name: string
+}
+
 @Entity()
 export class Type extends BaseEntity {
 
@@ -21,4 +27,12 @@ export class Type extends BaseEntity {
 
     @OneToMany(() => Subtype, subtype => subtype.type)
     subtypes: Subtype[];
+
+    toJSON = (): TypeJSON => {
+        return {
+            id: this.id,
+            sku: this.sku,
+            name: this.name
+        }
+    }
 }

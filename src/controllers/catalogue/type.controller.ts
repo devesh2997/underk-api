@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { Type } from "../../entity/catalogue/Type";
+import { Type, TypeJSON } from "../../entity/catalogue/Type";
 import { TO, ReE, ReS } from "../../utils";
 import { TypeService } from "../../services/catalogue/type.service";
 
 export class TypeController {
     static get = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
-        let err: string, type: Type
+        let err: string, type: TypeJSON
 
         [err, type] = await TO(TypeService.get(query))
 
@@ -17,7 +17,7 @@ export class TypeController {
 
     static delete = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
-        let err: string, type: Type
+        let err: string, type: TypeJSON
 
         [err, type] = await TO(TypeService.delete(query))
 
@@ -28,7 +28,7 @@ export class TypeController {
 
     static create = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body
-        let err: string, type: Type
+        let err: string, type: TypeJSON
 
         [err, type] = await TO(TypeService.create(body))
 
