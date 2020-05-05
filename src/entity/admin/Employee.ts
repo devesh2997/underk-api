@@ -1,6 +1,6 @@
 import { Entity, Generated, PrimaryColumn, OneToOne, Column, BaseEntity } from "typeorm";
 import { Admin } from "./Admin";
-import { Length, IsEmail, IsInt, IsNotEmpty } from "class-validator";
+import { Length, IsEmail, IsNotEmpty, IsNumber } from "class-validator";
 
 export interface EmployeeJSON {
 
@@ -93,13 +93,13 @@ export class Employee extends BaseEntity {
     @Column({ default: false })
     mobileVerified: boolean
 
-    @Column()
-    @IsInt()
+    @Column("bigint")
+    @IsNumber()
     @IsNotEmpty()
     mobileNumber: number
 
-    @Column()
-    @IsInt()
+    @Column("bigint")
+    @IsNumber()
     @IsNotEmpty()
     dob: number
 
