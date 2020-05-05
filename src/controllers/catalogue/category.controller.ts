@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { TO, ReS } from "../../utils";
+import { TO, ReS, ReE } from "../../utils";
 import { CategoryService } from "../../services/catalogue/category.service";
 import { Category } from "../../entity/catalogue/category";
 
@@ -10,6 +10,8 @@ export class CategoryController {
         let err: string, category: Category
 
         [err, category] = await TO(CategoryService.get(query))
+
+        if (err) return ReE(res, err, 422)
 
         return ReS(res, {
             message: "Category found",
@@ -25,10 +27,28 @@ export class CategoryController {
 
         [err, category] = await TO(CategoryService.delete(query))
 
+        if (err) return ReE(res, err, 422)
+
         return ReS(res, {
             message: "Category deleted",
             category: category
         }, 201)
+
+    }
+
+    static create = async (req: Request, res: Response): Promise<Response> => {
+        const body = req.body
+        let err: string, category: Category
+
+        [err, category] = await TO(CategoryService.create(body))
+
+        if (err) return ReE(res, err, 422)
+
+        return ReS(res, {
+            message: 'Successfully created new category.',
+            category: category
+        },
+            201)
 
     }
 }

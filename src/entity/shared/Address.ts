@@ -1,5 +1,4 @@
 import { PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm"
-import { Mobile } from "./Mobile"
 
 export abstract class Address extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -22,8 +21,5 @@ export abstract class Address extends BaseEntity {
 
     @Column()
     pincode: number
-
-    @Column(()=>Mobile)
-    mobile: Mobile
 
 }

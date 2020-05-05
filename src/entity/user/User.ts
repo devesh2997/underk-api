@@ -1,9 +1,8 @@
 import { Entity, Column, OneToMany, Generated, PrimaryColumn } from "typeorm"
-import { Person } from "../shared/Person"
 import { UserAddress } from "./UserAddress"
 
 @Entity()
-export class User extends Person {
+export class User {
     @Generated('increment')
     id: number
 
