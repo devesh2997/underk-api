@@ -3,6 +3,7 @@ import { EmployeeController } from "../../../controllers/employee/employee.contr
 import { AdminController } from "../../../controllers/admin/admin.controller";
 import { TypeController } from "../../../controllers/catalogue/type.controller";
 import { SubtypeController } from "../../../controllers/catalogue/subtype.controller";
+import { AttributeController } from "../../../controllers/catalogue/attribute.controller";
 
 const router = Router()
 
@@ -26,6 +27,10 @@ router.post('/type',TypeController.create)
 router.get('/subtype',SubtypeController.get)
 router.delete('/subtype',SubtypeController.delete)
 router.post('/subtype',SubtypeController.create)
+
+router.get('/attribute',AttributeController.get)
+router.delete('/attribute',AttributeController.delete)
+router.post('/attribute',AttributeController.create)
 
 
 

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Subtype, SubtypeJSON } from "../../entity/catalogue/Subtype";
+import { SubtypeJSON } from "../../entity/catalogue/Subtype";
 import { TO, ReE, ReS } from "../../utils";
 import { SubtypeService } from "../../services/catalogue/subtype.service";
 

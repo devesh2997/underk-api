@@ -1,6 +1,6 @@
 import { to } from "await-to-ts"
 import { Response } from "express";
-import { validate } from "class-validator";
+import { validate, isNotEmpty } from "class-validator";
 
 
 //validate for errors 
@@ -61,4 +61,11 @@ export const TE = (err_message: string, log: boolean = true) => {
   }
 
   throw err_message
+}
+
+export const TIE = (err: any,) => {
+  // TIE stands for Throw If Error
+  if(isNotEmpty(err)){
+    throw err
+  }
 }
