@@ -1,4 +1,4 @@
-import { Entity, Column, BaseEntity, Generated, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, BaseEntity, Generated, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Length, IsEmail, IsInt } from "class-validator";
 
 @Entity()
@@ -47,4 +47,10 @@ export class Supplier extends BaseEntity {
 
     @Column("text")
     address: string
+
+    @CreateDateColumn()
+    public created_at: Date;
+
+    @UpdateDateColumn()
+    public updated_at: Date;
 }

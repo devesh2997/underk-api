@@ -20,6 +20,21 @@ export class AdminController {
 
     }
 
+    static getAll = async (_: Request, res: Response): Promise<Response> => {
+        let err: string, admins: Admin[]
+
+        [err, admins] = await TO(AdminService.getAll())
+
+        if (err) return ReE(res, err, 422)
+
+        return ReS(res, {
+            message: 'Admins found :'+admins.length,
+            admins: admins
+        },
+            201)
+
+    }
+
     static delete = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
         let err: string, admin: Admin

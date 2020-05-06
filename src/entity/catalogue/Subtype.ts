@@ -1,4 +1,4 @@
-import { BaseEntity, Generated, PrimaryColumn, Column, ManyToOne, OneToMany, Entity } from "typeorm";
+import { BaseEntity, Generated, PrimaryColumn, Column, ManyToOne, OneToMany, Entity, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Type, TypeJSON } from "./Type";
 import { Attribute } from "./Attribute";
 
@@ -43,4 +43,10 @@ export class Subtype extends BaseEntity {
             attributes: this.attributes
         }
     }
+
+    @CreateDateColumn()
+    public created_at: Date;
+
+    @UpdateDateColumn()
+    public updated_at: Date;
 }

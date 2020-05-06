@@ -1,4 +1,4 @@
-import { Entity, Column, Generated, PrimaryColumn, OneToOne, BaseEntity, JoinColumn } from "typeorm"
+import { Entity, Column, Generated, PrimaryColumn, OneToOne, BaseEntity, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm"
 import { Employee, EmployeeJSON } from "./Employee"
 import { MinLength } from "class-validator"
 import { TE, TO } from "../../utils"
@@ -61,5 +61,10 @@ export class Admin extends BaseEntity {
         }
     }
 
+    @CreateDateColumn()
+    public created_at: Date;
+
+    @UpdateDateColumn()
+    public updated_at: Date;
 
 }

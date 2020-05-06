@@ -1,4 +1,4 @@
-import { BaseEntity, Column, ManyToOne, Entity, Unique, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, ManyToOne, Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Attribute, AttributeJSON } from "./Attribute";
 
 export interface AttributeValueJSON {
@@ -37,6 +37,12 @@ export class AttributeValue extends BaseEntity {
 
     @Column({ nullable: true })
     value: string
+
+    @CreateDateColumn()
+    public created_at: Date;
+
+    @UpdateDateColumn()
+    public updated_at: Date;
 
     toJSON = (): AttributeValueJSON => {
         let attribute: AttributeJSON | undefined

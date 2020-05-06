@@ -1,4 +1,4 @@
-import { Entity, Generated, PrimaryColumn, OneToOne, Column, BaseEntity } from "typeorm";
+import { Entity, Generated, PrimaryColumn, OneToOne, Column, BaseEntity, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Admin } from "./Admin";
 import { Length, IsEmail, IsInt, IsNotEmpty } from "class-validator";
 
@@ -114,4 +114,10 @@ export class Employee extends BaseEntity {
     @Column("text")
     @IsNotEmpty()
     address: string
+
+    @CreateDateColumn()
+    public created_at: Date;
+
+    @UpdateDateColumn()
+    public updated_at: Date;
 }

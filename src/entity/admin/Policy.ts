@@ -1,6 +1,8 @@
-import { PrimaryGeneratedColumn, Column } from "typeorm";
+import { PrimaryGeneratedColumn, Column, Entity, ManyToOne } from "typeorm";
 import { IsUppercase } from "class-validator";
+import { Role } from "./Role";
 
+@Entity()
 export class Policy {
     @PrimaryGeneratedColumn()
     id: number
@@ -11,4 +13,7 @@ export class Policy {
 
     @Column("text")
     description: string
+
+    @ManyToOne(()=>Role, role=>role.policies)
+    role: Role
 }

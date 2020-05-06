@@ -45,6 +45,23 @@ export default class AdminService {
         return adm.toJSON() as AdminJSON
     }
 
+    static getAll = async (): Promise<AdminJSON[]> | never => {
+        let err: any, adms: Admin[]
+
+        [err, adms] = await TO(Admin.find())
+
+        if (err) {
+            TE(err)
+        }
+
+        if (typeof adms === 'undefined') {
+            TE("Admin not found")
+        }
+
+
+        return adms.map(adm => adm.toJSON())
+    }
+
     static delete = async (AdminCreateInfo: any): Promise<AdminJSON> | never => {
         let err: any, adm: Admin | undefined
 

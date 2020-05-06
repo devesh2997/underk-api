@@ -1,4 +1,4 @@
-import { Entity, Column, Generated, PrimaryColumn, BaseEntity } from "typeorm"
+import { Entity, Column, Generated, PrimaryColumn, BaseEntity, CreateDateColumn, UpdateDateColumn } from "typeorm"
 
 export interface CollectionJSON {
     slug: string,
@@ -33,4 +33,10 @@ export class Collection extends BaseEntity {
     static fromJson = (json: CollectionJSON): Collection => {
         return new Collection(json.slug, json.name)
     }
+
+    @CreateDateColumn()
+    public created_at: Date;
+
+    @UpdateDateColumn()
+    public updated_at: Date;
 }

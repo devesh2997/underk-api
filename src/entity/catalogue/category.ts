@@ -1,4 +1,4 @@
-import { Entity, Tree, Column, TreeChildren, TreeParent, Generated, PrimaryColumn, BaseEntity } from "typeorm"
+import { Entity, Tree, Column, TreeChildren, TreeParent, BaseEntity, CreateDateColumn, UpdateDateColumn, PrimaryGeneratedColumn } from "typeorm"
 
 export interface CategoryJSON {
     id: number,
@@ -7,6 +7,7 @@ export interface CategoryJSON {
     name: string,
     children: Category[],
     parent: Category,
+    ancestors: Category[]
 }
 
 @Entity()
@@ -20,10 +21,10 @@ export class Category extends BaseEntity {
         this.name = name
     }
 
-    @Generated("increment")
+    @PrimaryGeneratedColumn()
     id: number;
 
-    @PrimaryColumn()
+    @Column({ unique: true })
     slug: string
 
     @Column({ unique: true })
@@ -39,6 +40,8 @@ export class Category extends BaseEntity {
     @TreeParent()
     parent: Category;
 
+    ancestors: Category[]
+
     toJSON = (): CategoryJSON => {
         return {
             id: this.id,
@@ -46,7 +49,14 @@ export class Category extends BaseEntity {
             sku: this.sku,
             children: this.children,
             parent: this.parent,
-            name: this.name
+            name: this.name,
+            ancestors: this.ancestors
         }
     }
+
+    @CreateDateColumn()
+    public created_at: Date;
+
+    @UpdateDateColumn()
+    public updated_at: Date;
 }

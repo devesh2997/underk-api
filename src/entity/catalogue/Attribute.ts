@@ -1,4 +1,4 @@
-import { BaseEntity, Column, ManyToOne, OneToMany, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { BaseEntity, Column, ManyToOne, OneToMany, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Subtype, SubtypeJSON } from "./Subtype";
 import { AttributeValue } from "./AttributeValue";
 import { IsLowercase, isNotEmpty } from "class-validator";
@@ -39,6 +39,12 @@ export class Attribute extends BaseEntity {
 
     @Column("bool", { default: false })
     variantsBasis: boolean
+
+    @CreateDateColumn()
+    public created_at: Date;
+
+    @UpdateDateColumn()
+    public updated_at: Date;
 
     toJSON = (): AttributeJSON => {
         let subtype: SubtypeJSON | undefined
