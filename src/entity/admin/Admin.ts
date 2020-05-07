@@ -19,6 +19,7 @@ export interface AdminJSON {
 
 @Entity()
 export class Admin extends BaseEntity {
+
     @Generated('increment')
     id: number
 

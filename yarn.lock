@@ -1768,6 +1768,10 @@ pinkie@^2.0.0:
   resolved "https://registry.yarnpkg.com/pinkie/-/pinkie-2.0.4.tgz#72556b80cfa0d48a974e80e77248e80ed4f7f870"
   integrity sha1-clVrgM+g1IqXToDnckjoDtT3+HA=
 
+"policies@https://github.com/devesh2997/underk-policies#master":
+  version "1.0.0"
+  resolved "https://github.com/devesh2997/underk-policies#5ecbe01cef93fe97350e7366ee5e10603a0026b3"
+
 postgres-array@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/postgres-array/-/postgres-array-2.0.0.tgz#48f8fce054fbc69671999329b8834b772652d82e"
@@ -2354,7 +2358,7 @@ typescript@^3.8.3:
 
 "underk-policies@https://github.com/devesh2997/underk-policies#master":
   version "1.0.0"
-  resolved "https://github.com/devesh2997/underk-policies#be8b4ed64c51e177073919d78068c1f2ce951afa"
+  resolved "https://github.com/devesh2997/underk-policies#fcb2e8f654729930a4ecbb95a480b459753695ca"
 
 unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"

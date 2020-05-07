@@ -8,12 +8,14 @@ import logger from "morgan";
 //Routers
 import v1 from "./routes/v1";
 import adminRouter from './routes/v1/admin'
+import { insertMockData } from "./mock";
 
 const PORT: number = 400
 
 const main = async (): Promise<void> => {
 
-    await createConnection();
+    await createConnection()
+    await insertMockData()
     const app = Express()
 
     app.use(logger('dev'));

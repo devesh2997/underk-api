@@ -8,7 +8,7 @@ import { Policy } from "../../entity/admin/Policy"
 type AdminCreateInfo = {
     alias: string
     password: string,
-    euid: string,
+    euid: string | undefined,
     policyIds: number[] | string,
     roleIds: number[] | string
 }
@@ -27,13 +27,16 @@ export type AdminLoginSuccess = {
 
 export default class AdminService {
 
-    static get = async (AdminCreateInfo: any): Promise<AdminJSON> | never => {
+    static get = async (adminCreateInfo: any): Promise<AdminJSON> | never => {
         let err: any, adm: Admin | undefined
 
-        if (isEmpty(AdminCreateInfo.auid)) {
-            TE("auid not provided")
+        if (isEmpty(adminCreateInfo.auid) && isEmpty(adminCreateInfo.alias)) {
+            TE("Please provide auid or alias")
+        }
+        if (isNotEmpty(adminCreateInfo.auid)) {
+            [err, adm] = await TO(Admin.findOne({ auid: adminCreateInfo.auid }, { relations: ['employee', 'roles', 'policies'] }))
         } else {
-            [err, adm] = await TO(Admin.findOne({ auid: AdminCreateInfo.auid }, { relations: ['employee', 'roles', 'policies'] }))
+            [err, adm] = await TO(Admin.findOne({ alias: adminCreateInfo.alias }, { relations: ['employee', 'roles', 'policies'] }))
         }
 
         if (err) {
@@ -66,18 +69,23 @@ export default class AdminService {
         return adms.map(adm => adm.toJSON())
     }
 
-    static delete = async (AdminCreateInfo: any): Promise<AdminJSON> | never => {
+    static delete = async (adminCreateInfo: any): Promise<AdminJSON> | never => {
         let err: any, adm: Admin | undefined
 
-        if (isEmpty(AdminCreateInfo.auid)) {
-            TE("auid not provided")
-        } else {
-            [err, adm] = await TO(Admin.findOne({ auid: AdminCreateInfo.auid }))
-            if (err || isEmpty(adm)) {
-                TE("Admin not found")
-            }
-            ;[err, adm] = await TO(Admin.remove(adm as Admin))
+        if (isEmpty(adminCreateInfo.auid) && isEmpty(adminCreateInfo.alias)) {
+            TE("Please provide auid or alias")
         }
+        if (isNotEmpty(adminCreateInfo.auid)) {
+            [err, adm] = await TO(Admin.findOne({ auid: adminCreateInfo.auid }, { relations: ['employee', 'roles', 'policies'] }))
+        } else {
+            [err, adm] = await TO(Admin.findOne({ alias: adminCreateInfo.alias }, { relations: ['employee', 'roles', 'policies'] }))
+        }
+
+        if (isEmpty(adm)) {
+            TE("Admin not found")
+        }
+
+        [err, adm] = await TO(Admin.remove(adm as Admin))
 
         if (err) {
             TE(err)

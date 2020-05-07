@@ -2,8 +2,7 @@ import { PolicyJSON, Policy } from "../../entity/admin/Policy";
 import { TE, TO, VE } from "../../utils";
 import { isEmpty, isNotEmpty } from "class-validator";
 
-type PolicyRequestInfo = {
-    id: number,
+export type PolicyRequestInfo = {
     name: string,
     description: string
 }
@@ -11,12 +10,15 @@ type PolicyRequestInfo = {
 export class PolicyService {
     static get = async (policyInfo: any): Promise<PolicyJSON> | never => {
         let err: any, policy: Policy
-        if (isEmpty(policyInfo.id)) {
-            TE("Policy id not provided")
+        if (isEmpty(policyInfo.id) && isEmpty(policyInfo.name)) {
+            TE("Please provid policy id or policy name")
         }
 
-        [err, policy] = await TO(Policy.findOne({ id: policyInfo.id }))
-
+        if (isNotEmpty(policyInfo.id)) {
+            [err, policy] = await TO(Policy.findOne({ id: policyInfo.id }))
+        } else {
+            [err, policy] = await TO(Policy.findOne({ name: policyInfo.name }))
+        }
         if (err) TE(err)
 
         if (isEmpty(policy)) TE("Policy not found")

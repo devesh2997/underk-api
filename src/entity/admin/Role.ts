@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany } from "typeorm";
 import { IsUppercase } from "class-validator";
 import { Policy, PolicyJSON } from "./Policy";
 
@@ -35,7 +35,7 @@ export class Role extends BaseEntity {
     @Column("text")
     description: string
 
-    @OneToMany(() => Policy, policy => policy.role)
+    @ManyToMany(() => Policy)
     policies: Policy[]
 
     toJSON = (): RoleJSON => {

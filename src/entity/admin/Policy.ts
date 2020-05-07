@@ -28,9 +28,6 @@ export class Policy extends BaseEntity {
     @Column("text")
     description: string
 
-    @ManyToOne(() => Role, role => role.policies)
-    role: Role
-
     toJSON = (): PolicyJSON => {
         return {
             id: this.id,
