@@ -6,15 +6,15 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import CONFIG from "../../config/config";
 import { Policy, PolicyJSON } from "./Policy";
-import { Role, RoleJSON, RoleJSONWithPolicyStrings } from "./Role";
+import { Role, RoleJSON } from "./Role";
 
 export interface AdminJSON {
     id: number
     auid: string
     alias: string
     employee: EmployeeJSON | undefined,
-    roles: RoleJSONWithPolicyStrings[],
-    policies: string[]
+    roles: RoleJSON[],
+    policies: PolicyJSON[]
 }
 
 @Entity()
@@ -71,13 +71,13 @@ export class Admin extends BaseEntity {
 
     toJSON = (): AdminJSON => {
         let emp = this.employee ? this.employee.toJSON() : undefined
-        let roles: RoleJSONWithPolicyStrings[] = []
-        let policies: string[] = []
+        let roles: RoleJSON[] = []
+        let policies: PolicyJSON[] = []
         if (isNotEmpty(this.roles)) {
-            this.roles.forEach(role => roles.push(role.toJSONWithPolicyNames()))
+            this.roles.forEach(role => roles.push(role.toJSON()))
         }
         if (isNotEmpty(this.policies)) {
-            this.policies.forEach(policy => policies.push(policy.name))
+            this.policies.forEach(policy => policies.push(policy.toJSON()))
         }
         return {
             id: this.id,

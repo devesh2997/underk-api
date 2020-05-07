@@ -21,7 +21,8 @@ type LoginInfo = {
 export type AdminLoginSuccess = {
     auid: string,
     alias: string,
-    token: string
+    token: string,
+    policies: string[]
 }
 
 export default class AdminService {
@@ -32,7 +33,7 @@ export default class AdminService {
         if (isEmpty(AdminCreateInfo.auid)) {
             TE("auid not provided")
         } else {
-            [err, adm] = await TO(Admin.findOne({ auid: AdminCreateInfo.auid }, { relations: ['employee','roles','policies'] }))
+            [err, adm] = await TO(Admin.findOne({ auid: AdminCreateInfo.auid }, { relations: ['employee', 'roles', 'policies'] }))
         }
 
         if (err) {
@@ -155,7 +156,7 @@ export default class AdminService {
             TE("Some error occurred")
         }
 
-        ;[err, adm] = await TO(Admin.findOne({ alias: adminCreateInfo.alias }, { relations: ['employee','policies','roles'] }))
+        ;[err, adm] = await TO(Admin.findOne({ alias: adminCreateInfo.alias }, { relations: ['employee', 'policies', 'roles'] }))
         if (err) {
             TE("Some error occurred")
         }
@@ -170,7 +171,7 @@ export default class AdminService {
             TE("Alias or password not provided")
         }
 
-        [err, adm] = await TO(Admin.findOne({ alias: loginInfo.alias }))
+        [err, adm] = await TO(Admin.findOne({ alias: loginInfo.alias }, { relations: ['policies', 'roles'] }))
 
         if (err || isEmpty(adm)) {
             TE("Login unsuccessfull")
@@ -180,10 +181,20 @@ export default class AdminService {
 
         const token = adm.getJWT()
 
+        let policies: string[] = adm.policies.map(policy => policy.name)
+        for (let i = 0; i < adm.roles.length; i++) {
+            const role = adm.roles[i]
+            for (let j = 0; j < role.policies.length; j++) {
+                policies.push(role.policies[j].name)
+            }
+        }
+
+
         return {
             auid: adm.auid,
             alias: adm.alias,
-            token: token
+            token: token,
+            policies: policies
         }
     }
 
