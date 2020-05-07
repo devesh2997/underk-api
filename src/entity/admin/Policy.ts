@@ -1,6 +1,5 @@
-import { PrimaryGeneratedColumn, Column, Entity, ManyToOne, BaseEntity } from "typeorm";
+import { PrimaryGeneratedColumn, Column, Entity, BaseEntity } from "typeorm";
 import { IsUppercase, IsNotEmpty } from "class-validator";
-import { Role } from "./Role";
 
 export interface PolicyJSON {
     id: number

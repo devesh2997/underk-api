@@ -1,7 +1,6 @@
-import { getManager } from "typeorm"
-import { TO, TE } from "./utils"
+import { TO } from "./utils"
 import { Admin } from "./entity/admin/Admin";
-import { isEmpty, isNotEmpty } from "class-validator";
+import { isNotEmpty, isEmpty } from "class-validator";
 import AdminService from "./services/admin/admin.service";
 import * as POLICIES from "underk-policies";
 import { PolicyService } from "./services/admin/policy.service";
@@ -23,24 +22,26 @@ export const insertMockData = async (): Promise<void> => {
 
     for (let i = 0; i < policyNames.length; i++) {
         let policy: PolicyJSON
-        const policyName = policyNames[i]
-        if (policyName === POLICIES.SUPER) {
-            [err, policy] = await TO(PolicyService.get({ name: policyName }))
-            if (isNotEmpty(policy)) {
-                superPolicyId = policy.id
-            } else {
-                [err, policy] = await TO(PolicyService.create({ name: policyNames[i], description: '' }))
-            }
-        } else {
+        const policyName = policyNames[i];
+        [err, policy] = await TO(PolicyService.get({ name: policyName }))
+        if (isEmpty(policy)) {
             [err, policy] = await TO(PolicyService.create({ name: policyNames[i], description: '' }))
+        }
+        if (policy.name === POLICIES.SUPER) {
+            superPolicyId = policy.id
         }
         if (err) console.log(err)
     }
 
     let superAdmin: Admin
-    [err, superAdmin] = await TO(AdminService.delete({ alias: 'superuser'}));
+    [err, superAdmin] = await TO(AdminService.get({ alias: 'superuser' }))
+    if (isNotEmpty(superAdmin)) {
+        console.log(superAdmin)
+        return
+    }
+    [err, superAdmin] = await TO(AdminService.delete({ alias: 'superuser' }));
     [err, superAdmin] = await TO(AdminService.create({ alias: 'superuser', password: 'superuser', roleIds: '[]', policyIds: '[' + superPolicyId + ']', euid: undefined }))
-    if(err){
+    if (err) {
         console.log(err)
     }
 

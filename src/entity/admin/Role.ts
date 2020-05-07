@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToMany } from "typeorm";
 import { IsUppercase } from "class-validator";
 import { Policy, PolicyJSON } from "./Policy";
 

@@ -66,8 +66,8 @@ export class Admin extends BaseEntity {
     }
 
     getJWT = (): string => {
-        let expiration_time = parseInt(CONFIG.jwt_expiration);
-        return jwt.sign({ admin_id: this.id }, CONFIG.jwt_encryption, { expiresIn: expiration_time });
+        let expiration_time = parseInt(CONFIG.jwt_admin_expiration);
+        return jwt.sign({ auid: this.auid }, CONFIG.jwt_encryption, { expiresIn: expiration_time });
     }
 
     toJSON = (): AdminJSON => {
