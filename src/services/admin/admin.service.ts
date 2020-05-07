@@ -1,13 +1,16 @@
 import { AdminJSON, Admin } from "../../entity/admin/Admin"
-import { isEmpty, TE, TO, VE } from "../../utils"
-import { isNotEmpty } from "class-validator"
+import { TE, TO, VE } from "../../utils"
+import { isNotEmpty, isEmpty } from "class-validator"
 import { Employee } from "../../entity/admin/Employee"
 import bcrypt from "bcryptjs"
+import { Policy } from "../../entity/admin/Policy"
 
 type AdminCreateInfo = {
     alias: string
     password: string,
     euid: string,
+    policyIds: number[] | string,
+    roleIds: number[] | string
 }
 
 type LoginInfo = {
@@ -29,7 +32,7 @@ export default class AdminService {
         if (isEmpty(AdminCreateInfo.auid)) {
             TE("auid not provided")
         } else {
-            [err, adm] = await TO(Admin.findOne({ auid: AdminCreateInfo.auid }, { relations: ['employee'] }))
+            [err, adm] = await TO(Admin.findOne({ auid: AdminCreateInfo.auid }, { relations: ['employee','roles','policies'] }))
         }
 
         if (err) {
@@ -89,7 +92,6 @@ export default class AdminService {
         adm.password = adminCreateInfo.password
         adm.alias = adminCreateInfo.alias
 
-
         //validate password (check length etc.) and alias length
         await VE(adm)
 
@@ -118,6 +120,25 @@ export default class AdminService {
             adm.employee = emp
         }
 
+        if (isNotEmpty(adminCreateInfo.policyIds)) {
+            try {
+                adm.policies = []
+                adminCreateInfo.policyIds = JSON.parse(adminCreateInfo.policyIds as string) as number[]
+                adminCreateInfo.policyIds = adminCreateInfo.policyIds.map(id => Number(id))
+                for (let i = 0; i < adminCreateInfo.policyIds.length; i++) {
+                    const id = adminCreateInfo.policyIds[i]
+                    let policy: Policy
+                    [err, policy] = await TO(Policy.findOne({ id: id }))
+                    if (err) TE(err)
+                    adm.policies.push(policy)
+                }
+            } catch (e) {
+                TE(e)
+            }
+        }
+
+        console.log(adm)
+
 
         //hash password before storing
         let salt, hash
@@ -129,12 +150,12 @@ export default class AdminService {
 
         adm.password = hash;
 
-        [err] = await TO(Admin.insert(adm))
+        [err] = await TO(Admin.save(adm))
         if (err) {
             TE("Some error occurred")
         }
 
-        ;[err, adm] = await TO(Admin.findOne({ alias: adminCreateInfo.alias }, { relations: ['employee'] }))
+        ;[err, adm] = await TO(Admin.findOne({ alias: adminCreateInfo.alias }, { relations: ['employee','policies','roles'] }))
         if (err) {
             TE("Some error occurred")
         }

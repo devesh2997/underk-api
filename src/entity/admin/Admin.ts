@@ -1,16 +1,20 @@
-import { Entity, Column, Generated, PrimaryColumn, OneToOne, BaseEntity, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm"
+import { Entity, Column, Generated, PrimaryColumn, OneToOne, BaseEntity, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm"
 import { Employee, EmployeeJSON } from "./Employee"
-import { MinLength } from "class-validator"
+import { MinLength, isNotEmpty } from "class-validator"
 import { TE, TO } from "../../utils"
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import CONFIG from "../../config/config";
+import { Policy, PolicyJSON } from "./Policy";
+import { Role, RoleJSON, RoleJSONWithPolicyStrings } from "./Role";
 
 export interface AdminJSON {
     id: number
     auid: string
     alias: string
-    employee: EmployeeJSON | undefined
+    employee: EmployeeJSON | undefined,
+    roles: RoleJSONWithPolicyStrings[],
+    policies: string[]
 }
 
 @Entity()
@@ -34,6 +38,20 @@ export class Admin extends BaseEntity {
     @MinLength(6)
     password: string
 
+    @ManyToMany(_ => Policy)
+    @JoinTable()
+    policies: Policy[];
+
+    @ManyToMany(_ => Role)
+    @JoinTable()
+    roles: Role[];
+
+    @CreateDateColumn()
+    public created_at: Date;
+
+    @UpdateDateColumn()
+    public updated_at: Date;
+
     comparePassword = async (pw: string): Promise<Admin> | never => {
         let err, pass
         if (!this.password) TE('password not set');
@@ -53,18 +71,22 @@ export class Admin extends BaseEntity {
 
     toJSON = (): AdminJSON => {
         let emp = this.employee ? this.employee.toJSON() : undefined
+        let roles: RoleJSONWithPolicyStrings[] = []
+        let policies: string[] = []
+        if (isNotEmpty(this.roles)) {
+            this.roles.forEach(role => roles.push(role.toJSONWithPolicyNames()))
+        }
+        if (isNotEmpty(this.policies)) {
+            this.policies.forEach(policy => policies.push(policy.name))
+        }
         return {
             id: this.id,
             auid: this.auid,
             alias: this.alias,
-            employee: emp
+            employee: emp,
+            roles: roles,
+            policies: policies
         }
     }
-
-    @CreateDateColumn()
-    public created_at: Date;
-
-    @UpdateDateColumn()
-    public updated_at: Date;
 
 }

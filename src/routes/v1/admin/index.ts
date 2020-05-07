@@ -6,6 +6,8 @@ import { SubtypeController } from "../../../controllers/catalogue/subtype.contro
 import { AttributeController } from "../../../controllers/catalogue/attribute.controller";
 import { AttributeValueController } from "../../../controllers/catalogue/attribute-value.controller";
 import { CategoryController } from "../../../controllers/catalogue/category.controller";
+import { RoleController } from "../../../controllers/admin/role.controller";
+import { PolicyController } from "../../../controllers/admin/policy.controller";
 
 const router = Router()
 
@@ -15,7 +17,15 @@ router.post('/', AdminController.create)
 router.delete('/', AdminController.delete)
 router.post('/login', AdminController.login)
 
+router.get('/role', RoleController.get)
+router.get('/roles', RoleController.getAll)
+router.post('/role', RoleController.create)
+router.delete('/role', RoleController.delete)
 
+router.get('/policy', PolicyController.get)
+router.get('/policies', PolicyController.getAll)
+router.post('/policy', PolicyController.create)
+router.delete('/policy', PolicyController.delete)
 
 router.get('/emp', EmployeeController.get)
 router.post('/emp', EmployeeController.create)

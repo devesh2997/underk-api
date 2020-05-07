@@ -1,5 +1,6 @@
 import { Type, TypeJSON } from "../../entity/catalogue/Type";
-import { isEmpty, TE, TO } from "../../utils";
+import {  TE, TO } from "../../utils";
+import { isEmpty } from "class-validator";
 
 export class TypeService {
     static get = async (typeInfo: any): Promise<TypeJSON> | never => {
