@@ -1,10 +1,10 @@
 import { registerDecorator, ValidationOptions } from "class-validator";
 
 
-export function IsValidAssetType(validationOptions?: ValidationOptions) {
+export function IsValidContentFormat(validationOptions?: ValidationOptions) {
     return function (object: Object, propertyName: string) {
         registerDecorator({
-            name: "isValidAssetType",
+            name: "isValidContentFormat",
             target: object.constructor,
             propertyName: propertyName,
             options: validationOptions,
@@ -12,7 +12,7 @@ export function IsValidAssetType(validationOptions?: ValidationOptions) {
                 validate(value: string) {
                     value = value.toLowerCase()
                     return typeof value === "string" &&
-                        (value === 'preview' || value === 'thumbnail' || value === 'placeholder' || value === 'original')
+                        (value === 'jgp' || value === 'jpeg' || value === 'png'|| value === 'webp')
                 }
             }
         });

@@ -1,6 +1,6 @@
 import { Category, CategoryJSON } from "../../entity/catalogue/category"
-import { isEmpty, TE, TO } from "../../utils"
-import { isNotEmpty } from "class-validator"
+import { TE, TO } from "../../utils"
+import { isNotEmpty, isEmpty } from "class-validator"
 import { getManager } from "typeorm"
 
 type CategoryCreateInfo = {
@@ -128,7 +128,7 @@ export class CategoryService {
             console.log(category)
         }
 
-        [err] = await TO(Category.insert(category))
+        [err] = await TO(Category.save(category))
         if (err) {
             TE(err)
         }

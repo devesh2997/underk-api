@@ -40,6 +40,9 @@ export class Attribute extends BaseEntity {
     @Column("bool", { default: false })
     variantsBasis: boolean
 
+    @Column("bool", { default: false })
+    isOption: boolean
+
     @CreateDateColumn()
     public created_at: Date;
 

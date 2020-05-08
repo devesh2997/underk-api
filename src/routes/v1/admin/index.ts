@@ -1,4 +1,5 @@
 import { Router } from "express";
+import POLICIES from "underk-policies";
 import { EmployeeController } from "../../../controllers/employee/employee.controller";
 import { AdminController } from "../../../controllers/admin/admin.controller";
 import { TypeController } from "../../../controllers/catalogue/type.controller";
@@ -8,13 +9,14 @@ import { AttributeValueController } from "../../../controllers/catalogue/attribu
 import { CategoryController } from "../../../controllers/catalogue/category.controller";
 import { RoleController } from "../../../controllers/admin/role.controller";
 import { PolicyController } from "../../../controllers/admin/policy.controller";
+import policyChecker from "../../../middleware/policy-checker";
 
 const router = Router()
 
-router.get('/', AdminController.get)
-router.get('/all', AdminController.getAll)
-router.post('/', AdminController.create)
-router.delete('/', AdminController.delete)
+router.get('/', policyChecker([POLICIES.ADMIN_VIEW]), AdminController.get)
+router.get('/all', policyChecker([POLICIES.ADMIN_VIEW]), AdminController.getAll)
+router.post('/', policyChecker([POLICIES.ADMIN_PUBLISH]), AdminController.create)
+router.delete('/', policyChecker([POLICIES.ADMIN_PUBLISH]), AdminController.delete)
 
 router.get('/role', RoleController.get)
 router.get('/roles', RoleController.getAll)

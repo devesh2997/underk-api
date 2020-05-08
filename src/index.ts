@@ -34,7 +34,7 @@ const main = async (): Promise<void> => {
 
     app.use('/v1', v1)
 
-    app.use('/v1/admin-login', AdminController.login)
+    app.post('/v1/admin-login', AdminController.login)
 
     app.use('/v1/admin', passport.authenticate('admin-jwt', { session: false }), adminRouter)
 

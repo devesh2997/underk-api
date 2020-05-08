@@ -1,39 +1,50 @@
-import { BaseEntity, PrimaryGeneratedColumn, Column, Entity } from "typeorm";
+import { BaseEntity, PrimaryGeneratedColumn, Column, Entity, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm";
 import { IsInt } from "class-validator";
-import { Asset } from "../shared/Asset";
+import { IsValidAssetType } from "../../utils/custom-decorators/IsValidAssetType";
+import { IsValidContentType } from "../../utils/custom-decorators/IsValidContentType";
+import { IsValidContentFormat } from "../../utils/custom-decorators/IsValidContentFormat";
+import { Product } from "./Product";
 
-// @Entity()
-// export class ProductAsset extends BaseEntity {
-//     @PrimaryGeneratedColumn()
-//     id: number
+@Entity()
+export class ProductAsset extends BaseEntity {
+    @PrimaryGeneratedColumn()
+    id: number
 
-//     @Column()
-//     @IsInt()
-//     position: number
+    @Column()
+    @IsInt()
+    position: number
 
-//     @Column()
-//     originalPreferred: Asset
+    @Column()
+    name: number
 
-//     @Column()
-//     originalBackup: Asset
+    @Column()
+    downloadUrl: string
 
-//     @Column()
-//     previewPreferred: Asset
+    @Column({ nullable: true })
+    placeholderUrl: string
 
-//     @Column()
-//     previewBackup: Asset
+    @Column({ nullable: true })
+    shortUrl: string
 
-//     @Column()
-//     thumbnailPreferred: Asset
+    @Column()
+    @IsValidAssetType()
+    assetType: string
 
-//     @Column()
-//     thumbnailBackup: Asset
+    @Column()
+    @IsValidContentType()
+    contentType: string
 
-//     @Column()
-//     placeholderPreferred: Asset
+    @Column()
+    @IsValidContentFormat()
+    contentFormat: string
 
-//     @Column()
-//     placeholderBackup: Asset
+    @ManyToOne(()=>Product,product=>product.assets)
+    product: Product
 
+    @CreateDateColumn()
+    created_at: Date;
 
-// }
+    @UpdateDateColumn()
+    updated_at: Date;
+
+}

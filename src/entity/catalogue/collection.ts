@@ -1,4 +1,5 @@
-import { Entity, Column, Generated, PrimaryColumn, BaseEntity, CreateDateColumn, UpdateDateColumn } from "typeorm"
+import { Entity, Column, Generated, PrimaryColumn, BaseEntity, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm"
+import { Product } from "./Product";
 
 export interface CollectionJSON {
     slug: string,
@@ -22,6 +23,9 @@ export class Collection extends BaseEntity {
 
     @Column()
     name: string;
+
+    @OneToMany(() => Product, product => product.category)
+    products: Product[]
 
     toJSON = (): CollectionJSON => {
         return {

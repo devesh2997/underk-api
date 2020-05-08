@@ -1,5 +1,6 @@
-import { BaseEntity, Column, ManyToOne, Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { BaseEntity, Column, ManyToOne, Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToMany } from "typeorm";
 import { Attribute, AttributeJSON } from "./Attribute";
+import { Product } from "./Product";
 
 export interface AttributeValueJSON {
     id: number,
@@ -37,6 +38,9 @@ export class AttributeValue extends BaseEntity {
 
     @Column({ nullable: true })
     value: string
+
+    @ManyToMany(()=>Product,product=>product.attributes)
+    products: Product[]
 
     @CreateDateColumn()
     public created_at: Date;
