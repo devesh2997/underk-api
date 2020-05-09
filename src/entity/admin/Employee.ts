@@ -1,6 +1,7 @@
 import { Entity, Generated, PrimaryColumn, OneToOne, Column, BaseEntity, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Admin } from "./Admin";
 import { Length, IsEmail, IsNotEmpty, IsNumber } from "class-validator";
+import { IsGender } from "src/utils/custom-decorators/IsGender";
 
 export interface EmployeeJSON {
 
@@ -11,7 +12,7 @@ export interface EmployeeJSON {
     mobileCountryCode: string
     mobileNumber: number
     dob: number
-    gender: 'M' | 'F' | 'U' | 'N'
+    gender: string
     picUrl: string
     mobileVerified: boolean,
     emailVerified: boolean,
@@ -22,7 +23,7 @@ export interface EmployeeJSON {
 @Entity()
 export class Employee extends BaseEntity {
 
-    constructor(firstName: string, lastName: string, email: string, mobileCountryCode: string, mobileNumber: number, dob: number, gender: 'M' | 'F' | 'U' | 'N', picUrl: string, address: string) {
+    constructor(firstName: string, lastName: string, email: string, mobileCountryCode: string, mobileNumber: number, dob: number, gender: string, picUrl: string, address: string) {
         super()
         this.firstName = firstName
         this.lastName = lastName
@@ -105,7 +106,8 @@ export class Employee extends BaseEntity {
 
     @Column()
     @IsNotEmpty()
-    gender: 'M' | 'F' | 'U' | 'N'
+    @IsGender()
+    gender: string
 
     @Column("text", { nullable: true })
     picUrl: string

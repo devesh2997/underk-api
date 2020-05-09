@@ -1,6 +1,6 @@
 import { Employee, EmployeeJSON } from "../../entity/admin/Employee"
-import { TO, TE, VE, isEmpty } from "../../utils/index"
-import { isNotEmpty } from "class-validator"
+import { TO, TE, VE } from "../../utils/index"
+import { isNotEmpty, isEmpty } from "class-validator"
 
 export class EmployeeService {
 

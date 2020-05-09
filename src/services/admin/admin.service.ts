@@ -13,7 +13,7 @@ type AdminCreateInfo = {
     roleIds: number[] | string
 }
 
-type LoginInfo = {
+type AdminLoginInfo = {
     alias: string,
     password: string
 }
@@ -27,16 +27,16 @@ export type AdminLoginSuccess = {
 
 export default class AdminService {
 
-    static get = async (adminCreateInfo: any): Promise<AdminJSON> | never => {
+    static get = async (adminGetInfo: any): Promise<AdminJSON> | never => {
         let err: any, adm: Admin | undefined
 
-        if (isEmpty(adminCreateInfo.auid) && isEmpty(adminCreateInfo.alias)) {
+        if (isEmpty(adminGetInfo.auid) && isEmpty(adminGetInfo.alias)) {
             TE("Please provide auid or alias")
         }
-        if (isNotEmpty(adminCreateInfo.auid)) {
-            [err, adm] = await TO(Admin.findOne({ auid: adminCreateInfo.auid }, { relations: ['employee', 'roles', 'policies'] }))
+        if (isNotEmpty(adminGetInfo.auid)) {
+            [err, adm] = await TO(Admin.findOne({ auid: adminGetInfo.auid }, { relations: ['employee', 'roles', 'policies'] }))
         } else {
-            [err, adm] = await TO(Admin.findOne({ alias: adminCreateInfo.alias }, { relations: ['employee', 'roles', 'policies'] }))
+            [err, adm] = await TO(Admin.findOne({ alias: adminGetInfo.alias }, { relations: ['employee', 'roles', 'policies'] }))
         }
 
         if (err) {
@@ -173,7 +173,7 @@ export default class AdminService {
 
     }
 
-    static login = async (loginInfo: LoginInfo): Promise<AdminLoginSuccess> | never => {
+    static login = async (loginInfo: AdminLoginInfo): Promise<AdminLoginSuccess> | never => {
         let err: any, adm: Admin
         if (isEmpty(loginInfo.alias) || isEmpty(loginInfo.password)) {
             TE("Alias or password not provided")

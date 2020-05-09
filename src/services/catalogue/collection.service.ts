@@ -1,5 +1,6 @@
 import { Collection, CollectionJSON } from "../../entity/catalogue/collection"
-import { isEmpty, TE, TO, VE } from "../../utils"
+import { TE, TO, VE } from "../../utils"
+import { isEmpty } from "class-validator"
 
 export class CollectionService {
 
