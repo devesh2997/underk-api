@@ -1,7 +1,7 @@
 import { Entity, Generated, PrimaryColumn, OneToOne, Column, BaseEntity, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Admin } from "./Admin";
 import { Length, IsEmail, IsNotEmpty, IsNumber } from "class-validator";
-import { IsGender } from "src/utils/custom-decorators/IsGender";
+import { IsGender } from "../../utils/custom-decorators/IsGender";
 
 export interface EmployeeJSON {
 

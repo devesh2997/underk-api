@@ -1,7 +1,19 @@
 import { to } from "await-to-ts"
 import { Response } from "express";
-import { validate, isNotEmpty } from "class-validator";
+import { validate, isNotEmpty, isEmpty, isEmail } from "class-validator";
+import axios, { AxiosRequestConfig } from 'axios'
 
+//makes http request with the given config
+//if method is not provided, a get request is made
+export const doRequest = (config: AxiosRequestConfig) => {
+  if(isEmpty(config.method)){
+    config.method = 'GET'
+  }
+  if(isEmpty(config.url)){
+    TE("url not provided for making request.")
+  }
+  return axios(config)
+}
 
 //validate for errors 
 export const VE = async (obj: any) => {
@@ -63,9 +75,9 @@ export const TE = (err_message: string, log: boolean = true) => {
   throw err_message
 }
 
-export const TIE = (err: any,) => {
+export const TIE = (err: any, ) => {
   // TIE stands for Throw If Error
-  if(isNotEmpty(err)){
+  if (isNotEmpty(err)) {
     throw err
   }
 }

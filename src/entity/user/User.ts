@@ -1,7 +1,9 @@
-import { Entity, Column, OneToMany, Generated, PrimaryColumn, BaseEntity } from "typeorm"
+import { Entity, Column, OneToMany, Generated, PrimaryColumn, BaseEntity, CreateDateColumn, UpdateDateColumn } from "typeorm"
 import { UserAddress } from "./UserAddress"
 import { IsEmail, IsNotEmpty, IsNumber } from "class-validator"
-import { IsGender } from "src/utils/custom-decorators/IsGender"
+import { IsGender } from "../../utils/custom-decorators/IsGender"
+import CONFIG from "../../config/config"
+import jwt from "jsonwebtoken";
 
 export interface UserJSON {
     id: number,
@@ -64,6 +66,17 @@ export class User extends BaseEntity{
 
     @OneToMany(() => UserAddress, UserAddress => UserAddress.user)
     addresses: UserAddress[]
+
+    @CreateDateColumn()
+    public created_at: Date;
+
+    @UpdateDateColumn()
+    public updated_at: Date;
+
+    getJWT = (): string => {
+        let expiration_time = parseInt(CONFIG.jwt_user_expiration);
+        return jwt.sign({ auid: this.uuid }, CONFIG.jwt_encryption, { expiresIn: expiration_time });
+    }
 
     toJSON = (): UserJSON => {
         return {
