@@ -55,7 +55,7 @@ export default class AdminService {
     static getAll = async (): Promise<AdminJSON[]> | never => {
         let err: any, adms: Admin[]
 
-        [err, adms] = await TO(Admin.find())
+        [err, adms] = await TO(Admin.find({ relations: ['employee', 'roles', 'policies'] }))
 
         if (err) {
             TE(err)
