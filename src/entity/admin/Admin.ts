@@ -14,7 +14,8 @@ export interface AdminJSON {
     alias: string
     employee: EmployeeJSON | undefined,
     roles: RoleJSON[],
-    policies: PolicyJSON[]
+    policies: PolicyJSON[],
+    created_at: Date
 }
 
 @Entity()
@@ -86,7 +87,8 @@ export class Admin extends BaseEntity {
             alias: this.alias,
             employee: emp,
             roles: roles,
-            policies: policies
+            policies: policies,
+            created_at: this.created_at
         }
     }
 
