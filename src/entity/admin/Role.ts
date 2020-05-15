@@ -40,8 +40,7 @@ export class Role extends BaseEntity {
     policies: Policy[]
 
     toJSON = (): RoleJSON => {
-        let policies: PolicyJSON[]
-        policies = this.policies.map(policy => policy.toJSON())
+        let policies: PolicyJSON[] = []
         return {
             id: this.id,
             name: this.name,
