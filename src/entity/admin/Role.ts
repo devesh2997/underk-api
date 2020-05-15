@@ -1,5 +1,5 @@
 import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from "typeorm";
-import { IsUppercase } from "class-validator";
+import { IsUppercase, isNotEmpty } from "class-validator";
 import { Policy, PolicyJSON } from "./Policy";
 
 export interface RoleJSON {
@@ -22,7 +22,7 @@ export class Role extends BaseEntity {
     constructor(name: string, description: string) {
         super()
         this.name = name
-        this.description= description
+        this.description = description
     }
 
     @PrimaryGeneratedColumn()
@@ -51,8 +51,9 @@ export class Role extends BaseEntity {
     }
 
     toJSONWithPolicyNames = (): RoleJSONWithPolicyStrings => {
-        let policies: string[]
-        policies = this.policies.map(policy => policy.name)
+        let policies: string[] = []
+        if (isNotEmpty(this.policies) && this.policies.length > 0)
+            policies = this.policies.map(policy => policy.name)
         return {
             id: this.id,
             name: this.name,
