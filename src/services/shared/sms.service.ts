@@ -1,4 +1,4 @@
-import { isEmpty } from "class-validator"
+import { isEmpty, isNotEmpty } from "class-validator"
 import { TE, TO, doRequest } from "../../utils"
 import { Sms } from "../../entity/shared/Sms"
 
@@ -8,46 +8,57 @@ let url = 'https://api.textlocal.in/send/?apikey=' +
     TEXT_LOCAL_API_KEY +
     '&numbers='
 
-type mobile = {
-    mobileCountryCode: string
-    mobileNumber: number
+type textLocalError = {
+    code: number,
+    message: string
 }
 
-export const send = async (numbers: mobile[], sender: string, message: string) => {
-    let err: any, messageApiResponse: any, smss: Sms[]
-    if (isEmpty(numbers) || numbers.length === 0) {
-        TE("Numbers not provided for sending sms")
-    }
-    if (isEmpty(sender)) {
-        TE("sender not provided for sending sms")
-    }
-    if (isEmpty(message)) {
-        TE("message not provided for sending sms.")
-    }
+type textlocalResponse = {
+    status: string,
+    errors: textLocalError[],
+    cost: number | undefined
+}
 
-    smss = []
-    let fullUrl = url
-    for (let i = 0; i < numbers.length; i++) {
-        const mobile = numbers[i]
-        let number = mobile.mobileCountryCode + '' + mobile.mobileNumber
-        fullUrl += number
-        if (i !== numbers.length) {
-            fullUrl += ','
+export class SmsService {
+    static send = async (numbers: string[], message: string) => {
+        let err: any, textLocalApiResponse: textlocalResponse
+        if (isEmpty(numbers) || numbers.length === 0) {
+            TE("Numbers not provided for sending sms")
         }
-        smss.push(new Sms(mobile.mobileCountryCode, mobile.mobileNumber, message))
+        if (isEmpty(message)) {
+            TE("message not provided for sending sms.")
+        }
+        let fullUrl = url
+        for (let i = 0; i < numbers.length; i++) {
+            const mobile = numbers[i]
+            fullUrl += mobile
+            if (i !== numbers.length) {
+                fullUrl += ','
+            }
+        }
+        fullUrl += '&sender=' +
+            'underK' +
+            '&message=' +
+            message + '&test=true'
+
+            ;[err, textLocalApiResponse] = await TO(doRequest({ url: fullUrl }))
+
+        if (err) {
+            TE(err)
+        }
+
+        let errors: string[] = []
+        if (isNotEmpty(textLocalApiResponse.errors)) {
+            errors = textLocalApiResponse.errors.map(err => err.message)
+        }
+
+        let sms: Sms = new Sms(numbers, message, textLocalApiResponse.status, textLocalApiResponse.cost, errors)
+
+            ;[err] = await TO(sms.save())
+
+        if (err) {
+            TE(err)
+        }
     }
-    fullUrl += '&sender=' +
-        'underK' +
-        '&message=' +
-        message + '&test=true'
-
-        ;[err, messageApiResponse] = await TO(doRequest({ url: fullUrl }))
-
-    if (err) {
-        TE(err)
-    }
-
-    console.log(messageApiResponse)
-
-
 }
+

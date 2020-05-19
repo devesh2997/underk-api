@@ -29,7 +29,7 @@ export class User extends BaseEntity{
     @Generated("uuid")
     uuid: string
 
-    @Column()
+    @Column({ nullable: true })
     firstName: string
 
     @Column({ nullable: true })
@@ -46,7 +46,7 @@ export class User extends BaseEntity{
     @IsNumber()
     mobileNumber: number
 
-    @Column("bigint")
+    @Column("bigint", { nullable: true })
     @IsNumber()
     dob: number
 
@@ -75,7 +75,7 @@ export class User extends BaseEntity{
 
     getJWT = (): string => {
         let expiration_time = parseInt(CONFIG.jwt_user_expiration);
-        return jwt.sign({ auid: this.uuid }, CONFIG.jwt_encryption, { expiresIn: expiration_time });
+        return jwt.sign({ uuid: this.uuid }, CONFIG.jwt_encryption, { expiresIn: expiration_time });
     }
 
     toJSON = (): UserJSON => {

@@ -1,18 +1,99 @@
 import { to } from "await-to-ts"
 import { Response } from "express";
-import { validate, isNotEmpty, isEmpty, isEmail } from "class-validator";
+import { validate, isNotEmpty, isEmpty } from "class-validator";
 import axios, { AxiosRequestConfig } from 'axios'
+
+//mask an email by replacing middle characters with *****
+//eg: ananddevesh22@gmail.com => a***********2@gmail.com
+export const maskEmail = (email: string): string => {
+  let str: string, parts: string[]
+  str = ""
+  parts = email.split('@')
+  const part = parts[0]
+  for (let i = 0; i < part.length; i++) {
+    if (i == 0 || i == part.length - 1) {
+      str += part[i]
+    } else {
+      str += '*'
+    }
+  }
+  return str + '@' + parts[1]
+}
+
+//converts a string array to a comma separated string
+export const stringArrayToCommaSeparatedString = (arr: string[]): string => {
+  let str = ""
+  for (let i = 0; i < arr.length; i++) {
+    str += arr[i]
+    if (i !== arr.length - 1) {
+      str += ','
+    }
+  }
+
+  return str
+}
+
+// check if given fields are not empty in an object
+//if empty field is detected through error if throwError flag is set
+export const isAnyEmpty = (object: any, fields: string[], throwError: boolean = true) => {
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i]
+    if (!object.hasOwnProperty(field) || isEmpty(object[field])) {
+      if (throwError) {
+        TE(`Please provide ${field}`)
+      }
+      return true
+    }
+  }
+  return false
+}
+
+//generate otp
+export const generateOtp = (numDigits: number = 4): string => {
+  const digits = '0123456789'
+  let OTP = ''
+  for (let i = 0; i < numDigits; i++) {
+    OTP += digits[Math.floor(Math.random() * 10)]
+  }
+
+  return OTP
+}
+
+//add days to a given date
+export const addDays = (date: Date, days: number) => {
+  var result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+
+//add minutes to a given date
+export const addMinutes = (date: Date, minutes: number) => {
+  let result = new Date(date)
+  result.setMinutes(result.getMinutes() + minutes)
+  return result;
+};
 
 //makes http request with the given config
 //if method is not provided, a get request is made
-export const doRequest = (config: AxiosRequestConfig) => {
-  if(isEmpty(config.method)){
+export const doRequest = async (config: AxiosRequestConfig) => {
+  if (isEmpty(config.method)) {
     config.method = 'GET'
   }
-  if(isEmpty(config.url)){
+  if (isEmpty(config.url)) {
     TE("url not provided for making request.")
   }
-  return axios(config)
+  let err: any, res
+  [err, res] = await TO(axios(config))
+  if (err) {
+    console.log(err.response.data)
+    throw err.toString()
+  }
+  if (res.status !== 200) {
+    throw 'Some error occurred while requesting ' + config.url
+  }
+  if (res.status === 200) {
+    return res.data
+  }
 }
 
 //validate for errors 
@@ -43,7 +124,6 @@ export const TO = async (promise: Promise<any>): Promise<[any, any]> => {
 
 export const ReE = (res: Response, err: any, code: number) => {
   // Error Web Response
-  console.log(err)
   if (typeof err == 'object' && typeof err.message != 'undefined') {
     err = err.message
   }

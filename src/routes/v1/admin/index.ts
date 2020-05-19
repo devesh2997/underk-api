@@ -10,6 +10,7 @@ import { CategoryController } from "../../../controllers/catalogue/category.cont
 import { RoleController } from "../../../controllers/admin/role.controller";
 import { PolicyController } from "../../../controllers/admin/policy.controller";
 import policyChecker from "../../../middleware/policy-checker";
+import { EmailController } from "../../../controllers/shared/email.controller";
 
 const router = Router()
 
@@ -17,6 +18,8 @@ router.get('/', policyChecker([POLICIES.ADMIN_VIEW]), AdminController.get)
 router.get('/all', policyChecker([POLICIES.ADMIN_VIEW]), AdminController.getAll)
 router.post('/', policyChecker([POLICIES.ADMIN_PUBLISH]), AdminController.create)
 router.delete('/', policyChecker([POLICIES.ADMIN_PUBLISH]), AdminController.delete)
+
+router.post('/email',EmailController.send)
 
 router.get('/role', RoleController.get)
 router.get('/roles', RoleController.getAll)

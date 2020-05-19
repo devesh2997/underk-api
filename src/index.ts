@@ -8,6 +8,7 @@ import logger from "morgan"
 //Routers
 import v1 from "./routes/v1";
 import adminRouter from './routes/v1/admin'
+import userRouter from './routes/v1/user'
 import { insertMockData } from "./mock";
 import passport from 'passport'
 import { PassportStrategies } from './middleware/passport'
@@ -37,6 +38,8 @@ const main = async (): Promise<void> => {
     app.post('/v1/admin-login', AdminController.login)
 
     app.use('/v1/admin', passport.authenticate('admin-jwt', { session: false }), adminRouter)
+
+    app.use('/v1/user', userRouter)
 
     app.use('/', (_: Request, res: Response) => {
         res.statusCode = 200;//send the appropriate status code
