@@ -14,10 +14,10 @@ import { EmailController } from "../../../controllers/shared/email.controller";
 
 const router = Router()
 
-router.get('/', policyChecker([POLICIES.ADMIN_VIEW]), AdminController.get)
-router.get('/all', policyChecker([POLICIES.ADMIN_VIEW]), AdminController.getAll)
-router.post('/', policyChecker([POLICIES.ADMIN_PUBLISH]), AdminController.create)
-router.delete('/', policyChecker([POLICIES.ADMIN_PUBLISH]), AdminController.delete)
+router.get('/', policyChecker([POLICIES.ADMIN_VIEW.name]), AdminController.get)
+router.get('/all', policyChecker([POLICIES.ADMIN_VIEW.name]), AdminController.getAll)
+router.post('/', policyChecker([POLICIES.ADMIN_PUBLISH.name]), AdminController.create)
+router.delete('/', policyChecker([POLICIES.ADMIN_PUBLISH.name]), AdminController.delete)
 
 router.post('/email',EmailController.send)
 
@@ -28,8 +28,8 @@ router.delete('/role', RoleController.delete)
 
 router.get('/policy', PolicyController.get)
 router.get('/policies', PolicyController.getAll)
-router.post('/policy', PolicyController.create)
-router.delete('/policy', PolicyController.delete)
+// router.post('/policy', PolicyController.create)
+// router.delete('/policy', PolicyController.delete)
 
 router.get('/emp', EmployeeController.get)
 router.post('/emp', EmployeeController.create)

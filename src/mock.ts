@@ -6,29 +6,32 @@ import * as POLICIES from "underk-policies";
 import { PolicyService } from "./services/admin/policy.service";
 import { PolicyJSON } from "./entity/admin/Policy";
 
-const policyNames = [
+const policies = [
     POLICIES.SUPER,
     POLICIES.ADMIN_VIEW,
     POLICIES.ADMIN_PUBLISH,
     POLICIES.EMPLOYEE_VIEW,
     POLICIES.EMPLOYEE_PUBLISH,
     POLICIES.CATALOGUE_VIEW,
-    POLICIES.CATALOGUE_PUBLISH
+    POLICIES.CATALOGUE_PUBLISH,
+    POLICIES.EMAIL_PUBLISH,
+    POLICIES.EMAIL_VIEW,
+    POLICIES.SMS_PUBLISH,
+    POLICIES.SMS_VIEW
 ]
 
 export const insertMockData = async (): Promise<void> => {
     let err: any
     let superPolicyId: number = -1
 
-    for (let i = 0; i < policyNames.length; i++) {
+    for (let i = 0; i < policies.length; i++) {
         let policy: PolicyJSON
-        const policyName = policyNames[i];
-        [err, policy] = await TO(PolicyService.get({ name: policyName }))
+        [err, policy] = await TO(PolicyService.get({ name: policies[i].name }))
         if (isEmpty(policy)) {
-            [err, policy] = await TO(PolicyService.create({ name: policyNames[i], description: '' }))
+            [err, policy] = await TO(PolicyService.create({ name: policies[i].name, description: policies[i].description }))
         }
-        if (policy.name === POLICIES.SUPER) {
-            superPolicyId = policy.id
+        if (policy.name === POLICIES.SUPER.name) {
+            superPolicyId = policy.id as number
         }
         if (err) console.log(err)
     }

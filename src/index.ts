@@ -39,7 +39,8 @@ const main = async (): Promise<void> => {
 
     app.use('/v1/admin', passport.authenticate('admin-jwt', { session: false }), adminRouter)
 
-    app.use('/v1/user', userRouter)
+    app.use('/v1/user', userRouter
+    )
 
     app.use('/', (_: Request, res: Response) => {
         res.statusCode = 200;//send the appropriate status code

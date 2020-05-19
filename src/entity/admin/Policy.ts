@@ -1,8 +1,8 @@
-import { PrimaryGeneratedColumn, Column, Entity, BaseEntity } from "typeorm";
-import { IsUppercase, IsNotEmpty } from "class-validator";
+import { Generated, Column,PrimaryColumn, Entity, BaseEntity } from "typeorm";
+import { IsUppercase } from "class-validator";
 
 export interface PolicyJSON {
-    id: number
+    id?: number
     name: string
     description: string
 }
@@ -16,11 +16,10 @@ export class Policy extends BaseEntity {
         this.description = description
     }
 
-    @PrimaryGeneratedColumn()
+    @Generated('increment')
     id: number
 
-    @Column({ unique: true })
-    @IsNotEmpty()
+    @PrimaryColumn()
     @IsUppercase()
     name: string
 
