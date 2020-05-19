@@ -20,6 +20,22 @@ export class EmployeeController {
             201)
 
     }
+
+    static getAll = async (_: Request, res: Response): Promise<Response> => {
+        let err: string, employees: Employee[]
+
+        [err, employees] = await TO(EmployeeService.getAll())
+
+        if (err) return ReE(res, err, 422)
+
+        return ReS(res, {
+            message: 'Employees found :' + employees.length,
+            employees: employees
+        },
+            201)
+
+    }
+
     static delete = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
         let err: string, employee: Employee

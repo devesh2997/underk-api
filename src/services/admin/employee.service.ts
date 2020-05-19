@@ -30,6 +30,23 @@ export class EmployeeService {
         return emp.toJSON()
     }
 
+    static getAll = async (): Promise<EmployeeJSON[]> | never => {
+        let err: any, emps: Employee[]
+
+        [err, emps] = await TO(Employee.find())
+
+        if (err) {
+            TE(err)
+        }
+
+        if (typeof emps === 'undefined') {
+            TE("Employee not found.")
+        }
+
+
+        return emps.map(emp => emp.toJSON())
+    }
+
     static delete = async (employeeInfo: any): Promise<EmployeeJSON> | never => {
         let err: any, emp: Employee | undefined
 
