@@ -10,19 +10,16 @@ export type PolicyRequestInfo = {
 export class PolicyService {
     static get = async (policyInfo: any): Promise<PolicyJSON> | never => {
         let err: any, policy: Policy
-        if (isEmpty(policyInfo.id) && isEmpty(policyInfo.name)) {
+        if (isEmpty(policyInfo.name)) {
             TE("Please provid policy id or policy name")
         }
+        [err, policy] = await TO(Policy.findOne({ name: policyInfo.name }))
 
-        if (isNotEmpty(policyInfo.id)) {
-            [err, policy] = await TO(Policy.findOne({ id: policyInfo.id }))
-        } else {
-            [err, policy] = await TO(Policy.findOne({ name: policyInfo.name }))
-        }
         if (err) TE(err)
 
         if (isEmpty(policy)) TE("Policy not found")
 
+        console.log(policy.toJSON())
         return policy.toJSON()
     }
 

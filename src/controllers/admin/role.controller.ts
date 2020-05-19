@@ -47,5 +47,27 @@ export class RoleController {
         return ReS(res, { message: 'Role created', role: role }, 201)
     }
 
+    static addPolicies = async (req: Request, res: Response): Promise<Response> => {
+        const body = req.body
+        let err: string, role: RoleJSON
+
+        [err, role] = await TO(RoleService.addPolicies(body))
+
+        if (err) return ReE(res, err, 422)
+
+        return ReS(res, { message: 'Policies added', role: role }, 201)
+    }
+
+    static deletePolicies = async (req: Request, res: Response): Promise<Response> => {
+        const body = req.body
+        let err: string, role: RoleJSON
+
+        [err, role] = await TO(RoleService.deletePolicies(body))
+
+        if (err) return ReE(res, err, 422)
+
+        return ReS(res, { message: 'Policies deleted', role: role }, 201)
+    }
+
 
 }

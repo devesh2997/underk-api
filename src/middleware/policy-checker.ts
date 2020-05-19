@@ -9,7 +9,8 @@ const policyChecker = (allowedPolicies: string[]) => {
             res.sendStatus(401)
         }
         const userPolicies: string[] = user.policies
-        if (userPolicies.indexOf(POLICIES.SUPER)>=0) {
+        console.log(userPolicies)
+        if (userPolicies.indexOf(POLICIES.SUPER.name)>=0) {
             next()
         } else if (allowedPolicies.some((p) => userPolicies.indexOf(p) >= 0)) {
             next()

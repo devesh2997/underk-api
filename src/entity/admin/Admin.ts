@@ -15,7 +15,8 @@ export interface AdminJSON {
     employee: EmployeeJSON | undefined,
     roles: RoleJSON[],
     policies: PolicyJSON[],
-    created_at: Date
+    created_at: Date,
+    updated_at: Date
 }
 
 @Entity()
@@ -28,7 +29,7 @@ export class Admin extends BaseEntity {
     @Generated("uuid")
     auid: string
 
-    @Column()
+    @Column({ unique: true })
     @MinLength(3)
     alias: string
 
@@ -88,7 +89,8 @@ export class Admin extends BaseEntity {
             employee: emp,
             roles: roles,
             policies: policies,
-            created_at: this.created_at
+            created_at: this.created_at,
+            updated_at: this.updated_at
         }
     }
 

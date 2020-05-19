@@ -22,16 +22,12 @@ const policies = [
 
 export const insertMockData = async (): Promise<void> => {
     let err: any
-    let superPolicyId: number = -1
 
     for (let i = 0; i < policies.length; i++) {
         let policy: PolicyJSON
         [err, policy] = await TO(PolicyService.get({ name: policies[i].name }))
         if (isEmpty(policy)) {
             [err, policy] = await TO(PolicyService.create({ name: policies[i].name, description: policies[i].description }))
-        }
-        if (policy.name === POLICIES.SUPER.name) {
-            superPolicyId = policy.id as number
         }
         if (err) console.log(err)
     }
@@ -43,7 +39,7 @@ export const insertMockData = async (): Promise<void> => {
         return
     }
     [err, superAdmin] = await TO(AdminService.delete({ alias: 'superuser' }));
-    [err, superAdmin] = await TO(AdminService.create({ alias: 'superuser', password: 'superuser', roleIds: '[]', policyIds: '[' + superPolicyId + ']', euid: undefined }))
+    [err, superAdmin] = await TO(AdminService.create({ alias: 'superuser', password: 'superuser', roleIds: '[]', policyNames: '["SUPER"]', euid: undefined }))
     if (err) {
         console.log(err)
     }

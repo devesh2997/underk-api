@@ -28,7 +28,7 @@ export class AdminController {
         if (err) return ReE(res, err, 422)
 
         return ReS(res, {
-            message: 'Admins found :'+admins.length,
+            message: 'Admins found :' + admins.length,
             admins: admins
         },
             201)
@@ -61,6 +61,22 @@ export class AdminController {
 
         return ReS(res, {
             message: 'Successfully created new admin.',
+            admin: admin
+        },
+            201)
+
+    }
+
+    static update = async (req: Request, res: Response): Promise<Response> => {
+        const body = req.body
+        let err: string, admin: Admin
+
+        [err, admin] = await TO(AdminService.update(body))
+
+        if (err) return ReE(res, err, 422)
+
+        return ReS(res, {
+            message: 'Successfully update admin.',
             admin: admin
         },
             201)

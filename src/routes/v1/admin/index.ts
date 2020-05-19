@@ -18,6 +18,7 @@ router.get('/', policyChecker([POLICIES.ADMIN_VIEW.name]), AdminController.get)
 router.get('/all', policyChecker([POLICIES.ADMIN_VIEW.name]), AdminController.getAll)
 router.post('/', policyChecker([POLICIES.ADMIN_PUBLISH.name]), AdminController.create)
 router.delete('/', policyChecker([POLICIES.ADMIN_PUBLISH.name]), AdminController.delete)
+router.put('/', policyChecker([POLICIES.ADMIN_PUBLISH.name]), AdminController.update)
 
 router.post('/email',EmailController.send)
 
@@ -25,6 +26,8 @@ router.get('/role', RoleController.get)
 router.get('/roles', RoleController.getAll)
 router.post('/role', RoleController.create)
 router.delete('/role', RoleController.delete)
+router.post('/role/policy', RoleController.addPolicies)
+router.delete('/role/policy', RoleController.deletePolicies)
 
 router.get('/policy', PolicyController.get)
 router.get('/policies', PolicyController.getAll)

@@ -7,7 +7,7 @@ type RoleRequestInfo = {
     id: number,
     name: string,
     description: string,
-    policyIds: number[] | string
+    policyNames: string[] | string
 }
 
 export class RoleService {
@@ -67,15 +67,14 @@ export class RoleService {
             TE("Role with given name already exists")
         }
 
-        if (isNotEmpty(roleInfo.policyIds)) {
+        if (isNotEmpty(roleInfo.policyNames)) {
             try {
                 role.policies = []
-                roleInfo.policyIds = JSON.parse(roleInfo.policyIds as string) as number[]
-                roleInfo.policyIds = roleInfo.policyIds.map(id => Number(id))
-                for (let i = 0; i < roleInfo.policyIds.length; i++) {
-                    const id = roleInfo.policyIds[i]
+                roleInfo.policyNames = JSON.parse(roleInfo.policyNames as string)
+                for (let i = 0; i < roleInfo.policyNames.length; i++) {
+                    const name = roleInfo.policyNames[i]
                     let policy: Policy
-                    [err, policy] = await TO(Policy.findOne({ id: id }))
+                    [err, policy] = await TO(Policy.findOne({ name: name }))
                     if (err) TE(err)
                     role.policies.push(policy)
 
@@ -87,6 +86,92 @@ export class RoleService {
         }
 
         [err] = await TO(Role.save(role))
+
+        if (err) TE(err)
+
+        return role.toJSON()
+    }
+
+    static addPolicies = async (roleInfo: RoleRequestInfo): Promise<RoleJSON> => {
+        let err: any, role: Role
+
+        if (isEmpty(roleInfo.id)) {
+            TE("Role id not provided")
+        }
+
+        [err, role] = await TO(Role.findOne({ id: roleInfo.id }, { relations: ['policies'] }))
+        if (err) TE(err)
+        if (isEmpty(role)) {
+            TE("Role with given id does not exist")
+        }
+
+        if (isNotEmpty(roleInfo.policyNames)) {
+            try {
+                if (isEmpty(role.policies)) {
+                    role.policies = []
+                }
+                roleInfo.policyNames = JSON.parse(roleInfo.policyNames as string)
+                for (let i = 0; i < roleInfo.policyNames.length; i++) {
+                    const name = roleInfo.policyNames[i]
+                    const index = role.policies.findIndex(p => p.name === name)
+                    if (isNotEmpty(index) && index >= 0)
+                        continue
+                    let policy: Policy
+                    [err, policy] = await TO(Policy.findOne({ name: name }))
+                    if (err) TE(err)
+                    role.policies.push(policy)
+                }
+
+            } catch (e) {
+                TE(e)
+            }
+        }
+
+        [err, role] = await TO(role.save())
+
+        if (err) TE(err)
+
+        return role.toJSON()
+    }
+
+    static deletePolicies = async (roleInfo: RoleRequestInfo): Promise<RoleJSON> => {
+        let err: any, role: Role
+
+        if (isEmpty(roleInfo.id)) {
+            TE("Role id not provided")
+        }
+
+        [err, role] = await TO(Role.findOne({ id: roleInfo.id }, { relations: ['policies'] }))
+        if (err) TE(err)
+        if (isEmpty(role)) {
+            TE("Role with given id does not exist")
+        }
+
+        if (isNotEmpty(roleInfo.policyNames)) {
+            try {
+                if (isEmpty(role.policies)) {
+                    console.log('policies empty')
+                    role.policies = []
+                }
+                roleInfo.policyNames = JSON.parse(roleInfo.policyNames as string)
+                for (let i = 0; i < roleInfo.policyNames.length; i++) {
+                    const name = roleInfo.policyNames[i]
+                    let policy: Policy
+                    [err, policy] = await TO(Policy.findOne({ name: name }))
+                    if (err) TE(err)
+                    const index = role.policies.findIndex(p => p.name === policy.name)
+                    console.log(index)
+                    if (isNotEmpty(index) && index >= 0) {
+                        role.policies.splice(index, 1)
+                    }
+                }
+
+            } catch (e) {
+                TE(e)
+            }
+        }
+
+        [err, role] = await TO(Role.save(role))
 
         if (err) TE(err)
 

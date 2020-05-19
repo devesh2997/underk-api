@@ -18,6 +18,7 @@ export const PassportStrategies = (passport: any) => {
             if (err) return done(err, false)
 
             if (admin) {
+                console.log(admin.policies)
                 let policies: string[] = admin.policies.map(policy => policy.name)
                 for (let i = 0; i < admin.roles.length; i++) {
                     const role = admin.roles[i]
