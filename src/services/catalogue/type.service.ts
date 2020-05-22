@@ -22,6 +22,21 @@ export class TypeService {
         return type.toJSON()
     }
 
+    static getAll = async (): Promise<TypeJSON[]> | never => {
+        let err, types: Type[]
+
+        [err, types] = await TO(Type.find())
+        if (err) {
+            TE(err)
+        }
+
+        if (typeof types === 'undefined') {
+            TE("Type not found")
+        }
+
+        return types.map(t=>t.toJSON())
+    }
+
     static delete = async (typeInfo: any): Promise<TypeJSON> | never => {
         let err, type: Type | undefined
 

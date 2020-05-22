@@ -12,7 +12,7 @@ export class RoleController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Role found', role: role }, 201)
+        return ReS(res, { message: 'Role found', result: role }, 201)
     }
 
     static getAll = async (_: Request, res: Response): Promise<Response> => {
@@ -22,7 +22,7 @@ export class RoleController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Roles found: ' + roles.length, roles: roles }, 201)
+        return ReS(res, { message: 'Roles found: ' + roles.length, result: roles }, 201)
     }
 
     static delete = async (req: Request, res: Response): Promise<Response> => {
@@ -33,7 +33,7 @@ export class RoleController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Role deleted', role: role }, 201)
+        return ReS(res, { message: 'Role deleted', result: role }, 201)
     }
 
     static create = async (req: Request, res: Response): Promise<Response> => {
@@ -44,7 +44,7 @@ export class RoleController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Role created', role: role }, 201)
+        return ReS(res, { message: 'Role created', result: role }, 201)
     }
 
     static addPolicies = async (req: Request, res: Response): Promise<Response> => {
@@ -55,7 +55,7 @@ export class RoleController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Policies added', role: role }, 201)
+        return ReS(res, { message: 'Policies added', result: role }, 201)
     }
 
     static deletePolicies = async (req: Request, res: Response): Promise<Response> => {
@@ -66,7 +66,7 @@ export class RoleController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Policies deleted', role: role }, 201)
+        return ReS(res, { message: 'Policies deleted', result: role }, 201)
     }
 
 

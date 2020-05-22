@@ -12,7 +12,17 @@ export class TypeController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Type found', type: type }, 201)
+        return ReS(res, { message: 'Type found', result: type }, 201)
+    }
+
+    static getAll = async (_:Request, res: Response): Promise<Response> => {
+        let err: string, types: TypeJSON[]
+
+        [err, types] = await TO(TypeService.getAll())
+
+        if (err) return ReE(res, err, 422)
+
+        return ReS(res, { message: 'Type found', result: types }, 201)
     }
 
     static delete = async (req: Request, res: Response): Promise<Response> => {
@@ -23,7 +33,7 @@ export class TypeController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Type deleted', type: type }, 201)
+        return ReS(res, { message: 'Type deleted', result: type }, 201)
     }
 
     static create = async (req: Request, res: Response): Promise<Response> => {
@@ -34,7 +44,7 @@ export class TypeController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Type created', type: type }, 201)
+        return ReS(res, { message: 'Type created', result: type }, 201)
     }
 
 

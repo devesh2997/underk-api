@@ -12,7 +12,7 @@ export class PolicyController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Policy found', policy: policy }, 201)
+        return ReS(res, { message: 'Policy found', result: policy }, 201)
     }
 
     static getAll = async (_: Request, res: Response): Promise<Response> => {
@@ -22,7 +22,7 @@ export class PolicyController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Policies found: ' + policies.length, policies: policies }, 201)
+        return ReS(res, { message: 'Policies found: ' + policies.length, result: policies }, 201)
     }
 
     static delete = async (req: Request, res: Response): Promise<Response> => {
@@ -33,7 +33,7 @@ export class PolicyController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Policy deleted', policy: policy }, 201)
+        return ReS(res, { message: 'Policy deleted', result: policy }, 201)
     }
 
     static create = async (req: Request, res: Response): Promise<Response> => {
@@ -44,7 +44,7 @@ export class PolicyController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Policy created', policy: policy }, 201)
+        return ReS(res, { message: 'Policy created', result: policy }, 201)
     }
 
 

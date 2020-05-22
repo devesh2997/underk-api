@@ -46,6 +46,7 @@ router.delete('/category', CategoryController.delete)
 router.post('/category', CategoryController.create)
 
 router.get('/type', TypeController.get)
+router.get('/types', TypeController.getAll)
 router.delete('/type', TypeController.delete)
 router.post('/type', TypeController.create)
 

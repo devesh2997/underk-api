@@ -146,13 +146,16 @@ export const ReS = (res: Response, data: any, code: number) => {
   return res.json(send_data)
 }
 
-export const TE = (err_message: string, log: boolean = true) => {
+export const TE = (err: any, log: boolean = true) => {
   // TE stands for Throw Error
   if (log === true) {
-    console.error(err_message)
+    console.error(err)
   }
 
-  throw err_message
+  if (typeof err === 'string')
+    throw new Error(err)
+
+  else throw err
 }
 
 export const TIE = (err: any, ) => {

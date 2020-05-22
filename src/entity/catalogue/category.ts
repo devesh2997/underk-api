@@ -1,4 +1,4 @@
-import { Entity, Tree, Column, TreeChildren, TreeParent, BaseEntity, CreateDateColumn, UpdateDateColumn, Generated, PrimaryColumn, OneToMany } from "typeorm"
+import { Entity, Tree, Column, TreeChildren, TreeParent, BaseEntity, CreateDateColumn, UpdateDateColumn, Generated, PrimaryColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm"
 import { Product } from "./Product"
 
 export interface CategoryJSON {
@@ -22,10 +22,10 @@ export class Category extends BaseEntity {
         this.name = name
     }
 
-    @Generated('increment')
+    @PrimaryGeneratedColumn()
     id: number;
 
-    @PrimaryColumn({ unique: true })
+    @Column({ unique: true })
     slug: string
 
     @Column({ unique: true })

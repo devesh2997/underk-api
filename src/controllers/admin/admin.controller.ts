@@ -14,7 +14,7 @@ export class AdminController {
 
         return ReS(res, {
             message: 'Admin found',
-            admin: admin
+            result: admin
         },
             201)
 
@@ -29,7 +29,7 @@ export class AdminController {
 
         return ReS(res, {
             message: 'Admins found :' + admins.length,
-            admins: admins
+            result: admins
         },
             201)
 
@@ -45,7 +45,7 @@ export class AdminController {
 
         return ReS(res, {
             message: 'Admin deleted',
-            admin: admin
+            result: admin
         },
             201)
 
@@ -61,7 +61,7 @@ export class AdminController {
 
         return ReS(res, {
             message: 'Successfully created new admin.',
-            admin: admin
+            result: admin
         },
             201)
 
@@ -77,7 +77,7 @@ export class AdminController {
 
         return ReS(res, {
             message: 'Successfully update admin.',
-            admin: admin
+            result: admin
         },
             201)
 
@@ -93,7 +93,7 @@ export class AdminController {
 
         return ReS(res, {
             message: 'Successfully logged in.',
-            admin: admin
+            result: admin
         },
             201)
 

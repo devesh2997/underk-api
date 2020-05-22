@@ -24,7 +24,7 @@ export class AttributeValue extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column()
+    @Column({ nullable: true })
     sku: string
 
     @Column()
@@ -39,7 +39,7 @@ export class AttributeValue extends BaseEntity {
     @Column({ nullable: true })
     value: string
 
-    @ManyToMany(()=>Product,product=>product.attributes)
+    @ManyToMany(() => Product, product => product.attributes)
     products: Product[]
 
     @CreateDateColumn()
@@ -50,7 +50,7 @@ export class AttributeValue extends BaseEntity {
 
     toJSON = (): AttributeValueJSON => {
         let attribute: AttributeJSON | undefined
-        if(this.attribute){
+        if (this.attribute) {
             attribute = this.attribute.toJSON()
         }
         return {

@@ -27,11 +27,11 @@ export class CategoryService {
             TE("Category slug not provided")
         }
 
-        [err, category] = await TO(Category.findOne({ slug: categoryInfo.slug }, { relations: ['parent', 'children'] }))
+        [err, category] = await TO(Category.findOne({ slug: categoryInfo.slug }))
         if (err) {
             TE(err)
         }
-        
+
         if (typeof category === 'undefined') {
             TE("Category not found")
         }
@@ -39,10 +39,11 @@ export class CategoryService {
         let ancestors: Category[]
         const manager = getManager();
         [err, ancestors] = await TO(manager.getTreeRepository(Category).findAncestors(category));
-        if(ancestors){
+        if (ancestors) {
+            ancestors = ancestors.filter(a => a.slug !== category.slug)
             category.ancestors = ancestors
         }
-        
+
 
         return category.toJSON()
 

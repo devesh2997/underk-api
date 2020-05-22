@@ -1,5 +1,6 @@
 import { Supplier } from "../../entity/catalogue/Supplier";
-import { TO, TE, isEmpty } from "../../utils";
+import { TO, TE } from "../../utils";
+import { isEmpty } from "class-validator";
 
 export class SupplierService {
     static get = async (supplierInfo: any): Promise<Supplier> | never => {
