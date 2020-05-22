@@ -15,7 +15,7 @@ export class EmployeeController {
 
         return ReS(res, {
             message: 'Employee found',
-            employee: employee
+            result: employee
         },
             201)
 
@@ -30,7 +30,7 @@ export class EmployeeController {
 
         return ReS(res, {
             message: 'Employees found :' + employees.length,
-            employees: employees
+            result: employees
         },
             201)
 
@@ -46,7 +46,7 @@ export class EmployeeController {
 
         return ReS(res, {
             message: 'Employee deleted',
-            employee: employee
+            result: employee
         },
             201)
 
@@ -62,7 +62,7 @@ export class EmployeeController {
 
         return ReS(res, {
             message: 'Successfully created new employee.',
-            employee: employee
+            result: employee
         },
             201)
 
@@ -78,7 +78,7 @@ export class EmployeeController {
 
         return ReS(res, {
             message: 'Successfully updated new employee.',
-            employee: employee
+            result: employee
         },
             201)
 
