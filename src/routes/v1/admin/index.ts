@@ -35,6 +35,7 @@ router.get('/policies', PolicyController.getAll)
 // router.delete('/policy', PolicyController.delete)
 
 router.get('/emp', EmployeeController.get)
+router.get('/emp/all', EmployeeController.getAll)
 router.post('/emp', EmployeeController.create)
 router.put('/emp', EmployeeController.update)
 router.delete('/emp', EmployeeController.delete)
