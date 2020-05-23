@@ -1,14 +1,15 @@
 import { BaseEntity, Generated, PrimaryColumn, Column, ManyToOne, OneToMany, Entity, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Type, TypeJSON } from "./Type";
-import { Attribute } from "./Attribute";
+import { Attribute, AttributeJSON } from "./Attribute";
 import { Product } from "./Product";
+import { isNotEmpty } from "class-validator";
 
 export interface SubtypeJSON {
     id: number,
     sku: string,
     name: string,
-    type: TypeJSON,
-    attributes: Attribute[]
+    type?: TypeJSON,
+    attributes?: AttributeJSON[]
 }
 
 @Entity()
@@ -35,17 +36,26 @@ export class Subtype extends BaseEntity {
     @OneToMany(() => Attribute, attribute => attribute.subtype)
     attributes: Attribute[]
 
-    @OneToMany(()=>Product, product=>product.subtype)
+    @OneToMany(() => Product, product => product.subtype)
     products: Product[]
 
     toJSON = (): SubtypeJSON => {
-        return {
+        let res: SubtypeJSON = {
             id: this.id,
             sku: this.sku,
             name: this.name,
-            type: this.type.toJSON(),
-            attributes: this.attributes
         }
+        let type: TypeJSON
+        if (isNotEmpty(this.type)) {
+            type = this.type.toJSON()
+            res['type'] = type
+        }
+        let attributes: AttributeJSON[] = []
+        if (isNotEmpty(this.attributes)) {
+            attributes = this.attributes.map(a => a.toJSON())
+            res['attributes'] = attributes
+        }
+        return res
     }
 
     @CreateDateColumn()

@@ -1,6 +1,7 @@
 import { SubtypeJSON, Subtype } from "../../entity/catalogue/Subtype";
-import { isEmpty, TE, TO } from "../../utils";
+import { TE, TO } from "../../utils";
 import { Type } from "../../entity/catalogue/Type";
+import { isEmpty } from "class-validator";
 
 export class SubtypeService {
     static get = async (subtypeInfo: any): Promise<SubtypeJSON> | never => {
@@ -10,7 +11,7 @@ export class SubtypeService {
             TE("Subtype sku not provided")
         }
 
-        [err, subtype] = await TO(Subtype.findOne({ sku: subtypeInfo.sku }, { relations: ['type','attributes'] }))
+        [err, subtype] = await TO(Subtype.findOne({ sku: subtypeInfo.sku }, { relations: ['type', 'attributes'] }))
         if (err) {
             TE(err)
         }

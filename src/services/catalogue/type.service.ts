@@ -1,5 +1,5 @@
 import { Type, TypeJSON } from "../../entity/catalogue/Type";
-import {  TE, TO } from "../../utils";
+import { TE, TO } from "../../utils";
 import { isEmpty } from "class-validator";
 
 export class TypeService {
@@ -10,7 +10,7 @@ export class TypeService {
             TE("Type sku not provided")
         }
 
-        [err, type] = await TO(Type.findOne({ sku: typeInfo.sku }))
+        [err, type] = await TO(Type.findOne({ sku: typeInfo.sku }, { relations: ['subtypes','subtypes.attributes'] }))
         if (err) {
             TE(err)
         }
@@ -25,7 +25,7 @@ export class TypeService {
     static getAll = async (): Promise<TypeJSON[]> | never => {
         let err, types: Type[]
 
-        [err, types] = await TO(Type.find())
+        [err, types] = await TO(Type.find({ relations: ['subtypes','subtypes.attributes'] }))
         if (err) {
             TE(err)
         }
@@ -34,7 +34,7 @@ export class TypeService {
             TE("Type not found")
         }
 
-        return types.map(t=>t.toJSON())
+        return types.map(t => t.toJSON())
     }
 
     static delete = async (typeInfo: any): Promise<TypeJSON> | never => {

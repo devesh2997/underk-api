@@ -11,6 +11,7 @@ import { RoleController } from "../../../controllers/admin/role.controller";
 import { PolicyController } from "../../../controllers/admin/policy.controller";
 import policyChecker from "../../../middleware/policy-checker";
 import { EmailController } from "../../../controllers/shared/email.controller";
+import { UserController } from "../../../controllers/user/user.controller";
 
 const router = Router()
 
@@ -20,7 +21,11 @@ router.post('/', policyChecker([POLICIES.ADMIN_PUBLISH.name]), AdminController.c
 router.delete('/', policyChecker([POLICIES.ADMIN_PUBLISH.name]), AdminController.delete)
 router.put('/', policyChecker([POLICIES.ADMIN_PUBLISH.name]), AdminController.update)
 
-router.post('/email',EmailController.send)
+router.post('/email', EmailController.send)
+
+router.get('/user', UserController.get)
+router.post('/user', UserController.create)
+router.get('/users', UserController.getAll)
 
 router.get('/role', RoleController.get)
 router.get('/roles', RoleController.getAll)

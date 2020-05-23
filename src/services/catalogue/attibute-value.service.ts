@@ -1,7 +1,7 @@
-import { isEmpty, TE, TO, VE } from "../../utils";
+import { TE, TO, VE } from "../../utils";
 import { AttributeValue, AttributeValueJSON } from "../../entity/catalogue/AttributeValue";
 import { Attribute } from "../../entity/catalogue/Attribute";
-import { isNotEmpty } from "class-validator";
+import { isNotEmpty, isEmpty } from "class-validator";
 
 export class AttributeValueService {
     static get = async (attributeValueInfo: any): Promise<AttributeValueJSON> | never => {

@@ -3,6 +3,12 @@ import { Response } from "express";
 import { validate, isNotEmpty, isEmpty } from "class-validator";
 import axios, { AxiosRequestConfig } from 'axios'
 
+
+//checks if the string is not null, undefined or with length =
+export const isNotEmptyString = (str: string) => {
+  return isNotEmpty(str) && str.length > 0
+}
+
 //mask an email by replacing middle characters with *****
 //eg: ananddevesh22@gmail.com => a***********2@gmail.com
 export const maskEmail = (email: string): string => {

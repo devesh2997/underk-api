@@ -9,7 +9,8 @@ export interface AttributeJSON {
     name: string,
     subtype: SubtypeJSON | undefined,
     skuOrdering: number,
-    variantsBasis: boolean
+    variantsBasis: boolean,
+    isOption: boolean
 }
 
 
@@ -59,7 +60,8 @@ export class Attribute extends BaseEntity {
             name: this.name,
             subtype: subtype,
             skuOrdering: this.skuOrdering,
-            variantsBasis: this.variantsBasis
+            variantsBasis: this.variantsBasis,
+            isOption: this.isOption
         }
     }
 }

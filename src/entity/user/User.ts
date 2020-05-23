@@ -1,6 +1,6 @@
 import { Entity, Column, OneToMany, Generated, PrimaryColumn, BaseEntity, CreateDateColumn, UpdateDateColumn } from "typeorm"
 import { UserAddress } from "./UserAddress"
-import { IsEmail, IsNotEmpty, IsNumber } from "class-validator"
+import { IsEmail, IsNotEmpty, IsNumber, IsDate, IsBoolean } from "class-validator"
 import { IsGender } from "../../utils/custom-decorators/IsGender"
 import CONFIG from "../../config/config"
 import jwt from "jsonwebtoken";
@@ -13,15 +13,18 @@ export interface UserJSON {
     email: string,
     mobileCountryCode: string,
     mobileNumber: number,
-    dob: number,
+    dob: Date,
     gender: string,
     picUrl: string,
     emailVerified: boolean,
-    mobileVerified: boolean
+    mobileVerified: boolean,
+    created_at: Date,
+    updated_at: Date
 }
 
 @Entity()
-export class User extends BaseEntity{
+export class User extends BaseEntity {
+    @Column()
     @Generated('increment')
     id: number
 
@@ -46,9 +49,9 @@ export class User extends BaseEntity{
     @IsNumber()
     mobileNumber: number
 
-    @Column("bigint", { nullable: true })
-    @IsNumber()
-    dob: number
+    @Column({ nullable: true })
+    @IsDate()
+    dob: Date
 
     @Column({ default: 'N' })
     @IsNotEmpty()
@@ -59,9 +62,11 @@ export class User extends BaseEntity{
     picUrl: string
 
     @Column({ default: false })
+    @IsBoolean()
     emailVerified: boolean
 
     @Column({ default: false })
+    @IsBoolean()
     mobileVerified: boolean
 
     @OneToMany(() => UserAddress, UserAddress => UserAddress.user)
@@ -91,7 +96,9 @@ export class User extends BaseEntity{
             gender: this.gender,
             picUrl: this.picUrl,
             emailVerified: this.emailVerified,
-            mobileVerified: this.mobileVerified
+            mobileVerified: this.mobileVerified,
+            created_at: this.created_at,
+            updated_at: this.updated_at,
         }
     }
 

@@ -25,22 +25,6 @@ type UserLoginResponse = {
 }
 
 export default class UserAuthService {
-    static get = async (userGetInfo: any): Promise<UserJSON> => {
-        let err: any, user: User
-
-        if (isEmpty(userGetInfo.uuid)) {
-            TE("user id not provided")
-        }
-
-        [err, user] = await TO(User.findOne({ uuid: userGetInfo.uuid }))
-
-        if (err) {
-            TE(err)
-        }
-
-        return user.toJSON()
-    }
-
     static sendOTP = async (userLoginInfo: UserLoginInfo): Promise<string> => {
         if (isEmpty(userLoginInfo.mobileCountryCode) || isEmpty(userLoginInfo.mobileNumber)) {
             TE("Mobile number not provided")
