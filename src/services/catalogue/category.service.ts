@@ -2,6 +2,7 @@ import { Category, CategoryJSON } from "../../entity/catalogue/category"
 import { TE, TO } from "../../utils"
 import { isNotEmpty, isEmpty } from "class-validator"
 import { getManager } from "typeorm"
+import { BulkCreateResult } from "entity/shared/BulkCreateResult"
 
 type CategoryCreateInfo = {
     slug: string,
@@ -119,10 +120,10 @@ export class CategoryService {
         }
 
         category = new Category(categoryInfo.slug, categoryInfo.sku, categoryInfo.name)
-        if (isNotEmpty(categoryInfo.parentSlug)) {
+        if (isNotEmpty(categoryInfo.parentSlug) && categoryInfo.parentSlug.length > 0) {
             [err, parent] = await TO(Category.findOne({ slug: categoryInfo.parentSlug }))
             if (err || !parent) {
-                TE("Parent with given slug not found")
+                TE(`Parent with given slug ${categoryInfo.parentSlug} not found`)
             }
             console.log(parent)
             category.parent = parent
@@ -136,6 +137,28 @@ export class CategoryService {
 
         return category.toJSON()
 
+
+    }
+
+    static bulkCreate = async (categoriesInfo: CategoryCreateInfo[]): Promise<BulkCreateResult<CategoryJSON>> | never => {
+        if (typeof categoriesInfo !== 'object') {
+            TE("Invalid request data format")
+        }
+        let errors: any[] = []
+        let categoriesJSON: CategoryJSON[] = []
+        for (let i = 0; i < categoriesInfo.length; i++) {
+            let err: any, categoryJSON: CategoryJSON
+            let categoryInfo = categoriesInfo[i];
+
+            [err, categoryJSON] = await TO(CategoryService.create(categoryInfo))
+            if (err) {
+                errors.push({ index: i, error: err })
+            } else {
+                categoriesJSON.push(categoryJSON)
+            }
+        }
+
+        return { errors, entitiesCreated: categoriesJSON }
 
     }
 }

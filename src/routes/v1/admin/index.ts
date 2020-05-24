@@ -12,6 +12,7 @@ import { PolicyController } from "../../../controllers/admin/policy.controller";
 import policyChecker from "../../../middleware/policy-checker";
 import { EmailController } from "../../../controllers/shared/email.controller";
 import { UserController } from "../../../controllers/user/user.controller";
+import { CollectionController } from "../../../controllers/catalogue/collection.controller";
 
 const router = Router()
 
@@ -50,6 +51,13 @@ router.get('/categories', CategoryController.getAll)
 router.get('/category-trees', CategoryController.getTrees)
 router.delete('/category', CategoryController.delete)
 router.post('/category', CategoryController.create)
+router.post('/category/bulk', CategoryController.bulkCreate)
+
+router.get('/collection', CollectionController.get)
+router.get('/collections', CollectionController.getAll)
+router.delete('/collection', CollectionController.delete)
+router.post('/collection', CollectionController.create)
+router.post('/collection/bulk', CollectionController.bulkCreate)
 
 router.get('/type', TypeController.get)
 router.get('/types', TypeController.getAll)

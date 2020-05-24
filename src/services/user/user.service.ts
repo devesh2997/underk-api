@@ -1,6 +1,6 @@
 import { User, UserJSON } from "../../entity/user/User"
 import { isEmpty, isNotEmpty, isEmail } from "class-validator"
-import { TE, TO, VE, isNotEmptyString } from "../../utils"
+import { TE, TO, isNotEmptyString } from "../../utils"
 
 export default class UserService {
     static get = async (userGetInfo: any): Promise<UserJSON> => {

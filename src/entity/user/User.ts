@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 export interface UserJSON {
     id: number,
     uuid: string,
+    uKoins: number
     firstName: string,
     lastName: string,
     email: string,
@@ -31,6 +32,9 @@ export class User extends BaseEntity {
     @PrimaryColumn({ type: "uuid" })
     @Generated("uuid")
     uuid: string
+
+    @Column({ default: 0 })
+    uKoins: number
 
     @Column({ nullable: true })
     firstName: string
@@ -87,6 +91,7 @@ export class User extends BaseEntity {
         return {
             id: this.id,
             uuid: this.uuid,
+            uKoins: this.uKoins,
             firstName: this.firstName,
             lastName: this.lastName,
             email: this.email,

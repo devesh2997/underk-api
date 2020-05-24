@@ -1,6 +1,7 @@
 import { Collection, CollectionJSON } from "../../entity/catalogue/collection"
 import { TE, TO, VE } from "../../utils"
 import { isEmpty } from "class-validator"
+import { BulkCreateResult } from "entity/shared/BulkCreateResult"
 
 export class CollectionService {
 
@@ -21,6 +22,22 @@ export class CollectionService {
         }
 
         return collection.toJSON()
+
+    }
+
+    static getAll = async (): Promise<CollectionJSON[]> | never => {
+        let err, collections: Collection[]
+
+        [err, collections] = await TO(Collection.find())
+        if (err) {
+            TE(err)
+        }
+
+        if (typeof collections === 'undefined') {
+            TE("Collections not found")
+        }
+
+        return collections.map(c => c.toJSON())
 
     }
 
@@ -64,6 +81,28 @@ export class CollectionService {
         }
 
         return collection.toJSON()
+
+    }
+
+    static bulkCreate = async (collectionsInfo: CollectionJSON[]): Promise<BulkCreateResult<CollectionJSON>> | never => {
+        if (typeof collectionsInfo !== 'object') {
+            TE("Invalid request data format")
+        }
+        let errors: any[] = []
+        let collectionsJSON: CollectionJSON[] = []
+        for (let i = 0; i < collectionsInfo.length; i++) {
+            let err: any, collectionJSON: CollectionJSON
+            let collectionInfo = collectionsInfo[i];
+
+            [err, collectionJSON] = await TO(CollectionService.create(collectionInfo))
+            if (err) {
+                errors.push({ index: i, error: err })
+            } else {
+                collectionsJSON.push(collectionJSON)
+            }
+        }
+
+        return { errors, entitiesCreated: collectionsJSON }
 
     }
 

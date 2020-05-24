@@ -25,7 +25,7 @@ export class TypeService {
     static getAll = async (): Promise<TypeJSON[]> | never => {
         let err, types: Type[]
 
-        [err, types] = await TO(Type.find({ relations: ['subtypes','subtypes.attributes'] }))
+        [err, types] = await TO(Type.find({ relations: ['subtypes','subtypes.attributes','subtypes.attributes.values'] }))
         if (err) {
             TE(err)
         }

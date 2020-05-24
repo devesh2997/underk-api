@@ -22,7 +22,7 @@ export class TypeController {
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Type found', result: types }, 201)
+        return ReS(res, { message: 'Types found', result: types }, 201)
     }
 
     static delete = async (req: Request, res: Response): Promise<Response> => {

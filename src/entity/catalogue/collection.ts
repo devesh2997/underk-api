@@ -2,6 +2,7 @@ import { Entity, Column, Generated, PrimaryColumn, BaseEntity, CreateDateColumn,
 import { Product } from "./Product";
 
 export interface CollectionJSON {
+    id: number,
     slug: string,
     name: string,
 }
@@ -16,6 +17,7 @@ export class Collection extends BaseEntity {
     }
 
     @Generated("increment")
+    @Column()
     id: number;
 
     @PrimaryColumn()
@@ -29,6 +31,7 @@ export class Collection extends BaseEntity {
 
     toJSON = (): CollectionJSON => {
         return {
+            id: this.id,
             slug: this.slug,
             name: this.name
         }

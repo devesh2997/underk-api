@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { TO, ReS, ReE } from "../../utils";
 import { CategoryService, CategoryTree } from "../../services/catalogue/category.service";
-import { Category } from "../../entity/catalogue/category";
+import { Category, CategoryJSON } from "../../entity/catalogue/category";
+import { BulkCreateResult } from "entity/shared/BulkCreateResult";
 
 export class CategoryController {
     static get = async (req: Request, res: Response): Promise<Response> => {
@@ -15,7 +16,7 @@ export class CategoryController {
 
         return ReS(res, {
             message: "Category found",
-            category: category
+            result: category
         }, 201)
 
     }
@@ -28,8 +29,8 @@ export class CategoryController {
         if (err) return ReE(res, err, 422)
 
         return ReS(res, {
-            message: "Categories found : "+categories.length,
-            categories: categories
+            message: "Categories found : " + categories.length,
+            result: categories
         }, 201)
 
     }
@@ -42,8 +43,8 @@ export class CategoryController {
         if (err) return ReE(res, err, 422)
 
         return ReS(res, {
-            message: "Trees found : "+categories.length,
-            categories: categories
+            message: "Trees found : " + categories.length,
+            result: categories
         }, 201)
 
     }
@@ -59,7 +60,7 @@ export class CategoryController {
 
         return ReS(res, {
             message: "Category deleted",
-            category: category
+            result: category
         }, 201)
 
     }
@@ -74,7 +75,23 @@ export class CategoryController {
 
         return ReS(res, {
             message: 'Successfully created new category.',
-            category: category
+            result: category
+        },
+            201)
+
+    }
+
+    static bulkCreate = async (req: Request, res: Response): Promise<Response> => {
+        const body = req.body
+        let err: string, bulkCreateResult: BulkCreateResult<Category>
+
+        [err, bulkCreateResult] = await TO(CategoryService.bulkCreate(body))
+
+        if (err) return ReE(res, err, 422)
+
+        return ReS(res, {
+            message: 'Categories created : ' + bulkCreateResult.entitiesCreated.length + ', Errors : ' + bulkCreateResult.errors.length,
+            result: bulkCreateResult
         },
             201)
 
