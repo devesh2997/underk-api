@@ -29,7 +29,7 @@ export class RoleService {
     static getAll = async (): Promise<RoleJSON[]> => {
         let err: any, policies: Role[]
 
-        [err, policies] = await TO(Role.find())
+        [err, policies] = await TO(Role.find({ relations: ['policies'] }))
 
         if (err) TE(err)
 
