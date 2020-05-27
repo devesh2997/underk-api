@@ -2,6 +2,15 @@ import { TE, TO, VE } from "../../utils";
 import { AttributeValue, AttributeValueJSON } from "../../entity/catalogue/AttributeValue";
 import { Attribute } from "../../entity/catalogue/Attribute";
 import { isNotEmpty, isEmpty } from "class-validator";
+import { BulkCreateResult } from "entity/shared/BulkCreateResult";
+
+type AttributeValueCreateInfo = {
+    sku: string,
+    name: string,
+    attributeId: number,
+    valueType?: string,
+    value: string
+}
 
 export class AttributeValueService {
     static get = async (attributeValueInfo: any): Promise<AttributeValueJSON> | never => {
@@ -50,7 +59,7 @@ export class AttributeValueService {
         return attributeValue.toJSON()
     }
 
-    static create = async (attributeValueInfo: any): Promise<AttributeValueJSON> | never => {
+    static create = async (attributeValueInfo: AttributeValueCreateInfo): Promise<AttributeValueJSON> | never => {
         let err: any, attributeValue: AttributeValue
 
         if (isEmpty(attributeValueInfo.sku)) {
@@ -85,8 +94,8 @@ export class AttributeValueService {
             if (String(attributeValueInfo.value)[0] !== '#') {
                 TE("Hexcode must begin with # symbol")
             }
-            attributeValue.valueType = attributeValueInfo.valueType
-            attributeValue.value = attributeValueInfo.value
+            attributeValue.valueType = attributeValueInfo.valueType as string
+            attributeValue.value = attributeValueInfo.value as string
         }
 
         let attribute: Attribute
@@ -116,5 +125,27 @@ export class AttributeValueService {
         }
 
         return attributeValue.toJSON()
+    }
+
+    static bulkCreate = async (attributeValuesInfo: AttributeValueCreateInfo[]): Promise<BulkCreateResult<AttributeValueJSON>> | never => {
+        if (typeof attributeValuesInfo !== 'object') {
+            TE("Invalid request data format")
+        }
+        let errors: any[] = []
+        let attributeValuesJSON: AttributeValueJSON[] = []
+        for (let i = 0; i < attributeValuesInfo.length; i++) {
+            let err: any, attributeValueJSON: AttributeValueJSON
+            let attributeValueInfo = attributeValuesInfo[i];
+
+            [err, attributeValueJSON] = await TO(AttributeValueService.create(attributeValueInfo))
+            if (err) {
+                errors.push({ index: i, error: err })
+            } else {
+                attributeValuesJSON.push(attributeValueJSON)
+            }
+        }
+
+        return { errors, entitiesCreated: attributeValuesJSON }
+
     }
 }

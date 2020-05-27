@@ -1,5 +1,6 @@
-import { Entity, Column, BaseEntity, Generated, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, Column, BaseEntity, Generated, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { Length, IsEmail, IsInt } from "class-validator";
+import { ProductInventory } from "./ProductInventory";
 
 @Entity()
 export class Supplier extends BaseEntity {
@@ -18,10 +19,13 @@ export class Supplier extends BaseEntity {
     firstName: string
 
     @Column({ nullable: true })
+    middleName: string
+
+    @Column({ nullable: true })
     lastName: string
 
     get name(): string {
-        return `${this.firstName} ${this.lastName}`
+        return `${this.firstName} ${this.middleName} ${this.lastName}`
     }
 
     @Column("text")
@@ -29,11 +33,11 @@ export class Supplier extends BaseEntity {
     email: string
 
     @Column({ nullable: true })
-    countryCode: string
+    mobileCountryCode: string
 
     @Column({ nullable: true })
     @IsInt()
-    number: number
+    mobileNumber: number
 
     @Column({ nullable: true })
     @IsInt()
@@ -47,6 +51,9 @@ export class Supplier extends BaseEntity {
 
     @Column("text")
     address: string
+
+    @OneToMany(() => ProductInventory, inventory => inventory.supplier)
+    inventories: ProductInventory[]
 
     @CreateDateColumn()
     public created_at: Date;

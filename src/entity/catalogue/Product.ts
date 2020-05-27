@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, Column, Generated, PrimaryColumn, ManyToOne, ManyToMany, OneToMany } from "typeorm";
+import { BaseEntity, Entity, Column, Generated, ManyToOne, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Type } from "./Type";
 import { Subtype } from "./Subtype";
 import { AttributeValue } from "./AttributeValue";
@@ -9,9 +9,13 @@ import { ProductAsset } from "./ProductAsset";
 @Entity()
 export class Product extends BaseEntity {
     @Generated('increment')
+    @Column()
     id: number
 
-    @PrimaryColumn({ unique: true })
+    @PrimaryGeneratedColumn('uuid')
+    pid: string
+
+    @Column({ unique: true, nullable: false })
     slug: string
 
     @Column()
@@ -30,10 +34,7 @@ export class Product extends BaseEntity {
     isInclusiveTax: boolean
 
     @Column()
-    isActive: boolean
-
-    @Column()
-    isAvailable: boolean
+    status: string
 
     @OneToMany(() => ProductAsset, asset => asset.product)
     assets: ProductAsset[]
@@ -53,7 +54,7 @@ export class Product extends BaseEntity {
     @ManyToMany(() => AttributeValue, attributeValue => attributeValue.products)
     attributes: []
 
-
-
+    @ManyToMany(() => Product, product => product.variants)
+    variants: []
 
 }

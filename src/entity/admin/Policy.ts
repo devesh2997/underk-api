@@ -17,6 +17,7 @@ export class Policy extends BaseEntity {
     }
 
     @Generated('increment')
+    @Column()
     id: number
 
     @PrimaryColumn()

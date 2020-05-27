@@ -23,6 +23,7 @@ export interface AdminJSON {
 export class Admin extends BaseEntity {
 
     @Generated('increment')
+    @Column()
     id: number
 
     @PrimaryColumn({ type: "uuid" })

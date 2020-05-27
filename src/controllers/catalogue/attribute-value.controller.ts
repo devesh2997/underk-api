@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { TO, ReE, ReS } from "../../utils";
-import { AttributeValueJSON } from "../../entity/catalogue/AttributeValue";
+import { AttributeValueJSON, AttributeValue } from "../../entity/catalogue/AttributeValue";
 import { AttributeValueService } from "../../services/catalogue/attibute-value.service";
+import { BulkCreateResult } from "entity/shared/BulkCreateResult";
 
 export class AttributeValueController {
     static get = async (req: Request, res: Response): Promise<Response> => {
@@ -35,6 +36,22 @@ export class AttributeValueController {
         if (err) return ReE(res, err, 422)
 
         return ReS(res, { message: 'AttributeValue created', attributeValue: attributeValue }, 201)
+    }
+
+    static bulkCreate = async (req: Request, res: Response): Promise<Response> => {
+        const body = req.body
+        let err: string, bulkCreateResult: BulkCreateResult<AttributeValue>
+
+        [err, bulkCreateResult] = await TO(AttributeValueService.bulkCreate(body))
+
+        if (err) return ReE(res, err, 422)
+
+        return ReS(res, {
+            message: 'AttributeValues created : ' + bulkCreateResult.entitiesCreated.length + ', Errors : ' + bulkCreateResult.errors.length,
+            result: bulkCreateResult
+        },
+            201)
+
     }
 
 

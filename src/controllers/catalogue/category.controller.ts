@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { TO, ReS, ReE } from "../../utils";
 import { CategoryService, CategoryTree } from "../../services/catalogue/category.service";
-import { Category, CategoryJSON } from "../../entity/catalogue/category";
+import { Category } from "../../entity/catalogue/category";
 import { BulkCreateResult } from "entity/shared/BulkCreateResult";
 
 export class CategoryController {

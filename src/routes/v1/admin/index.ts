@@ -75,6 +75,7 @@ router.post('/attribute', AttributeController.create)
 router.get('/attribute-value', AttributeValueController.get)
 router.delete('/attribute-value', AttributeValueController.delete)
 router.post('/attribute-value', AttributeValueController.create)
+router.post('/attribute-value/bulk', AttributeValueController.bulkCreate)
 
 
 
