@@ -124,6 +124,16 @@ export const TO = async (promise: Promise<any>): Promise<[any, any]> => {
   return [null, res]
 }
 
+
+//generic version of TO (for type safety)
+export const TOG = async <T>(promise: Promise<T>): Promise<[any, T | undefined]> => {
+  let err, res
+    ;[err, res] = await to(promise)
+  if (err) return [err, undefined]
+
+  return [null, res]
+}
+
 // export const isEmpty = (o: any) => {
 //   return o === null || o === undefined || (o !== undefined && o.length === 0)
 // }

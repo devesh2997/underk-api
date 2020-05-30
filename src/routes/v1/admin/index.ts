@@ -13,6 +13,7 @@ import policyChecker from "../../../middleware/policy-checker";
 import { EmailController } from "../../../controllers/shared/email.controller";
 import { UserController } from "../../../controllers/user/user.controller";
 import { CollectionController } from "../../../controllers/catalogue/collection.controller";
+import { WarehouseController } from "../../../controllers/inventory/warehouse.controller";
 
 const router = Router()
 
@@ -76,6 +77,11 @@ router.get('/attribute-value', AttributeValueController.get)
 router.delete('/attribute-value', AttributeValueController.delete)
 router.post('/attribute-value', AttributeValueController.create)
 router.post('/attribute-value/bulk', AttributeValueController.bulkCreate)
+
+router.get('/warehouse', WarehouseController.get)
+router.get('/warehouses', WarehouseController.getAll)
+router.delete('/warehouse', WarehouseController.delete)
+router.post('/warehouse', WarehouseController.create)
 
 
 

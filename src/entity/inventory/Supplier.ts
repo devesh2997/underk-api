@@ -1,6 +1,25 @@
 import { Entity, Column, BaseEntity, Generated, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
-import { Length, IsEmail, IsInt } from "class-validator";
+import { Length, IsEmail, IsInt, IsNotEmpty } from "class-validator";
 import { ProductInventory } from "./ProductInventory";
+import { IsGender } from "../../utils/custom-decorators/IsGender";
+
+export interface SupplierJSON {
+    id: number
+    suid: string
+    sku: string
+    firstName: string
+    middleName: string | undefined
+    lastName: string | undefined
+    email: string
+    mobileCountryCode: string
+    mobileNumber: number
+    dob: Date
+    gender: string
+    picUrl: string
+    address: string
+    created_at: Date
+    updated_at: Date
+}
 
 @Entity()
 export class Supplier extends BaseEntity {
@@ -32,18 +51,19 @@ export class Supplier extends BaseEntity {
     @IsEmail()
     email: string
 
-    @Column({ nullable: true })
+    @Column()
     mobileCountryCode: string
 
-    @Column({ nullable: true })
+    @Column()
     @IsInt()
     mobileNumber: number
 
-    @Column({ nullable: true })
-    @IsInt()
-    dob: number
+    @Column()
+    dob: Date
 
     @Column({ default: 'N' })
+    @IsNotEmpty()
+    @IsGender()
     gender: 'M' | 'F' | 'U' | 'N'
 
     @Column("text")
@@ -60,4 +80,24 @@ export class Supplier extends BaseEntity {
 
     @UpdateDateColumn()
     public updated_at: Date;
+
+    toJSON = (): SupplierJSON => {
+        return {
+            id: this.id,
+            suid: this.suid,
+            sku: this.sku,
+            firstName: this.firstName,
+            middleName: this.middleName,
+            lastName: this.lastName,
+            email: this.email,
+            mobileCountryCode: this.mobileCountryCode,
+            mobileNumber: this.mobileNumber,
+            dob: this.dob,
+            gender: this.gender,
+            picUrl: this.picUrl,
+            address: this.address,
+            created_at: this.created_at,
+            updated_at: this.updated_at,
+        }
+    }
 }
