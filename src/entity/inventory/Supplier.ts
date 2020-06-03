@@ -24,16 +24,34 @@ export interface SupplierJSON {
 @Entity()
 export class Supplier extends BaseEntity {
 
+    constructor(sku: string, firstName: string, middleName: string, lastName: string, email: string, mobileCountryCode: string, mobileNumber: number, dob: Date, gender: string, picUrl: string, address: string) {
+        super()
+        this.sku = sku
+        this.firstName = firstName
+        this.middleName = middleName
+        this.lastName = lastName
+        this.email = email
+        this.mobileCountryCode = mobileCountryCode
+        this.mobileNumber = mobileNumber
+        this.dob = dob
+        this.gender = gender
+        this.picUrl = picUrl
+        this.address = address
+    }
+
     @Generated("increment")
+    @Column()
     id: number
 
     @PrimaryGeneratedColumn("uuid")
     suid: string
 
     @Column({ unique: true })
+    @IsNotEmpty()
     sku: string
 
     @Column()
+    @IsNotEmpty()
     @Length(1, 100)
     firstName: string
 
@@ -48,28 +66,33 @@ export class Supplier extends BaseEntity {
     }
 
     @Column("text")
+    @IsNotEmpty()
     @IsEmail()
     email: string
 
     @Column()
+    @IsNotEmpty()
     mobileCountryCode: string
 
-    @Column()
+    @Column("bigint")
+    @IsNotEmpty()
     @IsInt()
     mobileNumber: number
 
     @Column()
+    @IsNotEmpty()
     dob: Date
 
     @Column({ default: 'N' })
     @IsNotEmpty()
     @IsGender()
-    gender: 'M' | 'F' | 'U' | 'N'
+    gender: string
 
-    @Column("text")
+    @Column("text", { nullable: true })
     picUrl: string
 
     @Column("text")
+    @IsNotEmpty()
     address: string
 
     @OneToMany(() => ProductInventory, inventory => inventory.supplier)

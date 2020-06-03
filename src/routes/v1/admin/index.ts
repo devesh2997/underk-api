@@ -14,6 +14,7 @@ import { EmailController } from "../../../controllers/shared/email.controller";
 import { UserController } from "../../../controllers/user/user.controller";
 import { CollectionController } from "../../../controllers/catalogue/collection.controller";
 import { WarehouseController } from "../../../controllers/inventory/warehouse.controller";
+import { SupplierController } from "../../../controllers/inventory/supplier.controller";
 
 const router = Router()
 
@@ -82,6 +83,11 @@ router.get('/warehouse', WarehouseController.get)
 router.get('/warehouses', WarehouseController.getAll)
 router.delete('/warehouse', WarehouseController.delete)
 router.post('/warehouse', WarehouseController.create)
+
+router.get('/supplier', SupplierController.get)
+router.get('/suppliers', SupplierController.getAll)
+router.delete('/supplier', SupplierController.delete)
+router.post('/supplier', SupplierController.create)
 
 
 
