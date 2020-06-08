@@ -68,10 +68,11 @@ export class AdminController {
     }
 
     static update = async (req: Request, res: Response): Promise<Response> => {
+        const user: any = req.user
         const body = req.body
         let err: string, admin: Admin
 
-        [err, admin] = await TO(AdminService.update(body))
+        [err, admin] = await TO(AdminService.update(user.auid as string, body))
 
         if (err) return ReE(res, err, 422)
 
