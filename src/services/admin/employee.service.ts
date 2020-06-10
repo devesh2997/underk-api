@@ -81,7 +81,7 @@ export class EmployeeService {
         }
 
         //create employee object
-        emp = new Employee(employeeInfo.firstName, employeeInfo.lastName, employeeInfo.email, employeeInfo.mobileCountryCode, employeeInfo.mobileNumber, employeeInfo.dob, employeeInfo.gender, employeeInfo.picUrl, employeeInfo.address)
+        emp = new Employee(employeeInfo.firstName, employeeInfo.lastName, employeeInfo.email, employeeInfo.mobileCountryCode, employeeInfo.mobileNumber, employeeInfo.dob, employeeInfo.gender, employeeInfo.picUrl, employeeInfo.address, employeeInfo.mobileVerified, employeeInfo.emailVerified)
 
         //validate employee object
         await VE(emp)
@@ -137,6 +137,7 @@ export class EmployeeService {
         }
 
         emp = Employee.fromJson(existingEmployeeJSON)
+        emp.euid = existingEmployeeJSON.euid
         await VE(emp)
 
             //try to update employee
