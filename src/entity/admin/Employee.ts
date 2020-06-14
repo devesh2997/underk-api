@@ -23,7 +23,7 @@ export interface EmployeeJSON {
 @Entity()
 export class Employee extends BaseEntity {
 
-    constructor(firstName: string, lastName: string, email: string, mobileCountryCode: string, mobileNumber: number, dob: number, gender: string, picUrl: string, address: string) {
+    constructor(firstName: string, lastName: string, email: string, mobileCountryCode: string, mobileNumber: number, dob: number, gender: string, picUrl: string, address: string, mobileVerified: boolean, emailVerified: boolean) {
         super()
         this.firstName = firstName
         this.lastName = lastName
@@ -34,6 +34,8 @@ export class Employee extends BaseEntity {
         this.gender = gender
         this.picUrl = picUrl
         this.address = address
+        this.mobileVerified = mobileVerified
+        this.emailVerified = emailVerified
     }
 
     toJSON(): EmployeeJSON {
@@ -54,7 +56,7 @@ export class Employee extends BaseEntity {
     }
 
     static fromJson(json: EmployeeJSON): Employee {
-        return new Employee(json.firstName, json.lastName, json.email, json.mobileCountryCode, json.mobileNumber, json.dob, json.gender, json.picUrl, json.address)
+        return new Employee(json.firstName, json.lastName, json.email, json.mobileCountryCode, json.mobileNumber, json.dob, json.gender, json.picUrl, json.address, json.mobileVerified, json.emailVerified)
     }
 
     @Generated("increment")

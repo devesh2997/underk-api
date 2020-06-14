@@ -189,16 +189,20 @@ export default class AdminService {
 
     }
 
-    static update = async (adminUpdateInfo: AdminCreateUpdateInfo): Promise<AdminJSON> | never => {
+    static update = async (reqUser: string, adminUpdateInfo: AdminCreateUpdateInfo): Promise<AdminJSON> | never => {
         let err: any, adm: Admin
 
         if (isEmpty(adminUpdateInfo.auid)) {
-            TE("auid not prvided")
+            TE("auid not provided")
+        }
+        if (reqUser === adminUpdateInfo.auid) {
+            TE("invalid request")
         }
 
         [err, adm] = await TO(Admin.findOne({ auid: adminUpdateInfo.auid }, { relations: ['roles', 'policies', 'employee'] }))
 
         if (isNotEmpty(adminUpdateInfo.alias)) {
+            adm.alias = adminUpdateInfo.alias
             //validate alias length
             await VE(adm)
             //check if given alias is available or not
@@ -207,7 +211,6 @@ export default class AdminService {
             if (existingAdm) {
                 TE("Alias is already in use.")
             }
-            adm.alias = adminUpdateInfo.alias
         }
 
 
@@ -231,14 +234,10 @@ export default class AdminService {
 
         if (isNotEmpty(adminUpdateInfo.policyNames)) {
             try {
-                if (isEmpty(adm.policies))
-                    adm.policies = []
+                adm.policies = []
                 adminUpdateInfo.policyNames = JSON.parse(adminUpdateInfo.policyNames as string) as string[]
                 for (let i = 0; i < adminUpdateInfo.policyNames.length; i++) {
                     const name = adminUpdateInfo.policyNames[i]
-                    const index = adm.policies.findIndex(p => p.name === name)
-                    if (isNotEmpty(index) && index >= 0)
-                        continue
                     let policy: Policy
                     [err, policy] = await TO(Policy.findOne({ name: name }))
                     if (err) TE(err)
@@ -251,15 +250,11 @@ export default class AdminService {
 
         if (isNotEmpty(adminUpdateInfo.roleIds)) {
             try {
-                if (isEmpty(adm.roles))
-                    adm.roles = []
+                adm.roles = []
                 adminUpdateInfo.roleIds = JSON.parse(adminUpdateInfo.roleIds as string) as number[]
                 adminUpdateInfo.roleIds = adminUpdateInfo.roleIds.map(id => Number(id))
                 for (let i = 0; i < adminUpdateInfo.roleIds.length; i++) {
                     const id = adminUpdateInfo.roleIds[i]
-                    const index = adm.roles.findIndex(r => r.id === id)
-                    if (isNotEmpty(index) && index >= 0)
-                        continue
                     let role: Role
                     [err, role] = await TO(Role.findOne({ id: id }))
                     if (err) TE(err)
