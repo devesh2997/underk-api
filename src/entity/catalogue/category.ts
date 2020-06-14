@@ -1,4 +1,4 @@
-import { Entity, Tree, Column, TreeChildren, TreeParent, BaseEntity, CreateDateColumn, UpdateDateColumn, Generated, PrimaryColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm"
+import { Entity, Tree, Column, TreeChildren, TreeParent, BaseEntity, CreateDateColumn, UpdateDateColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm"
 import { Product } from "./Product"
 
 export interface CategoryJSON {

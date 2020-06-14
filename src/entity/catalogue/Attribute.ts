@@ -10,7 +10,7 @@ export interface AttributeJSON {
     subtype: SubtypeJSON | undefined,
     skuOrdering: number,
     variantsBasis: boolean,
-    isOption: boolean,
+    multiValued: boolean,
     values: AttributeValueJSON[] | undefined
 }
 
@@ -43,7 +43,7 @@ export class Attribute extends BaseEntity {
     variantsBasis: boolean
 
     @Column("bool", { default: false })
-    isOption: boolean
+    multiValued: boolean
 
     @CreateDateColumn()
     public created_at: Date;
@@ -66,7 +66,7 @@ export class Attribute extends BaseEntity {
             subtype: subtype,
             skuOrdering: this.skuOrdering,
             variantsBasis: this.variantsBasis,
-            isOption: this.isOption,
+            multiValued: this.multiValued,
             values: values
         }
     }

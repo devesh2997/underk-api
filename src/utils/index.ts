@@ -110,7 +110,7 @@ export const VE = async (obj: any) => {
       errors.forEach(err => {
         errObj[err.property] = err.constraints
       })
-      throw errObj
+      throw JSON.stringify(errObj)
     }
   })
 }

@@ -11,7 +11,7 @@ export const PassportStrategies = (passport: any) => {
     passport.use(
         'admin-jwt',
         new Strategy(opts, async function (jwt_payload, done) {
-            console.log(jwt_payload)
+            // console.log(jwt_payload)
             let err, admin: Admin
             [err, admin] = await TO(Admin.findOne({ auid: jwt_payload.auid }, { relations: ['policies', 'roles'] }))
 

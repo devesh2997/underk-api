@@ -58,7 +58,7 @@ export class SupplierService {
     static create = async (supplierInfo: any): Promise<SupplierJSON> | never => {
         let err, supplier: Supplier
 
-        supplier = new Supplier(supplierInfo.sku, supplierInfo.firstName, supplierInfo.middleName, supplierInfo.lastName, supplierInfo.email, supplierInfo.mobileCountryCode, supplierInfo.mobileNumber, supplierInfo.dob, supplierInfo.gender, supplierInfo.picUrl, supplierInfo.address);
+        supplier = new Supplier(supplierInfo.sku, supplierInfo.firstName, supplierInfo.lastName, supplierInfo.email, supplierInfo.mobileCountryCode, supplierInfo.mobileNumber, supplierInfo.dob, supplierInfo.gender, supplierInfo.picUrl, supplierInfo.address);
 
         await VE(supplier);
 

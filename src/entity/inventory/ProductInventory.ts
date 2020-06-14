@@ -1,22 +1,17 @@
 import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { Supplier } from "../inventory/Supplier";
+import { SKU } from "./SKU";
+import { Warehouse } from "./Warehouse";
 
 @Entity()
 export class ProductInventory extends BaseEntity {
     @PrimaryGeneratedColumn('increment')
     id: number
 
-    @Column()
-    pid: string
+    @ManyToOne(()=>Warehouse, warehouse=>warehouse.productsInventory)
+    warehouse: Warehouse
 
-    @ManyToOne(()=>Supplier,supplier=>supplier.inventories)
-    supplier: Supplier
-
-    @Column()
-    sku: string
-
-    @Column()
-    initialStock: number
+    @ManyToOne(()=>SKU, sku=>sku.inventories)
+    sku: SKU
 
     @Column()
     stock: number
@@ -24,13 +19,10 @@ export class ProductInventory extends BaseEntity {
     @Column()
     reserved: number
 
-    @Column()
-    costPricePerUnit: number
-
     @CreateDateColumn()
     created_at: Date
 
     @UpdateDateColumn()
     updated_at: Date
-
+    
 }

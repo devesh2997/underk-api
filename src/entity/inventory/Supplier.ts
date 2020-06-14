@@ -1,6 +1,5 @@
 import { Entity, Column, BaseEntity, Generated, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { Length, IsEmail, IsInt, IsNotEmpty } from "class-validator";
-import { ProductInventory } from "./ProductInventory";
 import { IsGender } from "../../utils/custom-decorators/IsGender";
 
 export interface SupplierJSON {
@@ -8,7 +7,6 @@ export interface SupplierJSON {
     suid: string
     sku: string
     firstName: string
-    middleName: string | undefined
     lastName: string | undefined
     email: string
     mobileCountryCode: string
@@ -24,11 +22,10 @@ export interface SupplierJSON {
 @Entity()
 export class Supplier extends BaseEntity {
 
-    constructor(sku: string, firstName: string, middleName: string, lastName: string, email: string, mobileCountryCode: string, mobileNumber: number, dob: Date, gender: string, picUrl: string, address: string) {
+    constructor(sku: string, firstName: string, lastName: string, email: string, mobileCountryCode: string, mobileNumber: number, dob: Date, gender: string, picUrl: string, address: string) {
         super()
         this.sku = sku
         this.firstName = firstName
-        this.middleName = middleName
         this.lastName = lastName
         this.email = email
         this.mobileCountryCode = mobileCountryCode
@@ -56,13 +53,10 @@ export class Supplier extends BaseEntity {
     firstName: string
 
     @Column({ nullable: true })
-    middleName: string
-
-    @Column({ nullable: true })
     lastName: string
 
     get name(): string {
-        return `${this.firstName} ${this.middleName} ${this.lastName}`
+        return `${this.firstName} ${this.lastName}`
     }
 
     @Column("text")
@@ -95,9 +89,6 @@ export class Supplier extends BaseEntity {
     @IsNotEmpty()
     address: string
 
-    @OneToMany(() => ProductInventory, inventory => inventory.supplier)
-    inventories: ProductInventory[]
-
     @CreateDateColumn()
     public created_at: Date;
 
@@ -110,7 +101,6 @@ export class Supplier extends BaseEntity {
             suid: this.suid,
             sku: this.sku,
             firstName: this.firstName,
-            middleName: this.middleName,
             lastName: this.lastName,
             email: this.email,
             mobileCountryCode: this.mobileCountryCode,

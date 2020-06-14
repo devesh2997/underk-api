@@ -2369,6 +2369,10 @@ typescript@^3.8.3:
   version "1.0.0"
   resolved "https://github.com/devesh2997/underk-policies#d8e0a8dd119fe0a2992a3d78b38c1ef9ef2355bf"
 
+"underk-types@https://github.com/devesh2997/underk-types#new":
+  version "1.0.0"
+  resolved "https://github.com/devesh2997/underk-types#de6a7caff5cf98ae316c9af83cc2a01c5bf560d5"
+
 unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"

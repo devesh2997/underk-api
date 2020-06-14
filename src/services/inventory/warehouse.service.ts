@@ -1,6 +1,7 @@
 import { WarehouseJSON, Warehouse } from "../../entity/inventory/Warehouse";
 import { isEmpty } from "class-validator";
 import { TE, TO, VE } from "../../utils";
+import { Address } from "../../entity/shared/Address";
 
 export class WarehouseService {
     static get = async (warehouseInfo: any): Promise<WarehouseJSON> | never => {
@@ -10,7 +11,7 @@ export class WarehouseService {
             TE("Warehouse code not provided")
         }
 
-        [err, warehouse] = await TO(Warehouse.findOne({ code: warehouseInfo.code }))
+        [err, warehouse] = await TO(Warehouse.findOne({ code: warehouseInfo.code }, { relations: ['address'] }))
         if (err) TE(err)
 
         if (typeof warehouse === 'undefined') {
@@ -23,7 +24,7 @@ export class WarehouseService {
     static getAll = async (): Promise<WarehouseJSON[]> | never => {
         let err, warehouses: Warehouse[]
 
-        [err, warehouses] = await TO(Warehouse.find())
+        [err, warehouses] = await TO(Warehouse.find({ relations: ['address'] }))
 
         if (err) TE(err)
 
@@ -41,7 +42,7 @@ export class WarehouseService {
             TE("Warehouse code not provided")
         }
 
-        [err, warehouse] = await TO(Warehouse.findOne({ code: warehouseInfo.code }))
+        [err, warehouse] = await TO(Warehouse.findOne({ code: warehouseInfo.code }, { relations: ['address'] }))
         if (err) TE(err)
 
         if (typeof warehouse === 'undefined') {
@@ -57,9 +58,18 @@ export class WarehouseService {
     static create = async (warehouseInfo: any): Promise<WarehouseJSON> | never => {
         let err: any, warehouse: Warehouse
 
+        if (isEmpty(warehouseInfo.address)) {
+            TE("Warehouse addresss not provided")
+        }
+
+        const address = new Address(warehouseInfo.address)
+
+        await VE(address)
+
         warehouse = new Warehouse(warehouseInfo.code, warehouseInfo.name)
 
         await VE(warehouse)
+        warehouse.address = address
 
         let existingWarehouse: Warehouse
 

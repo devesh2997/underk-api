@@ -1,4 +1,4 @@
-import { BaseEntity, Generated, PrimaryColumn, Column, ManyToOne, OneToMany, Entity, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { BaseEntity, Column, ManyToOne, OneToMany, Entity, CreateDateColumn, UpdateDateColumn, Unique, PrimaryGeneratedColumn } from "typeorm";
 import { Type, TypeJSON } from "./Type";
 import { Attribute, AttributeJSON } from "./Attribute";
 import { Product } from "./Product";
@@ -13,6 +13,7 @@ export interface SubtypeJSON {
 }
 
 @Entity()
+@Unique(["type", "sku"])
 export class Subtype extends BaseEntity {
 
     constructor(sku: string, name: string) {
@@ -21,10 +22,10 @@ export class Subtype extends BaseEntity {
         this.name = name
     }
 
-    @Generated("increment")
+    @PrimaryGeneratedColumn("increment")
     id: number
 
-    @PrimaryColumn()
+    @Column()
     sku: string
 
     @Column()
