@@ -2,6 +2,7 @@ import { Entity, BaseEntity, Generated, Column, PrimaryColumn, CreateDateColumn,
 import { IsNotEmpty } from "class-validator";
 import { Address, AddressJSON } from "../../entity/shared/Address";
 import { ProductInventory } from "./ProductInventory";
+import { PackagingInventory } from "./PackagingInventory";
 
 export interface WarehouseJSON {
     id: number
@@ -10,6 +11,7 @@ export interface WarehouseJSON {
     created_at: Date
     updated_at: Date
     address: AddressJSON
+    pincode: number
 }
 
 @Entity()
@@ -33,12 +35,18 @@ export class Warehouse extends BaseEntity {
     @IsNotEmpty({ message: 'Warehouse name nor provided' })
     name: string
 
+    @Column()
+    pincode: number
+
     @OneToOne(_ => Address, { cascade: true })
     @JoinColumn()
     address: Address;
 
-    @OneToMany(()=>ProductInventory, productInventory=>productInventory.warehouse)
+    @OneToMany(() => ProductInventory, productInventory => productInventory.warehouse)
     productsInventory: ProductInventory[]
+
+    @OneToMany(() => PackagingInventory, packagingInventory => packagingInventory.warehouse)
+    packagingInventory: PackagingInventory[]
 
     @CreateDateColumn()
     created_at: Date
@@ -51,6 +59,7 @@ export class Warehouse extends BaseEntity {
             id: this.id,
             code: this.code,
             name: this.name,
+            pincode: this.pincode,
             created_at: this.created_at,
             updated_at: this.updated_at,
             address: this.address.toJSON()

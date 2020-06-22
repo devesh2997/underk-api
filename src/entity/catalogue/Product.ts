@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, Column, Generated, ManyToOne, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable } from "typeorm";
+import { BaseEntity, Entity, Column, Generated, ManyToOne, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable, OneToOne, JoinColumn, } from "typeorm";
 import { Type, TypeJSON } from "./Type";
 import { Subtype, SubtypeJSON } from "./Subtype";
 import { AttributeValue, AttributeValueJSON } from "./AttributeValue";
@@ -8,16 +8,16 @@ import { ProductAsset } from "./ProductAsset";
 import { IsNotEmpty, isNotEmpty } from "class-validator";
 import { IsValidProductStatus } from "../../utils/custom-decorators/IsValidProductStatus";
 import { SKU } from "../../entity/inventory/SKU";
+import { OptionAttributeValue } from "./OptionAttributeValue";
+import { SKUAttributeValue } from "./SKUAttributeValue";
+import { Price } from "./Price";
+import { Dimensions } from "./Dimensions";
 
 export interface ProductJSON {
     id: number,
     pid: string,
     slug: string,
     title: string,
-    listPrice: number,
-    discount: number,
-    taxPercent: number,
-    isInclusiveTax: boolean,
     status: string,
     type: TypeJSON,
     subtype: SubtypeJSON,
@@ -46,24 +46,11 @@ export class Product extends BaseEntity {
 
     @Column()
     @IsNotEmpty()
-    listPrice: number
-
-    @Column()
-    @IsNotEmpty()
-    discount: number
-
-    @Column()
-    @IsNotEmpty()
-    taxPercent: number
-
-    @Column()
-    @IsNotEmpty()
-    isInclusiveTax: boolean
-
-    @Column()
-    @IsNotEmpty()
     @IsValidProductStatus()
     status: string
+
+    @Column()
+    baseSKU: string
 
     @OneToMany(() => ProductAsset, asset => asset.product)
     assets: ProductAsset[]
@@ -87,9 +74,24 @@ export class Product extends BaseEntity {
     @OneToMany(() => SKU, sku => sku.product)
     skus: SKU[]
 
+    @OneToMany(() => Price, price => price.product)
+    prices: Price[]
+
+    @OneToOne(() => Dimensions)
+    @JoinColumn()
+    dimensions: Dimensions
+
     @ManyToMany(() => AttributeValue)
     @JoinTable()
     attributes: AttributeValue[]
+
+    @ManyToMany(() => SKUAttributeValue)
+    @JoinTable()
+    skuAttributes: SKUAttributeValue[]
+
+    @ManyToMany(() => OptionAttributeValue)
+    @JoinTable()
+    optionAttributes: OptionAttributeValue[]
 
     @ManyToMany(() => Product)
     @JoinTable()
@@ -113,10 +115,6 @@ export class Product extends BaseEntity {
             pid: this.pid,
             slug: this.slug,
             title: this.title,
-            listPrice: this.listPrice,
-            discount: this.discount,
-            taxPercent: this.taxPercent,
-            isInclusiveTax: this.isInclusiveTax,
             status: this.status,
             type: this.type.toJSON(),
             subtype: this.subtype.toJSON(),

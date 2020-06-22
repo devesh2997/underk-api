@@ -110,7 +110,7 @@ export const VE = async (obj: any) => {
       errors.forEach(err => {
         errObj[err.property] = err.constraints
       })
-      throw JSON.stringify(errObj)
+      throw new Error(JSON.stringify(errObj))
     }
   })
 }
@@ -126,12 +126,13 @@ export const TO = async (promise: Promise<any>): Promise<[any, any]> => {
 
 
 //generic version of TO (for type safety)
-export const TOG = async <T>(promise: Promise<T>): Promise<[any, T | undefined]> => {
-  let err, res
-    ;[err, res] = await to(promise)
+export const TOG = async <T>(promise: Promise<T>): Promise<[Error | undefined, T | undefined]> => {
+  let err: Error
+  let res: T
+    ;[err, res] = await to<T>(promise)
   if (err) return [err, undefined]
 
-  return [null, res]
+  return [undefined, res]
 }
 
 // export const isEmpty = (o: any) => {
@@ -162,7 +163,7 @@ export const ReS = (res: Response, data: any, code: number) => {
   return res.json(send_data)
 }
 
-export const TE = (err: any, log: boolean = true) => {
+export const TE = (err: string | Error, log: boolean = true) => {
   // TE stands for Throw Error
   if (log === true) {
     console.error(err)
@@ -174,7 +175,7 @@ export const TE = (err: any, log: boolean = true) => {
   else throw err
 }
 
-export const TIE = (err: any, ) => {
+export const TIE = (err: any,) => {
   // TIE stands for Throw If Error
   if (isNotEmpty(err)) {
     throw err

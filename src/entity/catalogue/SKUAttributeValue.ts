@@ -1,31 +1,36 @@
 import { BaseEntity, Column, ManyToOne, Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { Attribute, AttributeJSON } from "./Attribute";
+import { SKUAttribute, SKUAttributeJSON } from "./SKUAttribute";
 
-export interface AttributeValueJSON {
+export interface SKUAttributeValueJSON {
     id: number,
+    sku: string,
     name: string,
-    attribute: AttributeJSON | undefined,
+    skuAttribute: SKUAttributeJSON,
     valueType: string,
     value: string
 }
 
 @Entity()
-@Unique(["attribute", "name"])
-export class AttributeValue extends BaseEntity {
+@Unique(["skuAttribute", "sku"])
+export class SKUAttributeValue extends BaseEntity {
 
-    constructor(name: string) {
+    constructor(sku: string, name: string) {
         super()
+        this.sku = sku
         this.name = name
     }
 
     @PrimaryGeneratedColumn()
     id: number
 
+    @Column({ nullable: true })
+    sku: string
+
     @Column()
     name: string
 
-    @ManyToOne(() => Attribute, attribute => attribute.values)
-    attribute: Attribute
+    @ManyToOne(() => SKUAttribute, skuAttribute => skuAttribute.values)
+    skuAttribute: SKUAttribute
 
     @Column({ default: 'none' })
     valueType: string
@@ -39,17 +44,14 @@ export class AttributeValue extends BaseEntity {
     @UpdateDateColumn()
     public updated_at: Date;
 
-    toJSON = (): AttributeValueJSON => {
-        let attribute: AttributeJSON | undefined
-        if (this.attribute) {
-            attribute = this.attribute.toJSON()
-        }
+    toJSON = (): SKUAttributeValueJSON => {
         return {
             id: this.id,
+            sku: this.sku,
             name: this.name,
             valueType: this.valueType,
             value: this.value,
-            attribute: attribute
+            skuAttribute: this.skuAttribute.toJSON()
         }
     }
 }

@@ -15,7 +15,7 @@ export class SKU extends BaseEntity{
     product: Product
 
     @OneToMany(()=>ProductInventory, inventory=>inventory.sku)
-    inventories: ProductInventory[]
+    inventory: ProductInventory[]
 
     @CreateDateColumn()
     created_at: Date

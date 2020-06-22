@@ -1,4 +1,4 @@
-import { Entity, Column, BaseEntity, Generated, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
+import { Entity, Column, BaseEntity, Generated, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Length, IsEmail, IsInt, IsNotEmpty } from "class-validator";
 import { IsGender } from "../../utils/custom-decorators/IsGender";
 

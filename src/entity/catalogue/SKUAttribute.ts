@@ -1,30 +1,30 @@
 import { BaseEntity, Column, ManyToOne, OneToMany, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Subtype, SubtypeJSON } from "./Subtype";
-import { AttributeValue, AttributeValueJSON } from "./AttributeValue";
+import { SKUAttributeValue, SKUAttributeValueJSON } from "./SKUAttributeValue";
 import { IsLowercase, isNotEmpty, IsNotEmpty } from "class-validator";
 
 
-export interface AttributeJSON {
+export interface SKUAttributeJSON {
     id: number,
     name: string,
     subtype: SubtypeJSON,
+    skuOrdering: number,
     variantsBasis: boolean,
-    isMultiValued: boolean,
-    isCompulsory: boolean,
     isFilterable: boolean,
-    values: AttributeValueJSON[]
+    values: SKUAttributeValueJSON[]
 }
+
 
 @Entity()
 @Unique(["subtype", "name"])
-export class Attribute extends BaseEntity {
+@Unique(["subtype", "skuOrdering"])
+export class SKUAttribute extends BaseEntity {
 
-    constructor(name: string, variantsBasis: boolean, isMultiValued: boolean, isCompulsory: boolean, isFilterable: boolean) {
+    constructor(name: string, skuOrdering: number, variantsBasis: boolean, isFilterable: boolean) {
         super()
         this.name = name
+        this.skuOrdering = skuOrdering
         this.variantsBasis = variantsBasis
-        this.isMultiValued = isMultiValued
-        this.isCompulsory = isCompulsory
         this.isFilterable = isFilterable
     }
     @PrimaryGeneratedColumn()
@@ -32,29 +32,22 @@ export class Attribute extends BaseEntity {
 
     @Column()
     @IsLowercase()
-    @IsNotEmpty()
     name: string
 
-    @ManyToOne(() => Subtype, subtype => subtype.attributes)
+    @ManyToOne(() => Subtype, subtype => subtype.skuAttributes)
+    @IsNotEmpty()
     subtype: Subtype
 
-    @OneToMany(() => AttributeValue, value => value.attribute)
-    values: AttributeValue[]
+    @OneToMany(() => SKUAttributeValue, value => value.skuAttribute)
+    values: SKUAttributeValue[]
+
+    @Column()
+    skuOrdering: number
 
     @Column("bool", { default: false })
-    @IsNotEmpty()
     variantsBasis: boolean
 
     @Column("bool", { default: false })
-    @IsNotEmpty()
-    isMultiValued: boolean
-
-    @Column("bool", { default: false })
-    @IsNotEmpty()
-    isCompulsory: boolean
-
-    @Column("bool", { default: false })
-    @IsNotEmpty()
     isFilterable: boolean
 
     @CreateDateColumn()
@@ -63,8 +56,8 @@ export class Attribute extends BaseEntity {
     @UpdateDateColumn()
     public updated_at: Date;
 
-    toJSON = (): AttributeJSON => {
-        let values: AttributeValueJSON[] | undefined = []
+    toJSON = (): SKUAttributeJSON => {
+        let values: SKUAttributeValueJSON[] = []
         if (isNotEmpty(this.values)) {
             values = this.values.map(v => v.toJSON())
         }
@@ -72,9 +65,8 @@ export class Attribute extends BaseEntity {
             id: this.id,
             name: this.name,
             subtype: this.subtype.toJSON(),
+            skuOrdering: this.skuOrdering,
             variantsBasis: this.variantsBasis,
-            isMultiValued: this.isMultiValued,
-            isCompulsory: this.isCompulsory,
             isFilterable: this.isFilterable,
             values: values
         }
