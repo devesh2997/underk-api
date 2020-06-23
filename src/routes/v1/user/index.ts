@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { UserAuthController } from "../../../controllers/user/auth.controller";
 
-const router = Router()
+const router = Router();
 
-router.post('/sendOtp',UserAuthController.sendOtp)
-router.post('/phoneLogin',UserAuthController.signInWithPhoneNumber)
-router.post('/verifyEmailOtp',UserAuthController.verifyEmailOtpAndSignIn)
+router.post("/auth/findUser", UserAuthController.findUser);
+router.post("/auth/sendOtp", UserAuthController.sendOtp);
+router.post("/auth/verifyOtp", UserAuthController.verifyOtp);
+router.post("/auth/createUser", UserAuthController.createUser);
+router.post("/auth/login", UserAuthController.login);
 
-export default router
+export default router;
