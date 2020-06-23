@@ -1,11 +1,11 @@
 import { BaseEntity, Column, ManyToOne, Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { OptionAttribute, OptionAttributeJSON } from "./OptionAttribute";
+import { OptionAttribute } from "./OptionAttribute";
+import { IsValidAttributeValueType } from "../../utils/custom-decorators/IsValidAttributeValueType";
 
 export interface OptionAttributeValueJSON {
     id: number,
     sku: string,
     name: string,
-    optionAttribute: OptionAttributeJSON | undefined,
     valueType: string,
     value: string
 }
@@ -14,10 +14,12 @@ export interface OptionAttributeValueJSON {
 @Unique(["optionAttribute", "sku"])
 export class OptionAttributeValue extends BaseEntity {
 
-    constructor(sku: string, name: string) {
+    constructor(sku: string, name: string, valueType: string, value: string) {
         super()
         this.sku = sku
         this.name = name
+        this.valueType = valueType
+        this.value = value
     }
 
     @PrimaryGeneratedColumn()
@@ -33,6 +35,7 @@ export class OptionAttributeValue extends BaseEntity {
     optionAttribute: OptionAttribute
 
     @Column({ default: 'none' })
+    @IsValidAttributeValueType()
     valueType: string
 
     @Column({ nullable: true })
@@ -45,17 +48,12 @@ export class OptionAttributeValue extends BaseEntity {
     public updated_at: Date;
 
     toJSON = (): OptionAttributeValueJSON => {
-        let optionAttribute: OptionAttributeJSON | undefined
-        if (this.optionAttribute) {
-            optionAttribute = this.optionAttribute.toJSON()
-        }
         return {
             id: this.id,
             sku: this.sku,
             name: this.name,
             valueType: this.valueType,
             value: this.value,
-            optionAttribute: optionAttribute
         }
     }
 }

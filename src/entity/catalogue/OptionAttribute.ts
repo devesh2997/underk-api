@@ -1,13 +1,12 @@
 import { BaseEntity, Column, ManyToOne, OneToMany, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { Subtype, SubtypeJSON } from "./Subtype";
+import { Subtype } from "./Subtype";
 import { OptionAttributeValue, OptionAttributeValueJSON } from "./OptionAttributeValue";
-import { IsLowercase, isNotEmpty } from "class-validator";
+import { IsLowercase, isNotEmpty, IsNotEmpty } from "class-validator";
 
 
 export interface OptionAttributeJSON {
     id: number,
     name: string,
-    subtype: SubtypeJSON,
     values: OptionAttributeValueJSON[]
 }
 
@@ -25,12 +24,13 @@ export class OptionAttribute extends BaseEntity {
 
     @Column()
     @IsLowercase()
+    @IsNotEmpty()
     name: string
 
     @ManyToOne(() => Subtype, subtype => subtype.optionAttributes)
     subtype: Subtype
 
-    @OneToMany(() => OptionAttributeValue, value => value.optionAttribute)
+    @OneToMany(() => OptionAttributeValue, value => value.optionAttribute, { cascade: true })
     values: OptionAttributeValue[]
 
     @CreateDateColumn()
@@ -40,19 +40,14 @@ export class OptionAttribute extends BaseEntity {
     public updated_at: Date;
 
     toJSON = (): OptionAttributeJSON => {
-        let subtype: SubtypeJSON | undefined
-        if (isNotEmpty(this.subtype)) {
-            subtype = this.subtype.toJSON()
-        }
-        let values: OptionAttributeValueJSON[] | undefined
+        let values: OptionAttributeValueJSON[] = []
         if (isNotEmpty(this.values)) {
             values = this.values.map(v => v.toJSON())
         }
         return {
             id: this.id,
             name: this.name,
-            subtype: this.subtype.toJSON(),
-            values: this.values.map(v => v.toJSON())
+            values: values
         }
     }
 }

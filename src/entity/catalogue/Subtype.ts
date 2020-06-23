@@ -1,5 +1,5 @@
 import { BaseEntity, Column, ManyToOne, OneToMany, Entity, CreateDateColumn, UpdateDateColumn, Unique, PrimaryGeneratedColumn } from "typeorm";
-import { Type, TypeJSON } from "./Type";
+import { Type } from "./Type";
 import { Attribute, AttributeJSON } from "./Attribute";
 import { SKUAttribute, SKUAttributeJSON } from "./SKUAttribute";
 import { Product } from "./Product";
@@ -10,7 +10,6 @@ export interface SubtypeJSON {
     id: number,
     sku: string,
     name: string,
-    type?: TypeJSON,
     attributes: AttributeJSON[],
     skuAttributes: SKUAttributeJSON[],
     optionAttributes: OptionAttributeJSON[]
@@ -64,11 +63,6 @@ export class Subtype extends BaseEntity {
             attributes: [],
             skuAttributes: [],
             optionAttributes: []
-        }
-        let type: TypeJSON
-        if (isNotEmpty(this.type)) {
-            type = this.type.toJSON()
-            res['type'] = type
         }
         let attributes: AttributeJSON[] = []
         let skuAttributes: SKUAttributeJSON[] = []

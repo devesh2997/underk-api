@@ -1,5 +1,5 @@
 import { BaseEntity, Column, ManyToOne, OneToMany, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { Subtype, SubtypeJSON } from "./Subtype";
+import { Subtype } from "./Subtype";
 import { AttributeValue, AttributeValueJSON } from "./AttributeValue";
 import { IsLowercase, isNotEmpty, IsNotEmpty } from "class-validator";
 
@@ -7,8 +7,6 @@ import { IsLowercase, isNotEmpty, IsNotEmpty } from "class-validator";
 export interface AttributeJSON {
     id: number,
     name: string,
-    subtype: SubtypeJSON,
-    variantsBasis: boolean,
     isMultiValued: boolean,
     isCompulsory: boolean,
     isFilterable: boolean,
@@ -19,10 +17,9 @@ export interface AttributeJSON {
 @Unique(["subtype", "name"])
 export class Attribute extends BaseEntity {
 
-    constructor(name: string, variantsBasis: boolean, isMultiValued: boolean, isCompulsory: boolean, isFilterable: boolean) {
+    constructor(name: string, isMultiValued: boolean, isCompulsory: boolean, isFilterable: boolean) {
         super()
         this.name = name
-        this.variantsBasis = variantsBasis
         this.isMultiValued = isMultiValued
         this.isCompulsory = isCompulsory
         this.isFilterable = isFilterable
@@ -38,12 +35,8 @@ export class Attribute extends BaseEntity {
     @ManyToOne(() => Subtype, subtype => subtype.attributes)
     subtype: Subtype
 
-    @OneToMany(() => AttributeValue, value => value.attribute)
+    @OneToMany(() => AttributeValue, value => value.attribute, { cascade: true })
     values: AttributeValue[]
-
-    @Column("bool", { default: false })
-    @IsNotEmpty()
-    variantsBasis: boolean
 
     @Column("bool", { default: false })
     @IsNotEmpty()
@@ -71,8 +64,6 @@ export class Attribute extends BaseEntity {
         return {
             id: this.id,
             name: this.name,
-            subtype: this.subtype.toJSON(),
-            variantsBasis: this.variantsBasis,
             isMultiValued: this.isMultiValued,
             isCompulsory: this.isCompulsory,
             isFilterable: this.isFilterable,

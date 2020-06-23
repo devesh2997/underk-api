@@ -1,5 +1,5 @@
 import { BaseEntity, Column, ManyToOne, OneToMany, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { Subtype, SubtypeJSON } from "./Subtype";
+import { Subtype } from "./Subtype";
 import { SKUAttributeValue, SKUAttributeValueJSON } from "./SKUAttributeValue";
 import { IsLowercase, isNotEmpty, IsNotEmpty } from "class-validator";
 
@@ -7,7 +7,6 @@ import { IsLowercase, isNotEmpty, IsNotEmpty } from "class-validator";
 export interface SKUAttributeJSON {
     id: number,
     name: string,
-    subtype: SubtypeJSON,
     skuOrdering: number,
     variantsBasis: boolean,
     isFilterable: boolean,
@@ -32,13 +31,13 @@ export class SKUAttribute extends BaseEntity {
 
     @Column()
     @IsLowercase()
+    @IsNotEmpty()
     name: string
 
     @ManyToOne(() => Subtype, subtype => subtype.skuAttributes)
-    @IsNotEmpty()
     subtype: Subtype
 
-    @OneToMany(() => SKUAttributeValue, value => value.skuAttribute)
+    @OneToMany(() => SKUAttributeValue, value => value.skuAttribute, { cascade: true })
     values: SKUAttributeValue[]
 
     @Column()
@@ -64,7 +63,6 @@ export class SKUAttribute extends BaseEntity {
         return {
             id: this.id,
             name: this.name,
-            subtype: this.subtype.toJSON(),
             skuOrdering: this.skuOrdering,
             variantsBasis: this.variantsBasis,
             isFilterable: this.isFilterable,

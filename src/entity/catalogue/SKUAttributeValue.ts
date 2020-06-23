@@ -1,11 +1,11 @@
 import { BaseEntity, Column, ManyToOne, Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { SKUAttribute, SKUAttributeJSON } from "./SKUAttribute";
+import { SKUAttribute } from "./SKUAttribute";
+import { IsValidAttributeValueType } from "../../utils/custom-decorators/IsValidAttributeValueType";
 
 export interface SKUAttributeValueJSON {
     id: number,
     sku: string,
     name: string,
-    skuAttribute: SKUAttributeJSON,
     valueType: string,
     value: string
 }
@@ -14,10 +14,12 @@ export interface SKUAttributeValueJSON {
 @Unique(["skuAttribute", "sku"])
 export class SKUAttributeValue extends BaseEntity {
 
-    constructor(sku: string, name: string) {
+    constructor(sku: string, name: string, valueType: string, value: string) {
         super()
         this.sku = sku
         this.name = name
+        this.valueType = valueType
+        this.value = value
     }
 
     @PrimaryGeneratedColumn()
@@ -33,6 +35,7 @@ export class SKUAttributeValue extends BaseEntity {
     skuAttribute: SKUAttribute
 
     @Column({ default: 'none' })
+    @IsValidAttributeValueType()
     valueType: string
 
     @Column({ nullable: true })
@@ -51,7 +54,6 @@ export class SKUAttributeValue extends BaseEntity {
             name: this.name,
             valueType: this.valueType,
             value: this.value,
-            skuAttribute: this.skuAttribute.toJSON()
         }
     }
 }

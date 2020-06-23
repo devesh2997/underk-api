@@ -140,6 +140,7 @@ export const TOG = async <T>(promise: Promise<T>): Promise<[Error | undefined, T
 // }
 
 export const ReE = (res: Response, err: any, code: number) => {
+  console.log(err)
   // Error Web Response
   if (typeof err == 'object' && typeof err.message != 'undefined') {
     err = err.message
