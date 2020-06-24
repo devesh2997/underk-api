@@ -103,4 +103,25 @@ export class UserAuthController {
             201
         );
     };
+
+    static loginWithGoogle = async (
+        req: Request,
+        res: Response
+    ): Promise<Response> => {
+        const body = req.body;
+        let err: string, result: UserLoginResponse;
+
+        [err, result] = await TO(UserAuthService.loginWithGoogle(body));
+
+        if (err) return ReE(res, err, 422);
+
+        return ReS(
+            res,
+            {
+                message: "Login successfull",
+                result,
+            },
+            201
+        );
+    };
 }

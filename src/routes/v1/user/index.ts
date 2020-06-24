@@ -8,5 +8,6 @@ router.post("/auth/sendOtp", UserAuthController.sendOtp);
 router.post("/auth/verifyOtp", UserAuthController.verifyOtp);
 router.post("/auth/createUser", UserAuthController.createUser);
 router.post("/auth/login", UserAuthController.login);
+router.post("/auth/loginWithGoogle", UserAuthController.loginWithGoogle);
 
 export default router;

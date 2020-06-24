@@ -6,6 +6,7 @@ import { SmsService } from "../shared/sms.service";
 import { EmailService } from "../shared/email.service";
 import { EmailOtp } from "../../entity/shared/EmailOtp";
 import bcrypt from "bcryptjs";
+import { OAuth2Client, LoginTicket, TokenPayload } from "google-auth-library";
 
 export type SendOtpResponse = {
     mobileCountryCode?: string;
@@ -22,6 +23,8 @@ export type UserLoginResponse = {
     mobileNumber: number;
     email: string;
 };
+
+const CLIENT_ID = "";
 
 export default class UserAuthService {
     static findUser = async (userInfo: {
@@ -297,6 +300,7 @@ export default class UserAuthService {
         mobileNumber?: number;
         email?: string;
         password?: string;
+        idToken?: string;
     }): Promise<User> => {
         if (
             isEmpty(userInfo.mobileCountryCode) ||
@@ -304,14 +308,38 @@ export default class UserAuthService {
         ) {
             TE("Mobile number not provided");
         }
-        if (isEmpty(userInfo.email)) {
-            TE("Email not provided");
+        if (isEmpty(userInfo.email) && isEmpty(userInfo.idToken)) {
+            TE("Email or id_token not provided");
         }
         if (isEmpty(userInfo.password)) {
             TE("Password not provided");
         }
 
-        let err: any, users: User[];
+        let err: any, payload: TokenPayload | undefined;
+        if (isNotEmpty(userInfo.idToken)) {
+            const client = new OAuth2Client(CLIENT_ID);
+
+            let err: any, ticket: LoginTicket;
+            [err, ticket] = await TO(
+                client.verifyIdToken({
+                    idToken: userInfo.idToken!,
+                    audience: CLIENT_ID,
+                })
+            );
+            if (err) TE(err);
+
+            payload = ticket.getPayload();
+            if (isEmpty(payload)) {
+                TE("Something went wrong");
+            }
+            if (isEmpty(payload!.email)) {
+                TE("Email not provided by google");
+            }
+
+            userInfo.email = payload!.email;
+        }
+
+        let users: User[];
 
         [err, users] = await TO(
             User.find({
@@ -334,31 +362,48 @@ export default class UserAuthService {
             TE("Another user account is associated with this email");
         }
 
-        const mobile = userInfo.mobileCountryCode + "" + userInfo.mobileNumber;
-        let smsOtp: SmsOtp;
-        [err, smsOtp] = await TO(SmsOtp.findOne({ mobile: mobile }));
-        if (err) TE(err);
-
-        let emailOtp: EmailOtp;
-        [err, emailOtp] = await TO(EmailOtp.findOne({ email: userInfo.email }));
-        if (err) TE(err);
-
-        if (
-            !(
-                (isNotEmpty(smsOtp) && smsOtp.verified) ||
-                (isNotEmpty(emailOtp) && emailOtp.verified)
-            )
-        ) {
-            TE("None of the mobile number and email is verified");
-        }
-
         let user = new User();
+        user.email = userInfo.email!;
         user.mobileCountryCode = userInfo.mobileCountryCode!;
         user.mobileNumber = userInfo.mobileNumber!;
-        user.mobileVerified = isNotEmpty(smsOtp) && smsOtp.verified;
-        user.email = userInfo.email!;
-        user.emailVerified = isNotEmpty(emailOtp) && emailOtp.verified;
         user.password = userInfo.password!;
+
+        if (isNotEmpty(userInfo.idToken)) {
+            user.emailVerified = true;
+            if (isNotEmpty(payload!.given_name)) {
+                user.firstName = payload!.given_name!;
+            }
+            if (isNotEmpty(payload!.family_name)) {
+                user.lastName = payload!.family_name!;
+            }
+            if (isNotEmpty(payload!.picture)) {
+                user.picUrl = payload!.picture!;
+            }
+        } else {
+            const mobile =
+                userInfo.mobileCountryCode + "" + userInfo.mobileNumber;
+            let smsOtp: SmsOtp;
+            [err, smsOtp] = await TO(SmsOtp.findOne({ mobile: mobile }));
+            if (err) TE(err);
+
+            let emailOtp: EmailOtp;
+            [err, emailOtp] = await TO(
+                EmailOtp.findOne({ email: userInfo.email })
+            );
+            if (err) TE(err);
+
+            if (
+                !(
+                    (isNotEmpty(smsOtp) && smsOtp.verified) ||
+                    (isNotEmpty(emailOtp) && emailOtp.verified)
+                )
+            ) {
+                TE("None of the mobile number and email is verified");
+            }
+
+            user.mobileVerified = isNotEmpty(smsOtp) && smsOtp.verified;
+            user.emailVerified = isNotEmpty(emailOtp) && emailOtp.verified;
+        }
 
         await VE(user);
 
@@ -423,6 +468,47 @@ export default class UserAuthService {
         } else {
             [err, user] = await TO(user.comparePassword(userInfo.password!));
         }
+        if (err) TE(err);
+
+        return {
+            uuid: user.uuid,
+            token: user.getJWT(),
+            mobileCountryCode: user.mobileCountryCode,
+            mobileNumber: user.mobileNumber,
+            email: user.email,
+        };
+    };
+
+    static loginWithGoogle = async (userInfo: {
+        idToken?: string;
+    }): Promise<UserLoginResponse> => {
+        if (isEmpty(userInfo.idToken)) {
+            TE("id_token not provided");
+        }
+
+        const client = new OAuth2Client(CLIENT_ID);
+
+        let err: any, ticket: LoginTicket;
+        [err, ticket] = await TO(
+            client.verifyIdToken({
+                idToken: userInfo.idToken!,
+                audience: CLIENT_ID,
+            })
+        );
+        if (err) TE(err);
+
+        const payload = ticket.getPayload();
+        if (isEmpty(payload)) {
+            TE("Something went wrong");
+        }
+        if (isEmpty(payload!.email)) {
+            TE("Email not provided by google");
+        }
+
+        let user: User;
+        [err, user] = await TO(
+            UserAuthService.findUser({ email: payload!.email })
+        );
         if (err) TE(err);
 
         return {
