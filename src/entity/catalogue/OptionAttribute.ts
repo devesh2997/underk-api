@@ -1,7 +1,7 @@
-import { BaseEntity, Column, ManyToOne, OneToMany, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { BaseEntity, Column, OneToMany, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from "typeorm";
 import { Subtype } from "./Subtype";
 import { OptionAttributeValue, OptionAttributeValueJSON } from "./OptionAttributeValue";
-import { IsLowercase, isNotEmpty, IsNotEmpty } from "class-validator";
+import { isNotEmpty, IsNotEmpty } from "class-validator";
 
 
 export interface OptionAttributeJSON {
@@ -23,11 +23,11 @@ export class OptionAttribute extends BaseEntity {
     id: number
 
     @Column()
-    @IsLowercase()
     @IsNotEmpty()
     name: string
 
-    @ManyToOne(() => Subtype, subtype => subtype.optionAttributes)
+    @OneToOne(() => Subtype, subtype => subtype.optionAttribute)
+    @JoinColumn()
     subtype: Subtype
 
     @OneToMany(() => OptionAttributeValue, value => value.optionAttribute, { cascade: true })

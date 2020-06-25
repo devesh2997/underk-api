@@ -1,8 +1,8 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, BeforeInsert, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, BeforeInsert, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToOne } from "typeorm";
 import { IsNotEmpty } from "class-validator";
 import { isValidCurrency } from "../../utils/custom-decorators/IsValidCurrency";
 import { TE } from "../../utils";
-import { Product } from "./Product";
+import { SKU } from "../../entity/inventory/SKU";
 
 export interface PriceJSON {
     id: number
@@ -18,8 +18,8 @@ export class Price extends BaseEntity {
     @PrimaryGeneratedColumn('increment')
     id: number
 
-    @ManyToOne(()=>Product, product=>product.prices)
-    product: Product
+    @OneToOne(()=>SKU, sku=>sku.price)
+    sku: SKU
 
     @Column()
     currency: string

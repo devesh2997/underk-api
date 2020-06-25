@@ -1,7 +1,7 @@
 import { BaseEntity, Generated, PrimaryColumn, Column, OneToMany, Entity, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Subtype, SubtypeJSON } from "./Subtype";
 import { Product } from "./Product";
-import { isNotEmpty } from "class-validator";
+import { isNotEmpty, IsNotEmpty } from "class-validator";
 
 export interface TypeJSON {
     id: number,
@@ -26,7 +26,8 @@ export class Type extends BaseEntity {
     @PrimaryColumn()
     sku: string
 
-    @Column()
+    @Column({ unique: true })
+    @IsNotEmpty()
     name: string
 
     @OneToMany(() => Subtype, subtype => subtype.type)

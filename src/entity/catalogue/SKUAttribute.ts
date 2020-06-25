@@ -1,7 +1,7 @@
 import { BaseEntity, Column, ManyToOne, OneToMany, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Subtype } from "./Subtype";
 import { SKUAttributeValue, SKUAttributeValueJSON } from "./SKUAttributeValue";
-import { IsLowercase, isNotEmpty, IsNotEmpty } from "class-validator";
+import { isNotEmpty, IsNotEmpty } from "class-validator";
 
 
 export interface SKUAttributeJSON {
@@ -30,7 +30,6 @@ export class SKUAttribute extends BaseEntity {
     id: number
 
     @Column()
-    @IsLowercase()
     @IsNotEmpty()
     name: string
 

@@ -8,13 +8,11 @@ type CategoryCreateInfo = {
     slug: string,
     parentSlug: string,
     name: string
-    sku: string
 }
 
 export type CategoryTree = {
     id: string,
     slug: string,
-    sku: string,
     name: string,
     children: CategoryTree[]
 }
@@ -115,11 +113,11 @@ export class CategoryService {
 
     static create = async (categoryInfo: CategoryCreateInfo): Promise<CategoryJSON> | never => {
         let err: any, parent: Category, category: Category
-        if (isEmpty(categoryInfo.slug) || isEmpty(categoryInfo.name) || isEmpty(categoryInfo.sku)) {
+        if (isEmpty(categoryInfo.slug) || isEmpty(categoryInfo.name)) {
             TE("Missing fields")
         }
 
-        category = new Category(categoryInfo.slug, categoryInfo.sku, categoryInfo.name)
+        category = new Category(categoryInfo.slug, categoryInfo.name)
         if (isNotEmpty(categoryInfo.parentSlug) && categoryInfo.parentSlug.length > 0) {
             [err, parent] = await TO(Category.findOne({ slug: categoryInfo.parentSlug }))
             if (err || !parent) {

@@ -12,6 +12,7 @@ export interface OptionAttributeValueJSON {
 
 @Entity()
 @Unique(["optionAttribute", "sku"])
+@Unique(["optionAttribute", "name"])
 export class OptionAttributeValue extends BaseEntity {
 
     constructor(sku: string, name: string, valueType: string, value: string) {
@@ -22,7 +23,7 @@ export class OptionAttributeValue extends BaseEntity {
         this.value = value
     }
 
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('increment')
     id: number
 
     @Column({ nullable: true })

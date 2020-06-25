@@ -1,9 +1,9 @@
-import { BaseEntity, Column, ManyToOne, OneToMany, Entity, CreateDateColumn, UpdateDateColumn, Unique, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, ManyToOne, OneToMany, Entity, CreateDateColumn, UpdateDateColumn, Unique, PrimaryGeneratedColumn, OneToOne } from "typeorm";
 import { Type } from "./Type";
 import { Attribute, AttributeJSON } from "./Attribute";
 import { SKUAttribute, SKUAttributeJSON } from "./SKUAttribute";
 import { Product } from "./Product";
-import { isNotEmpty } from "class-validator";
+import { isNotEmpty, IsNotEmpty } from "class-validator";
 import { OptionAttribute, OptionAttributeJSON } from "./OptionAttribute";
 
 export interface SubtypeJSON {
@@ -12,11 +12,12 @@ export interface SubtypeJSON {
     name: string,
     attributes: AttributeJSON[],
     skuAttributes: SKUAttributeJSON[],
-    optionAttributes: OptionAttributeJSON[]
+    optionAttribute?: OptionAttributeJSON
 }
 
 @Entity()
 @Unique(["type", "sku"])
+@Unique(["type", "name"])
 export class Subtype extends BaseEntity {
 
     constructor(sku: string, name: string) {
@@ -29,9 +30,11 @@ export class Subtype extends BaseEntity {
     id: number
 
     @Column()
+    @IsNotEmpty()
     sku: string
 
     @Column()
+    @IsNotEmpty()
     name: string
 
     @ManyToOne(() => Type, type => type.subtypes)
@@ -43,8 +46,8 @@ export class Subtype extends BaseEntity {
     @OneToMany(() => SKUAttribute, skuAttribute => skuAttribute.subtype, { cascade: true })
     skuAttributes: SKUAttribute[]
 
-    @OneToMany(() => OptionAttribute, optionAttribute => optionAttribute.subtype, { cascade: true })
-    optionAttributes: OptionAttribute[]
+    @OneToOne(() => OptionAttribute, optionAttribute => optionAttribute.subtype, { nullable: true, cascade: true })
+    optionAttribute: OptionAttribute
 
     @OneToMany(() => Product, product => product.subtype)
     products: Product[]
@@ -62,11 +65,10 @@ export class Subtype extends BaseEntity {
             name: this.name,
             attributes: [],
             skuAttributes: [],
-            optionAttributes: []
         }
         let attributes: AttributeJSON[] = []
         let skuAttributes: SKUAttributeJSON[] = []
-        let optionAttributes: OptionAttributeJSON[] = []
+        let optionAttribute: OptionAttributeJSON
         if (isNotEmpty(this.attributes)) {
             attributes = this.attributes.map(a => a.toJSON())
             res['attributes'] = attributes
@@ -75,9 +77,10 @@ export class Subtype extends BaseEntity {
             skuAttributes = this.skuAttributes.map(a => a.toJSON())
             res['skuAttributes'] = skuAttributes
         }
-        if (isNotEmpty(this.optionAttributes)) {
-            optionAttributes = this.optionAttributes.map(a => a.toJSON())
-            res['optionAttributes'] = optionAttributes
+        if (isNotEmpty(this.optionAttribute)) {
+            console.log(this.optionAttribute)
+            optionAttribute = this.optionAttribute.toJSON()
+            res['optionAttribute'] = optionAttribute
         }
         return res
     }

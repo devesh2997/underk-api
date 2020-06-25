@@ -1,10 +1,9 @@
-import { Entity, Tree, Column, TreeChildren, TreeParent, BaseEntity, CreateDateColumn, UpdateDateColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm"
+import { Entity, Tree, Column, TreeChildren, TreeParent, BaseEntity, CreateDateColumn, UpdateDateColumn, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm"
 import { Product } from "./Product"
 
 export interface CategoryJSON {
     id: number,
     slug: string,
-    sku: string,
     name: string,
     children: Category[],
     parent: Category,
@@ -12,13 +11,13 @@ export interface CategoryJSON {
 }
 
 @Entity()
+@Unique(["parent", "name"])
 @Tree("materialized-path")
 export class Category extends BaseEntity {
 
-    constructor(slug: string, sku: string, name: string) {
+    constructor(slug: string, name: string) {
         super()
         this.slug = slug
-        this.sku = sku
         this.name = name
     }
 
@@ -28,15 +27,11 @@ export class Category extends BaseEntity {
     @Column({ unique: true })
     slug: string
 
-    @Column({ unique: true })
-    sku: string
-
     @Column()
     name: string;
 
     @OneToMany(() => Product, product => product.category)
     products: Product[]
-
 
     @TreeChildren()
     children: Category[];
@@ -50,7 +45,6 @@ export class Category extends BaseEntity {
         return {
             id: this.id,
             slug: this.slug,
-            sku: this.sku,
             children: this.children,
             parent: this.parent,
             name: this.name,

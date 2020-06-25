@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, Column, Generated, ManyToOne, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable, OneToOne, JoinColumn, } from "typeorm";
+import { BaseEntity, Entity, Column, Generated, ManyToOne, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable, } from "typeorm";
 import { Type, TypeJSON } from "./Type";
 import { Subtype, SubtypeJSON } from "./Subtype";
 import { AttributeValue, AttributeValueJSON } from "./AttributeValue";
@@ -8,10 +8,8 @@ import { ProductAsset } from "./ProductAsset";
 import { IsNotEmpty, isNotEmpty } from "class-validator";
 import { IsValidProductStatus } from "../../utils/custom-decorators/IsValidProductStatus";
 import { SKU } from "../../entity/inventory/SKU";
-import { OptionAttributeValue } from "./OptionAttributeValue";
-import { SKUAttributeValue } from "./SKUAttributeValue";
-import { Price } from "./Price";
-import { Dimensions } from "./Dimensions";
+import { OptionAttributeValue, OptionAttributeValueJSON } from "./OptionAttributeValue";
+import { SKUAttributeValue, SKUAttributeValueJSON } from "./SKUAttributeValue";
 
 export interface ProductJSON {
     id: number,
@@ -22,6 +20,8 @@ export interface ProductJSON {
     type: TypeJSON,
     subtype: SubtypeJSON,
     attributes: AttributeValueJSON[],
+    skuAttributes: SKUAttributeValueJSON[],
+    optionAttributes: OptionAttributeValueJSON[],
     category: CategoryJSON,
     collections: CollectionJSON[],
     variants: ProductJSON[]
@@ -29,6 +29,16 @@ export interface ProductJSON {
 
 @Entity()
 export class Product extends BaseEntity {
+
+    constructor(title: string, slug: string, status: string, type: Type, subtype: Subtype, category: Category) {
+        super()
+        this.title = title
+        this.slug = slug
+        this.status = status
+        this.type = type
+        this.subtype = subtype
+        this.category = category
+    }
     @Generated('increment')
     @Column()
     id: number
@@ -37,19 +47,20 @@ export class Product extends BaseEntity {
     pid: string
 
     @Column({ unique: true, nullable: false })
-    @IsNotEmpty()
+    @IsNotEmpty({ message: "Product slug cannot be empty" })
     slug: string
 
     @Column()
-    @IsNotEmpty()
+    @IsNotEmpty({ message: "Product title cannot be empty" })
     title: string
 
     @Column()
     @IsNotEmpty()
-    @IsValidProductStatus()
+    @IsValidProductStatus({ message: "Product Status cannot be empty" })
     status: string
 
     @Column()
+    @IsNotEmpty({ message: "Base SKU cannot be empty" })
     baseSKU: string
 
     @OneToMany(() => ProductAsset, asset => asset.product)
@@ -73,13 +84,6 @@ export class Product extends BaseEntity {
 
     @OneToMany(() => SKU, sku => sku.product)
     skus: SKU[]
-
-    @OneToMany(() => Price, price => price.product)
-    prices: Price[]
-
-    @OneToOne(() => Dimensions)
-    @JoinColumn()
-    dimensions: Dimensions
 
     @ManyToMany(() => AttributeValue)
     @JoinTable()
@@ -106,6 +110,14 @@ export class Product extends BaseEntity {
         if (isNotEmpty(this.attributes)) {
             attributes = this.attributes.map(a => a.toJSON())
         }
+        let skuAttributes: SKUAttributeValueJSON[] = []
+        if (isNotEmpty(this.skuAttributes)) {
+            skuAttributes = this.skuAttributes.map(a => a.toJSON())
+        }
+        let optionAttributes: OptionAttributeValueJSON[] = []
+        if (isNotEmpty(this.optionAttributes)) {
+            optionAttributes = this.optionAttributes.map(a => a.toJSON())
+        }
         let variants: ProductJSON[] = []
         if (isNotEmpty(this.variants)) {
             variants = this.variants.map(p => p.toJSON())
@@ -121,6 +133,8 @@ export class Product extends BaseEntity {
             category: this.category.toJSON(),
             collections: collections,
             attributes: attributes,
+            skuAttributes: skuAttributes,
+            optionAttributes: optionAttributes,
             variants: variants
         }
     }

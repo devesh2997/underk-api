@@ -12,6 +12,7 @@ export interface SKUAttributeValueJSON {
 
 @Entity()
 @Unique(["skuAttribute", "sku"])
+@Unique(["skuAttribute", "name"])
 export class SKUAttributeValue extends BaseEntity {
 
     constructor(sku: string, name: string, valueType: string, value: string) {
@@ -22,7 +23,7 @@ export class SKUAttributeValue extends BaseEntity {
         this.value = value
     }
 
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('increment')
     id: number
 
     @Column({ nullable: true })

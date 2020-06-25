@@ -1,4 +1,4 @@
-import { Entity, Column, Generated, PrimaryColumn, BaseEntity, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm"
+import { Entity, Column, BaseEntity, CreateDateColumn, UpdateDateColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm"
 import { Product } from "./Product";
 
 export interface CollectionJSON {
@@ -16,14 +16,13 @@ export class Collection extends BaseEntity {
         this.name = name
     }
 
-    @Generated("increment")
-    @Column()
+    @PrimaryGeneratedColumn("increment")
     id: number;
 
-    @PrimaryColumn()
+    @Column({ unique: true })
     slug: string
 
-    @Column()
+    @Column({ unique: true })
     name: string;
 
     @OneToMany(() => Product, product => product.category)

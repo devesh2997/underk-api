@@ -1,7 +1,7 @@
 import { BaseEntity, Column, ManyToOne, OneToMany, Entity, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Subtype } from "./Subtype";
 import { AttributeValue, AttributeValueJSON } from "./AttributeValue";
-import { IsLowercase, isNotEmpty, IsNotEmpty } from "class-validator";
+import { isNotEmpty, IsNotEmpty } from "class-validator";
 
 
 export interface AttributeJSON {
@@ -28,7 +28,6 @@ export class Attribute extends BaseEntity {
     id: number
 
     @Column()
-    @IsLowercase()
     @IsNotEmpty()
     name: string
 

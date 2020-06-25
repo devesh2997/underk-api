@@ -15,18 +15,18 @@ export interface CreateSubtypeInfo {
     typeSku: string
     attributes: AttributeJSON[]
     skuAttributes: SKUAttributeJSON[],
-    optionAttributes: OptionAttributeJSON[]
+    optionAttribute: OptionAttributeJSON
 }
 
 export class SubtypeService {
-    static get = async (subtypeInfo: any): Promise<SubtypeJSON> | never => {
+    static get = async (subtypeInfo: { id: number }): Promise<Subtype> | never => {
         let err: any, subtype: Subtype
 
-        if (isEmpty(subtypeInfo.sku)) {
-            TE("Subtype sku not provided")
+        if (isEmpty(subtypeInfo.id)) {
+            TE("Subtype id not provided")
         }
 
-        [err, subtype] = await TO(Subtype.findOne({ sku: subtypeInfo.sku }, { relations: ['type', 'attributes', 'optionAttributes', 'skuAttributes'] }))
+        [err, subtype] = await TO(Subtype.findOne({ id: subtypeInfo.id }, { relations: ['type', 'attributes', 'attributes.values', 'optionAttribute', 'optionAttribute.values', 'skuAttributes', 'skuAttributes.values'] }))
         if (err) {
             TE(err)
         }
@@ -35,7 +35,7 @@ export class SubtypeService {
             TE("Subtype not found")
         }
 
-        return subtype.toJSON()
+        return subtype
     }
 
     static delete = async (subtypeInfo: any): Promise<SubtypeJSON> | never => {
@@ -104,7 +104,7 @@ export class SubtypeService {
             subtype.attributes = []
             for (let i = 0; i < subtypeInfo.attributes.length; i++) {
                 const attr = subtypeInfo.attributes[i]
-                const attribute = new Attribute(attr.name.toLowerCase(), attr.isMultiValued, attr.isCompulsory, attr.isFilterable)
+                const attribute = new Attribute(attr.name, attr.isMultiValued, attr.isCompulsory, attr.isFilterable)
                 await VE(attribute)
                 attribute.values = []
                 for (let j = 0; j < attr.values.length; j++) {
@@ -121,7 +121,7 @@ export class SubtypeService {
             subtype.skuAttributes = []
             for (let i = 0; i < subtypeInfo.skuAttributes.length; i++) {
                 const attr = subtypeInfo.skuAttributes[i]
-                const attribute = new SKUAttribute(attr.name.toLowerCase(), attr.skuOrdering, attr.variantsBasis, attr.isFilterable)
+                const attribute = new SKUAttribute(attr.name, attr.skuOrdering, attr.variantsBasis, attr.isFilterable)
                 await VE(attribute)
                 attribute.values = []
                 for (let j = 0; j < attr.values.length; j++) {
@@ -134,22 +134,21 @@ export class SubtypeService {
             }
         }
 
-        if (!isEmpty(subtypeInfo.optionAttributes)) {
-            subtype.optionAttributes = []
-            for (let i = 0; i < subtypeInfo.optionAttributes.length; i++) {
-                const attr = subtypeInfo.optionAttributes[i]
-                const attribute = new OptionAttribute(attr.name.toLowerCase(),)
-                await VE(attribute)
-                attribute.values = []
-                for (let j = 0; j < attr.values.length; j++) {
-                    const attrValue = attr.values[j]
-                    const attributeValue = new OptionAttributeValue(attrValue.sku, attrValue.name, attrValue.valueType, attrValue.value)
-                    await VE(attributeValue)
-                    attribute.values.push(attributeValue)
-                }
-                subtype.optionAttributes.push(attribute)
+        if (!isEmpty(subtypeInfo.optionAttribute)) {
+            const attr = subtypeInfo.optionAttribute
+            const attribute = new OptionAttribute(attr.name)
+            await VE(attribute)
+            attribute.values = []
+            for (let j = 0; j < attr.values.length; j++) {
+                const attrValue = attr.values[j]
+                const attributeValue = new OptionAttributeValue(attrValue.sku, attrValue.name, attrValue.valueType, attrValue.value)
+                await VE(attributeValue)
+                attribute.values.push(attributeValue)
             }
+            subtype.optionAttribute = attribute
         }
+
+        await VE(subtype);
 
         [err, subtype] = await TO(subtype.save())
         if (err) {

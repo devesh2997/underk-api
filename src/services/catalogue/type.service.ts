@@ -1,5 +1,5 @@
 import { Type, TypeJSON } from "../../entity/catalogue/Type";
-import { TE, TO } from "../../utils";
+import { TE, TO, VE } from "../../utils";
 import { isEmpty } from "class-validator";
 
 export class TypeService {
@@ -10,7 +10,7 @@ export class TypeService {
             TE("Type sku not provided")
         }
 
-        [err, type] = await TO(Type.findOne({ sku: typeInfo.sku }, { relations: ['subtypes', 'subtypes.attributes', 'subtypes.skuAttributes', 'subtypes.optionAttributes'] }))
+        [err, type] = await TO(Type.findOne({ sku: typeInfo.sku }, { relations: ['subtypes', 'subtypes.attributes', 'subtypes.skuAttributes', 'subtypes.optionAttribute'] }))
         if (err) {
             TE(err)
         }
@@ -25,7 +25,7 @@ export class TypeService {
     static getAll = async (): Promise<TypeJSON[]> | never => {
         let err, types: Type[]
 
-        [err, types] = await TO(Type.find({ relations: ['subtypes', 'subtypes.attributes', 'subtypes.attributes.values', 'subtypes.skuAttributes', 'subtypes.skuAttributes.values', 'subtypes.optionAttributes', 'subtypes.optionAttributes.values'] }))
+        [err, types] = await TO(Type.find({ relations: ['subtypes', 'subtypes.attributes', 'subtypes.attributes.values', 'subtypes.skuAttributes', 'subtypes.skuAttributes.values', 'subtypes.optionAttribute', 'subtypes.optionAttribute.values'] }))
         if (err) {
             TE(err)
         }
@@ -72,6 +72,8 @@ export class TypeService {
         }
 
         type = new Type(typeInfo.sku, typeInfo.name)
+
+        await VE(type)
 
         let existingType: Type
 
