@@ -1,50 +1,127 @@
 import { Request, Response } from "express";
 import { TO, ReE, ReS } from "../../utils";
-import UserAuthService, { UserLoginInfo } from "../../services/user/auth.service";
+import UserAuthService, {
+    SendOtpResponse,
+    UserLoginResponse,
+} from "../../services/user/auth.service";
+import { User } from "entity/user/User";
 
 export class UserAuthController {
+    static findUser = async (
+        req: Request,
+        res: Response
+    ): Promise<Response> => {
+        const body = req.body;
+        let err: string;
+
+        [err] = await TO(UserAuthService.findUser(body));
+
+        if (err) return ReE(res, err, 422);
+
+        return ReS(
+            res,
+            {
+                message: "User found",
+            },
+            201
+        );
+    };
+
     static sendOtp = async (req: Request, res: Response): Promise<Response> => {
-        const body = req.body
-        let err: string, otp: number
+        const body = req.body;
+        let err: string, result: SendOtpResponse;
 
-        [err, otp] = await TO(UserAuthService.sendOTP(body))
+        [err, result] = await TO(UserAuthService.sendOtp(body));
 
-        if (err) return ReE(res, err, 422)
+        if (err) return ReE(res, err, 422);
 
-        return ReS(res, {
-            message: 'OTP sent',
-            otp: otp
-        },
-            201)
-    }
+        return ReS(
+            res,
+            {
+                message: "OTP sent",
+                result,
+            },
+            201
+        );
+    };
 
-    static signInWithPhoneNumber = async (req: Request, res: Response): Promise<Response> => {
-        const body = req.body
-        let err: string, loginInfo: UserLoginInfo
+    static verifyOtp = async (
+        req: Request,
+        res: Response
+    ): Promise<Response> => {
+        const body = req.body;
+        let err: string;
 
-        [err, loginInfo] = await TO(UserAuthService.signInWithPhoneNumber(body))
+        [err] = await TO(UserAuthService.verifyOtp(body));
 
-        if (err) return ReE(res, err, 422)
+        if (err) return ReE(res, err, 422);
 
-        return ReS(res, {
-            message: 'Login successfull',
-            loginInfo: loginInfo
-        },
-            201)
-    }
+        return ReS(
+            res,
+            {
+                message: "OTP verified",
+            },
+            201
+        );
+    };
 
-    static verifyEmailOtpAndSignIn = async (req: Request, res: Response): Promise<Response> => {
-        const body = req.body
-        let err: string, loginInfo: UserLoginInfo
+    static createUser = async (
+        req: Request,
+        res: Response
+    ): Promise<Response> => {
+        const body = req.body;
+        let err: string, user: User;
 
-        [err, loginInfo] = await TO(UserAuthService.verifyEmailOtpAndSignIn(body))
+        [err, user] = await TO(UserAuthService.createUser(body));
 
-        if (err) return ReE(res, err, 422)
+        if (err) return ReE(res, err, 422);
 
-        return ReS(res, {
-            message: 'Login successfull',
-            loginInfo: loginInfo
-        },
-            201)
-    }
+        return ReS(
+            res,
+            {
+                message: "User created successfully",
+                result: user.toJSON(),
+            },
+            201
+        );
+    };
+
+    static login = async (req: Request, res: Response): Promise<Response> => {
+        const body = req.body;
+        let err: string, result: UserLoginResponse;
+
+        [err, result] = await TO(UserAuthService.login(body));
+
+        if (err) return ReE(res, err, 422);
+
+        return ReS(
+            res,
+            {
+                message: "Login successfull",
+                result,
+            },
+            201
+        );
+    };
+
+    static loginWithGoogle = async (
+        req: Request,
+        res: Response
+    ): Promise<Response> => {
+        const body = req.body;
+        let err: string, result: UserLoginResponse;
+
+        [err, result] = await TO(UserAuthService.loginWithGoogle(body));
+
+        if (err) return ReE(res, err, 422);
+
+        return ReS(
+            res,
+            {
+                message: "Login successfull",
+                result,
+            },
+            201
+        );
+    };
 }

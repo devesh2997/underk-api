@@ -1,13 +1,15 @@
 import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { IsBoolean } from "class-validator";
 
 @Entity()
 export class EmailOtp extends BaseEntity {
 
-    constructor(email: string, otp: string, expiry: Date) {
+    constructor(email: string, otp: string, expiry: Date, verified?: boolean) {
         super()
         this.email = email
         this.otp = otp
         this.expiry = expiry
+        this.verified = !!verified
     }
 
     @PrimaryGeneratedColumn()
@@ -21,6 +23,10 @@ export class EmailOtp extends BaseEntity {
 
     @Column()
     expiry: Date
+
+    @Column({ default: false })
+    @IsBoolean()
+    verified: boolean
 
     @CreateDateColumn()
     created_at: Date
