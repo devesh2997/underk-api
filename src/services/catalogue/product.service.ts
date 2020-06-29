@@ -9,6 +9,7 @@ import { SKUAttributeValue } from "../../entity/catalogue/SKUAttributeValue";
 import { AttributeValue } from "../../entity/catalogue/AttributeValue";
 import { OptionAttributeValue } from "../../entity/catalogue/OptionAttributeValue";
 import { DimensionsJSON } from "../../entity/catalogue/Dimensions";
+import { OptionAttribute } from "entity/catalogue/OptionAttribute";
 
 export type ProductCreateInfo = {
     slug: string
@@ -124,6 +125,7 @@ export class ProductService {
 
         let skuAttributes: SKUAttributeValue[] = []
         let attributes: AttributeValue[] = []
+        let optionAttributes: OptionAttributeValue[] = []
         const { productAttributeValues, productSKUAttributeValues, productOptionAttributeValues } = productInfo
         if (isEmpty(productSKUAttributeValues)) {
             TE("SKU attribute values cannot be empty")
@@ -148,6 +150,12 @@ export class ProductService {
             }
             productOptionAttributeValues.forEach((poav) => {
                 const subtypeOptionAttributeValue = subtype.optionAttribute.values.find((v) => v.name === poav.optionAttributeValueName)
+                if (typeof subtypeOptionAttributeValue === 'undefined') {
+                    TE(`No subtype option attribute value exists named ${poav.optionAttributeValueName}`)
+                } else {
+                    
+                    optionAttributes.push(subtypeOptionAttributeValue)
+                }
             })
         }
         productAttributeValues.forEach((a) => {
@@ -165,7 +173,6 @@ export class ProductService {
 
         })
 
-
         const { title, slug, status } = productInfo
         product = new Product(title, slug, status, type, subtype, category, prices)
         await VE(product)
@@ -174,6 +181,6 @@ export class ProductService {
 
 
     }
-
-
 }
+
+

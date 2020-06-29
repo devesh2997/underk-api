@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, BeforeInsert, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToOne } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, BeforeInsert, CreateDateColumn, UpdateDateColumn, OneToOne } from "typeorm";
 import { IsNotEmpty } from "class-validator";
 import { isValidCurrency } from "../../utils/custom-decorators/IsValidCurrency";
 import { TE } from "../../utils";
@@ -18,7 +18,7 @@ export class Price extends BaseEntity {
     @PrimaryGeneratedColumn('increment')
     id: number
 
-    @OneToOne(()=>SKU, sku=>sku.price)
+    @OneToOne(() => SKU, sku => sku.price)
     sku: SKU
 
     @Column()
