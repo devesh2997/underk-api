@@ -7,6 +7,7 @@ import {
     BaseEntity,
     CreateDateColumn,
     UpdateDateColumn,
+    OneToOne,
 } from "typeorm";
 import { UserAddress } from "./UserAddress";
 import {
@@ -16,12 +17,14 @@ import {
     IsDate,
     IsBoolean,
     MinLength,
+    isNotEmpty,
 } from "class-validator";
 import { IsGender } from "../../utils/custom-decorators/IsGender";
 import CONFIG from "../../config/config";
 import jwt from "jsonwebtoken";
 import { TE, TO } from "../../utils";
 import bcrypt from "bcryptjs";
+import { Wishlist } from "./Wishlist";
 
 export interface UserJSON {
     id: number;
@@ -98,6 +101,9 @@ export class User extends BaseEntity {
     @OneToMany(() => UserAddress, (UserAddress) => UserAddress.user)
     addresses: UserAddress[];
 
+    @OneToOne(() => Wishlist, (wishlist) => wishlist.user)
+    wishlist: Wishlist;
+
     @CreateDateColumn()
     public created_at: Date;
 
@@ -141,5 +147,19 @@ export class User extends BaseEntity {
             created_at: this.created_at,
             updated_at: this.updated_at,
         };
+    };
+
+    static insertMockData = async () => {
+        let err: any, users: User[];
+        [err, users] = await TO(User.find());
+        if (users.length > 0) {
+            return;
+        }
+
+        let user = new User();
+        [err, user] = await TO(user.save());
+        if (err) {
+            console.log(err);
+        }
     };
 }
