@@ -9,7 +9,13 @@ import {
     OneToMany,
 } from "typeorm";
 import { User } from "../../entity/user/User";
-import { CartItem } from "./CartItem";
+import { CartItem, CartItemJSON } from "./CartItem";
+import { isNotEmpty } from "class-validator";
+
+export interface CartJSON {
+    cid: string;
+    items: CartItemJSON[];
+}
 
 @Entity()
 export class Cart extends BaseEntity {
@@ -20,10 +26,22 @@ export class Cart extends BaseEntity {
     @PrimaryGeneratedColumn("uuid")
     cid: string;
 
-    @OneToOne(() => User)
+    @OneToOne(() => User, { nullable: true })
     @JoinColumn()
     user: User;
 
-    @OneToMany(() => CartItem, (i) => i.cart)
-    products: CartItem[];
+    @OneToMany(() => CartItem, (it) => it.cart, { cascade: true })
+    items: CartItem[];
+
+    toJSON = (): CartJSON => {
+        let items: CartItemJSON[] = [];
+        if (isNotEmpty(this.items)) {
+            items = this.items.map((it) => it.toJSON());
+        }
+
+        return {
+            cid: this.cid,
+            items,
+        };
+    };
 }

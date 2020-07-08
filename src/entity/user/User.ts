@@ -25,6 +25,7 @@ import jwt from "jsonwebtoken";
 import { TE, TO } from "../../utils";
 import bcrypt from "bcryptjs";
 import { Wishlist } from "./Wishlist";
+import { Cart } from "./Cart";
 
 export interface UserJSON {
     id: number;
@@ -103,6 +104,9 @@ export class User extends BaseEntity {
 
     @OneToOne(() => Wishlist, (wishlist) => wishlist.user)
     wishlist: Wishlist;
+
+    @OneToOne(() => Cart, (cart) => cart.user)
+    cart: Cart;
 
     @CreateDateColumn()
     public created_at: Date;
