@@ -24,7 +24,8 @@
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.24",
     "underk-policies": "https://github.com/devesh2997/underk-policies#master",
-    "underk-types": "https://github.com/devesh2997/underk-types#new"
+    "underk-types": "https://github.com/devesh2997/underk-types#new",
+    "underk-utils": "git+https://github.com/devesh2997/underk-utils.git#master"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",

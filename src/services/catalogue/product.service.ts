@@ -1,3 +1,5 @@
+import { OptionAttribute } from './../../entity/catalogue/OptionAttribute';
+import { Collection } from './../../entity/catalogue/collection';
 import { ProductJSON, Product } from "../../entity/catalogue/Product";
 import { TE, TO, VE } from "../../utils";
 import { Subtype } from "../../entity/catalogue/Subtype";
@@ -8,18 +10,19 @@ import { Category } from "../../entity/catalogue/category";
 import { SKUAttributeValue } from "../../entity/catalogue/SKUAttributeValue";
 import { AttributeValue } from "../../entity/catalogue/AttributeValue";
 import { OptionAttributeValue } from "../../entity/catalogue/OptionAttributeValue";
-import { DimensionsJSON } from "../../entity/catalogue/Dimensions";
-import { OptionAttribute } from "entity/catalogue/OptionAttribute";
+import { DimensionsJSON, Dimensions } from "../../entity/catalogue/Dimensions";
+import { Warehouse } from 'entity/inventory/Warehouse';
+import { Attribute } from 'entity/catalogue/Attribute';
+import { SKUAttribute } from 'entity/catalogue/SKUAttribute';
 
 export type ProductCreateInfo = {
-    slug: string
     title: string
-    status: string
+    slug: string
     typeName: string
     subtypeName: string
     categorySlug: string
     collectionsSlugs: string[]
-    productAttributeValues: {
+    productAttributeValues?: {
         attributeName: string,
         attributeValueName?: string
         attributeValueNames?: string[]
@@ -28,14 +31,20 @@ export type ProductCreateInfo = {
         skuAttributeName: string,
         skuAttributeValueName: string
     }[]
-    productOptionAttributeValues: {
+    productOptionAttributeValues?: {
         optionAttributeValueName: string,
-        optionAttributeValueDimension: DimensionsJSON,
+        optionAttributeValueDimensions: DimensionsJSON,
         optionAttributeValuePrice: PriceJSON,
-        optionAttributeValueInventory: {
+        optionAttributeValueInventory?: {
             warehouseCode: string,
             stock: number
         }[]
+    }[],
+    price?: PriceJSON,
+    productDimensions?: DimensionsJSON,
+    productInventory?: {
+        warehouseCode: string,
+        stock: number
     }[]
 
 }
@@ -90,97 +99,66 @@ export class ProductService {
     static create = async (productInfo: ProductCreateInfo): Promise<Product> | never => {
         let err: any, product: Product
 
-        if (isEmpty(productInfo.typeName)) {
-            TE("Type Name not provided")
-        }
-        if (isEmpty(productInfo.subtypeName)) {
-            TE("Subtype Name not provided")
-        }
-        if (isEmpty(productInfo.categorySlug)) {
-            TE("Category Slug not provided")
-        }
+        let types: Type[], categories: Category[], collections: Collection[], warehouses: Warehouse[];
 
-        let baseSKU = ""
-        let type: Type, subtype: Subtype, category: Category
-        const { typeName, subtypeName, categorySlug } = productInfo;
-        [err, type] = await TO(Type.find({ name: typeName }))
-        if (err) TE(err)
-        if (isEmpty(type)) {
-            TE("Type with given name not found.")
-        }
-        baseSKU = baseSKU += type.sku;
+        [err, types] = await TO(Type.find({ relations: ["subtypes", "subtypes.attributes", "subtypes.attributes.values", "subtypes.optionAttributes", "subtypes.optionAttributes.values", "subtypes.skuAttributes", "subtypes.skuAttributes.values"] }))
+        if (err) TE(err);
 
-        [err, subtype] = await TO(Subtype.findOne({ type: type, name: subtypeName }, { relations: ['type', 'attributes', 'attributes.values', 'optionAttributes', 'optionAttributes.values', 'skuAttributes', 'skuAttributes.values'] }))
-        if (err) TE(err)
-        if (isEmpty(subtype)) {
-            TE("Subtype with given name not found.")
-        }
-        baseSKU += "-" + subtype.sku;
+        [err, categories] = await TO(Category.find())
+        if (err) TE(err);
 
-        [err, category] = await TO(Category.findOne({ slug: categorySlug }))
-        if (err) TE(err)
-        if (isEmpty(category)) {
-            TE("Category with given slug not found.")
-        }
+        [err, collections] = await TO(Collection.find())
+        if (err) TE(err);
 
-        let skuAttributes: SKUAttributeValue[] = []
-        let attributes: AttributeValue[] = []
-        let optionAttributes: OptionAttributeValue[] = []
-        const { productAttributeValues, productSKUAttributeValues, productOptionAttributeValues } = productInfo
-        if (isEmpty(productSKUAttributeValues)) {
-            TE("SKU attribute values cannot be empty")
-        }
-        subtype.skuAttributes.forEach((sa) => {
-            const productSKUAttribute = productSKUAttributeValues.find((psav) => psav.skuAttributeName === sa.name)
-            if (typeof productSKUAttribute === 'undefined') {
-                TE(`Value of sku attribute ${sa.name} not provided`)
-            } else {
-                const productSKUAttributeValue = sa.values.find((sav) => sav.name === productSKUAttribute.skuAttributeValueName)
-                if (typeof productSKUAttributeValue === 'undefined') {
-                    TE(`Value for sku attribute ${sa.name} does not exist`)
-                } else {
-                    baseSKU += "-" + productSKUAttributeValue.sku
-                    skuAttributes.push(productSKUAttributeValue)
-                }
+        [err, warehouses] = await TO(Warehouse.find())
+        if (err) TE(err);
+
+        let productValidationResult = validateProductCreateInfo(productInfo, types, categories, collections, warehouses)
+
+        if (!productValidationResult.isValid) {
+            if (typeof productValidationResult.error === undefined) {
+                productValidationResult.error = "Some error occurred"
             }
-        })
-        if (isNotEmpty(subtype.optionAttribute)) {
-            if (isEmpty(productOptionAttributeValues) || productOptionAttributeValues.length === 0) {
-                TE("Atleast one option must be provided")
-            }
-            productOptionAttributeValues.forEach((poav) => {
-                const subtypeOptionAttributeValue = subtype.optionAttribute.values.find((v) => v.name === poav.optionAttributeValueName)
-                if (typeof subtypeOptionAttributeValue === 'undefined') {
-                    TE(`No subtype option attribute value exists named ${poav.optionAttributeValueName}`)
-                } else {
-                    
-                    optionAttributes.push(subtypeOptionAttributeValue)
-                }
-            })
+            TE(productValidationResult.error as string)
         }
-        productAttributeValues.forEach((a) => {
-            const subtypeAttribute = subtype.attributes.find((sa) => sa.name === a.attributeName)
-            if (typeof subtypeAttribute === 'undefined') {
-                TE(`Attribute with name ${a.attributeName} Not found`)
-            } else {
-                const subtypeAttributeValue = subtypeAttribute.values.find((sav) => sav.name === a.attributeValueName)
-                if (typeof subtypeAttributeValue === 'undefined') {
-                    TE(`Attribute value with name ${a.attributeValueName} Not found`)
-                } else {
-                    attributes.push(subtypeAttributeValue)
-                }
-            }
 
-        })
-
-        const { title, slug, status } = productInfo
-        product = new Product(title, slug, status, type, subtype, category, prices)
-        await VE(product)
-
-
-
-
+        //check for uniqueness of slug
+        let productWithSameSlug: Product
+        [err, productWithSameSlug] = await TO(Product.findOne({ slug: productInfo.slug }))
+        if (err) TE(err)
+        if (typeof productWithSameSlug !== 'undefined') {
+            TE("Product with same slug already exits")
+        }
     }
 }
+
+
+const findSKUOrderforSKUAttributeValue = (skuAttributes: SKUAttribute[], skuAttributeValue: SKUAttributeValue): number => {
+    const skuAttribute = skuAttributes.find(sa => typeof sa.values.find(val => val == skuAttributeValue) !== 'undefined')
+    if (typeof skuAttribute === 'undefined') {
+        TE(`No skuAttribute found which has value ${skuAttributeValue.name}`)
+    } return skuAttribute?.skuOrdering as number
+}
+const createProductBaseSKU = (type: Type, subtype: Subtype, skuAttributeValues: SKUAttributeValue[]): string => {
+    if (typeof type === 'undefined' || typeof subtype === 'undefined' || typeof skuAttributeValues === 'undefined') {
+        TE("type, subtype or skuAttributeValues not provided")
+    }
+    if (typeof subtype.skuAttributes === 'undefined') {
+        TE("subtype must contain skuAttributes")
+    }
+    let baseSKU = ""
+    baseSKU += type.sku
+    baseSKU += `-${subtype.sku}`
+    skuAttributeValues.sort((a, b) => findSKUOrderforSKUAttributeValue(subtype.skuAttributes, a) - findSKUOrderforSKUAttributeValue(subtype.skuAttributes, b))
+    for (let i = 0; i < skuAttributeValues.length; i++) {
+        baseSKU += `-${skuAttributeValues[i].sku}`
+    }
+    return baseSKU
+}
+
+
+
+
+
 
 

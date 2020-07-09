@@ -11,7 +11,6 @@ export interface WarehouseJSON {
     created_at: Date
     updated_at: Date
     address: AddressJSON
-    pincode: number
 }
 
 @Entity()
@@ -35,10 +34,8 @@ export class Warehouse extends BaseEntity {
     @IsNotEmpty({ message: 'Warehouse name nor provided' })
     name: string
 
-    @Column()
-    pincode: number
-
-    @OneToOne(_ => Address, { cascade: true })
+    @OneToOne(_ => Address, { cascade: true, nullable: false })
+    @IsNotEmpty()
     @JoinColumn()
     address: Address;
 
@@ -59,7 +56,6 @@ export class Warehouse extends BaseEntity {
             id: this.id,
             code: this.code,
             name: this.name,
-            pincode: this.pincode,
             created_at: this.created_at,
             updated_at: this.updated_at,
             address: this.address.toJSON()
