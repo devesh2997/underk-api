@@ -1,50 +1,43 @@
 import { Request, Response } from "express";
-import { TO, ReS, ReE } from "../../utils";
-import { CategoryService, CategoryTree } from "../../services/catalogue/category.service";
+import { ReS, ReE, TOG } from "../../utils";
+import { CategoryService } from "../../services/catalogue/category.service";
 import { Category } from "../../entity/catalogue/category";
-import { BulkCreateResult } from "entity/shared/BulkCreateResult";
 
 export class CategoryController {
     static get = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
 
-        let err: string, category: Category
+        let result = await TOG<Category | ApiError>(CategoryService.get(query))
 
-        [err, category] = await TO(CategoryService.get(query))
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
             message: "Category found",
-            result: category
+            result: result.toJSON()
         }, 201)
 
     }
 
     static getAll = async (_: Request, res: Response): Promise<Response> => {
-        let err: string, categories: Category[]
+        let result = await TOG<Category[] | ApiError>(CategoryService.getAll())
 
-        [err, categories] = await TO(CategoryService.getAll())
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
-            message: "Categories found : " + categories.length,
-            result: categories
+            message: "Categories found : " + result.length,
+            result: result.map(cat => cat.toJSON())
         }, 201)
 
     }
 
     static getTrees = async (_: Request, res: Response): Promise<Response> => {
-        let err: string, categories: CategoryTree[]
+        let result = await TOG<Category[] | ApiError>(CategoryService.getTrees())
 
-        [err, categories] = await TO(CategoryService.getTrees())
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
-            message: "Trees found : " + categories.length,
-            result: categories
+            message: "Trees found : " + result.length,
+            result: result.map(cat => cat.toJSON())
         }, 201)
 
     }
@@ -52,30 +45,26 @@ export class CategoryController {
     static delete = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
 
-        let err: string, category: Category
+        let result = await TOG<Category | ApiError>(CategoryService.delete(query))
 
-        [err, category] = await TO(CategoryService.delete(query))
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
             message: "Category deleted",
-            result: category
+            result: result.toJSON()
         }, 201)
 
     }
 
     static create = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body
-        let err: string, category: Category
+        let result = await TOG(CategoryService.create(body))
 
-        [err, category] = await TO(CategoryService.create(body))
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
             message: 'Successfully created new category.',
-            result: category
+            result: result.toJSON()
         },
             201)
 
@@ -83,15 +72,13 @@ export class CategoryController {
 
     static bulkCreate = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body
-        let err: string, bulkCreateResult: BulkCreateResult<Category>
+        let result = await TOG(CategoryService.bulkCreate(body))
 
-        [err, bulkCreateResult] = await TO(CategoryService.bulkCreate(body))
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
-            message: 'Categories created : ' + bulkCreateResult.entitiesCreated.length + ', Errors : ' + bulkCreateResult.errors.length,
-            result: bulkCreateResult
+            message: 'Categories created : ' + result.entitiesCreated.length + ', Errors : ' + result.errors.length,
+            result: result
         },
             201)
 

@@ -1,104 +1,95 @@
 import { Collection, CollectionJSON } from "../../entity/catalogue/collection"
 import { isEmpty } from "class-validator"
 import { BulkCreateResult } from "entity/shared/BulkCreateResult"
-import { CAE } from "utils"
+import { CAE, TOG, VE } from "utils"
+import { InsertResult, UpdateResult } from "typeorm"
 
 export class CollectionService {
 
     static get = async (collectionInfo: any): Promise<Collection | ApiError> => {
-        let err, collection: Collection
+        if (isEmpty(collectionInfo.slug)) {
+            return CAE("Collection slug not provided")
+        }
+
+        let res = await TOG(Collection.findOne({ slug: collectionInfo.slug }))
+        if (res instanceof ApiError) {
+            return res
+        }
+
+        if (typeof res === 'undefined') {
+            return CAE("Collection not found")
+        }
+
+        return res
+
+    }
+
+    static getAll = async (): Promise<Collection[] | ApiError> => {
+
+        let res = await TOG<Collection[]>(Collection.find())
+        if (res instanceof ApiError) {
+            return res
+        }
+
+        return res
+
+    }
+
+    static delete = async (collectionInfo: any): Promise<Collection | ApiError> => {
 
         if (isEmpty(collectionInfo.slug)) {
             return CAE("Collection slug not provided")
         }
 
-        [err, collection] = await TO(Collection.findOne({ slug: collectionInfo.slug }))
-        if (err) {
-            TE(err)
+        let res = await TOG<Collection | undefined>(Collection.findOne({ slug: collectionInfo.slug }))
+        if (res instanceof ApiError) {
+            return res
         }
 
-        if (typeof collection === 'undefined') {
-            TE("Collection not found")
+        if (typeof res === 'undefined') {
+            return CAE("Collection not found")
         }
 
-        return collection.toJSON()
+        res = await TOG<Collection>(res.remove())
+
+        if (res instanceof ApiError) {
+            return res
+        }
+
+        return res
 
     }
 
-    static getAll = async (): Promise<CollectionJSON[]> | never => {
-        let err, collections: Collection[]
-
-        [err, collections] = await TO(Collection.find())
-        if (err) {
-            TE(err)
-        }
-
-        if (typeof collections === 'undefined') {
-            TE("Collections not found")
-        }
-
-        return collections.map(c => c.toJSON())
-
-    }
-
-    static delete = async (collectionInfo: any): Promise<CollectionJSON> | never => {
-        let err, collection: Collection
-
-        if (isEmpty(collectionInfo.slug)) {
-            TE("Collection slug not provided")
-        }
-
-        [err, collection] = await TO(Collection.findOne({ slug: collectionInfo.slug }))
-        if (err) {
-            TE(err)
-        }
-
-        if (typeof collection === 'undefined') {
-            TE("Collection not found")
-        }
-
-        [err, collection] = await TO(Collection.remove(collection))
-
-        if (err) {
-            TE(err)
-        }
-
-        return collection.toJSON()
-
-    }
-
-    static create = async (collectionInfo: CollectionJSON): Promise<CollectionJSON> | never => {
-        let err: any, collection: Collection
+    static create = async (collectionInfo: CollectionJSON): Promise<Collection | ApiError> => {
         if (isEmpty(collectionInfo.slug) || isEmpty(collectionInfo.name)) {
-            TE("Missing fields")
+            return CAE("Missing fields")
         }
 
-        collection = new Collection(collectionInfo.slug, collectionInfo.name);
+        const collection = new Collection(collectionInfo.slug, collectionInfo.name);
 
-        [err] = await TO(Collection.insert(collection))
-        if (err) {
-            TE(err)
+        let res = await TOG<InsertResult>(Collection.insert(collection))
+        if (res instanceof ApiError) {
+            return res
         }
 
-        return collection.toJSON()
+        return collection
 
     }
 
-    static bulkCreate = async (collectionsInfo: CollectionJSON[]): Promise<BulkCreateResult<CollectionJSON>> | never => {
+    static bulkCreate = async (collectionsInfo: CollectionJSON[]): Promise<BulkCreateResult<CollectionJSON> | ApiError> => {
         if (typeof collectionsInfo !== 'object') {
-            TE("Invalid request data format")
+            return CAE("Invalid request data format")
         }
-        let errors: any[] = []
-        let collectionsJSON: CollectionJSON[] = []
+        const errors: any[] = []
+        const collectionsJSON: CollectionJSON[] = []
         for (let i = 0; i < collectionsInfo.length; i++) {
-            let err: any, collectionJSON: CollectionJSON
             let collectionInfo = collectionsInfo[i];
 
-            [err, collectionJSON] = await TO(CollectionService.create(collectionInfo))
-            if (err) {
-                errors.push({ index: i, error: err })
+            let res = await TOG<Collection | ApiError>(CollectionService.create(collectionInfo))
+            if (res instanceof ApiError) {
+                errors.push({ index: i, error: res.toResponseJSON() })
             } else {
-                collectionsJSON.push(collectionJSON)
+                collectionsJSON.push(res.toJSON())
             }
         }
 
@@ -106,31 +97,34 @@ export class CollectionService {
 
     }
 
-    static update = async (collectionInfo: CollectionJSON): Promise<CollectionJSON> | never => {
-        let err: any, collection: Collection
+    static update = async (collectionInfo: CollectionJSON): Promise<Collection | ApiError> => {
         if (isEmpty(collectionInfo.slug)) {
-            TE("Collection slug not provided")
+            return CAE("Collection slug not provided")
         }
 
-        let existingCollection: Collection
-        [err, existingCollection] = await TO(Collection.findOne({ slug: collectionInfo.slug }))
-        if (err || !existingCollection) {
-            TE("Collection does not exist")
+        const existingCollection = await TOG<Collection | undefined>(Collection.findOne({ slug: collectionInfo.slug }))
+        if (existingCollection instanceof ApiError) return existingCollection
+        if (typeof existingCollection === 'undefined') {
+            return CAE("Category not found.")
         }
 
         const existingCollectionJSON = existingCollection.toJSON()
 
+        delete collectionInfo.id
+
         Object.assign(existingCollectionJSON, collectionInfo)
 
-        collection = Collection.fromJson(existingCollectionJSON)
-        await VE(collection);
+        const collection = Collection.fromJson(existingCollectionJSON)
 
-        [err] = await TO(Collection.update({ slug: collection.slug }, collection))
-        if (err) {
-            TE(err)
+        const validationResult = await VE(collection);
+        if (validationResult instanceof ApiError) return validationResult;
+
+        const res = await TOG<UpdateResult>(Collection.update({ slug: collection.slug }, collection))
+        if (res instanceof ApiError) {
+            return res
         }
 
-        return collection.toJSON()
+        return collection
 
     }
 }

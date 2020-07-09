@@ -1,8 +1,8 @@
 import { Category, CategoryJSON } from "../../entity/catalogue/category"
 import { isNotEmpty, isEmpty } from "class-validator"
 import { getManager } from "typeorm"
-import { BulkCreateResult } from "entity/shared/BulkCreateResult"
-import { CAE, TOG } from "utils"
+import { BulkCreateResult } from "../../entity/shared/BulkCreateResult"
+import { CAE, TOG } from "../../utils"
 
 type CategoryCreateInfo = {
     slug: string,

@@ -1,89 +1,81 @@
-import { WarehouseJSON, Warehouse } from "../../entity/inventory/Warehouse";
+import { CAE, TOG } from './../../utils/index';
+import { Warehouse } from "../../entity/inventory/Warehouse";
 import { isEmpty } from "class-validator";
-import { TE, TO, VE } from "../../utils";
+import { VE } from "../../utils";
 import { Address } from "../../entity/shared/Address";
 
 export class WarehouseService {
-    static get = async (warehouseInfo: any): Promise<WarehouseJSON> | never => {
-        let err, warehouse: Warehouse
-
+    static get = async (warehouseInfo: any): Promise<Warehouse | ApiError> => {
         if (isEmpty(warehouseInfo.code)) {
-            TE("Warehouse code not provided")
+            return CAE("Warehouse code not provided")
         }
 
-        [err, warehouse] = await TO(Warehouse.findOne({ code: warehouseInfo.code }, { relations: ['address'] }))
-        if (err) TE(err)
+        let res = await TOG<Warehouse | undefined>(Warehouse.findOne({ code: warehouseInfo.code }, { relations: ['address'] }))
+        if (res instanceof ApiError) return res
 
-        if (typeof warehouse === 'undefined') {
-            TE("Warehouse not found")
+        if (typeof res === 'undefined') {
+            return CAE("Warehouse not found")
         }
 
-        return warehouse.toJSON()
+        return res
     }
 
-    static getAll = async (): Promise<WarehouseJSON[]> | never => {
-        let err, warehouses: Warehouse[]
+    static getAll = async (): Promise<Warehouse[] | ApiError> => {
 
-        [err, warehouses] = await TO(Warehouse.find({ relations: ['address'] }))
+        let res = await TOG<Warehouse[]>(Warehouse.find({ relations: ['address'] }))
 
-        if (err) TE(err)
+        if (res instanceof ApiError) return res
 
-        if (typeof warehouses === 'undefined') {
-            TE("Warehouses not found")
-        }
-
-        return warehouses.map(w => w.toJSON())
+        return res
     }
 
-    static delete = async (warehouseInfo: any): Promise<WarehouseJSON> | never => {
-        let err, warehouse: Warehouse
-
+    static delete = async (warehouseInfo: any): Promise<Warehouse | ApiError> => {
         if (isEmpty(warehouseInfo.code)) {
-            TE("Warehouse code not provided")
+            return CAE("Warehouse code not provided")
         }
 
-        [err, warehouse] = await TO(Warehouse.findOne({ code: warehouseInfo.code }, { relations: ['address'] }))
-        if (err) TE(err)
+        let res = await TOG<Warehouse | undefined>(Warehouse.findOne({ code: warehouseInfo.code }, { relations: ['address'] }))
+        if (res instanceof ApiError) return res
 
-        if (typeof warehouse === 'undefined') {
-            TE("Warehouse not found")
+        if (typeof res === 'undefined') {
+            return CAE("Warehouse not found")
         }
 
-        [err, warehouse] = await TO(warehouse.remove())
-        if (err) TE(err)
+        res = await TOG<Warehouse>(res.remove())
+        if (res instanceof ApiError) return res
 
-        return warehouse.toJSON()
+        return res
     }
 
-    static create = async (warehouseInfo: any): Promise<WarehouseJSON> | never => {
-        let err: any, warehouse: Warehouse
+    static create = async (warehouseInfo: any): Promise<Warehouse | ApiError> => {
+        let warehouse: Warehouse
 
         if (isEmpty(warehouseInfo.address)) {
-            TE("Warehouse addresss not provided")
+            return CAE("Warehouse addresss not provided")
         }
 
         const address = new Address(warehouseInfo.address)
 
-        await VE(address)
+        let validationResult = await VE(address)
+        if (validationResult instanceof ApiError) return validationResult
 
         warehouse = new Warehouse(warehouseInfo.code, warehouseInfo.name)
         warehouse.address = address
 
-        await VE(warehouse)
+        validationResult = await VE(warehouse)
+        if (validationResult instanceof ApiError) return validationResult
 
-        let existingWarehouse: Warehouse
-
-        [err, existingWarehouse] = await TO(Warehouse.findOne({ code: warehouseInfo.code }))
-        if (err) TE(err)
-        if (existingWarehouse) {
-            TE("Warehouse with given code already exists")
+        let existingWarehouse = await TOG<Warehouse | undefined>(Warehouse.findOne({ code: warehouseInfo.code }))
+        if (existingWarehouse instanceof ApiError) return existingWarehouse
+        if (typeof existingWarehouse !== 'undefined') {
+            return CAE("Warehouse with given code already exists")
         }
 
-        [err, warehouse] = await TO(warehouse.save())
+        let res = await TOG<Warehouse>(warehouse.save())
 
-        if (err) TE(err)
+        if (res instanceof ApiError) return res
 
-        return warehouse.toJSON()
+        return res
     }
 
 

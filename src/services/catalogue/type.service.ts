@@ -1,93 +1,75 @@
-import { Type, TypeJSON } from "../../entity/catalogue/Type";
-import { TE, TO, VE } from "../../utils";
+import { InsertResult } from 'typeorm';
+import { Type } from "../../entity/catalogue/Type";
+import { VE, CAE, TOG } from "../../utils";
 import { isEmpty } from "class-validator";
 
 export class TypeService {
-    static get = async (typeInfo: any): Promise<TypeJSON> | never => {
-        let err, type: Type
+    static get = async (typeInfo: any): Promise<Type | ApiError> => {
 
         if (isEmpty(typeInfo.sku)) {
-            TE("Type sku not provided")
+            return CAE("Type sku not provided")
         }
 
-        [err, type] = await TO(Type.findOne({ sku: typeInfo.sku }, { relations: ['subtypes', 'subtypes.attributes', 'subtypes.skuAttributes', 'subtypes.optionAttribute'] }))
-        if (err) {
-            TE(err)
+        let res = await TOG<Type | undefined>(Type.findOne({ sku: typeInfo.sku }, { relations: ['subtypes', 'subtypes.attributes', 'subtypes.skuAttributes', 'subtypes.optionAttribute'] }))
+        if (res instanceof ApiError) return res
+
+        if (typeof res === 'undefined') {
+            return CAE("Type not found")
         }
 
-        if (typeof type === 'undefined') {
-            TE("Type not found")
-        }
-
-        return type.toJSON()
+        return res
     }
 
-    static getAll = async (): Promise<Type[]> | never => {
-        let err, types: Type[]
+    static getAll = async (): Promise<Type[] | ApiError> => {
 
-        [err, types] = await TO(Type.find({ relations: ['subtypes', 'subtypes.attributes', 'subtypes.attributes.values', 'subtypes.skuAttributes', 'subtypes.skuAttributes.values', 'subtypes.optionAttribute', 'subtypes.optionAttribute.values'] }))
-        if (err) {
-            TE(err)
+        let res = await TOG<Type[]>(Type.find({ relations: ['subtypes', 'subtypes.attributes', 'subtypes.attributes.values', 'subtypes.skuAttributes', 'subtypes.skuAttributes.values', 'subtypes.optionAttribute', 'subtypes.optionAttribute.values'] }))
+        if (res instanceof ApiError) {
+            return res
         }
 
-        if (typeof types === 'undefined') {
-            TE("Type not found")
-        }
-
-        return types
+        return res
     }
 
-    static delete = async (typeInfo: any): Promise<TypeJSON> | never => {
-        let err, type: Type | undefined
-
+    static delete = async (typeInfo: any): Promise<Type | ApiError> => {
         if (isEmpty(typeInfo.sku)) {
-            TE("Type sku not provided")
+            return CAE("Type sku not provided")
         }
-        [err, type] = await TO(Type.findOne({ sku: typeInfo.sku }))
-        if (err) {
-            TE(err)
+        let res = await TOG<Type | undefined>(Type.findOne({ sku: typeInfo.sku }))
+        if (res instanceof ApiError) return res
+        if (typeof res === 'undefined') {
+            return CAE("Type not found")
         }
-        if (isEmpty(type)) {
-            TE("Type not found")
-        }
-        [err, type] = await TO(Type.remove(type as Type))
-        if (err) {
-            TE(err)
-        }
+        res = await TOG<Type>(res.remove())
+        if (res instanceof ApiError) return res
 
-        return type?.toJSON() as TypeJSON
-
+        return res
 
     }
 
-    static create = async (typeInfo: any): Promise<TypeJSON> | never => {
-        let err: any, type: Type
-
+    static create = async (typeInfo: any): Promise<Type | ApiError> => {
         if (isEmpty(typeInfo.sku)) {
-            TE("Type sku not provided")
+            return CAE("Type sku not provided")
         }
 
         if (isEmpty(typeInfo.name)) {
-            TE("Type name not provided")
+            return CAE("Type name not provided")
         }
 
-        type = new Type(typeInfo.sku, typeInfo.name)
+        let type = new Type(typeInfo.sku, typeInfo.name)
 
-        await VE(type)
+        let validationResult = await VE(type)
+        if (validationResult instanceof ApiError) return validationResult
 
-        let existingType: Type
-
-        [err, existingType] = await TO(Type.findOne({ sku: typeInfo.sku }))
-        if (existingType) {
-            TE("Type with given sku already exists")
+        let existingType = await TOG<Type | undefined>(Type.findOne({ sku: typeInfo.sku }))
+        if (existingType instanceof ApiError) return existingType
+        if (typeof existingType !== 'undefined') {
+            return CAE("Type with given sku already exists")
         }
 
-        [err] = await TO(Type.insert(type))
-        if (err) {
-            TE(err)
-        }
+        let res = await TOG<InsertResult>(Type.insert(type))
+        if (res instanceof ApiError) return res
 
-        return type.toJSON()
+        return type
     }
 
 

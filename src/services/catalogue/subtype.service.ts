@@ -1,5 +1,4 @@
-import { SubtypeJSON, Subtype } from "../../entity/catalogue/Subtype";
-import { TE, TO, VE } from "../../utils";
+import { VE, CAE, TOG } from "../../utils";
 import { Type } from "../../entity/catalogue/Type";
 import { isEmpty } from "class-validator";
 import { Attribute, AttributeJSON } from "../../entity/catalogue/Attribute";
@@ -8,6 +7,7 @@ import { OptionAttribute, OptionAttributeJSON } from "../../entity/catalogue/Opt
 import { AttributeValue } from "../../entity/catalogue/AttributeValue";
 import { SKUAttributeValue } from "../../entity/catalogue/SKUAttributeValue";
 import { OptionAttributeValue } from "../../entity/catalogue/OptionAttributeValue";
+import { Subtype } from "entity/catalogue/Subtype";
 
 export interface CreateSubtypeInfo {
     sku: string
@@ -19,85 +19,72 @@ export interface CreateSubtypeInfo {
 }
 
 export class SubtypeService {
-    static get = async (subtypeInfo: { id: number }): Promise<Subtype> | never => {
-        let err: any, subtype: Subtype
-
+    static get = async (subtypeInfo: any): Promise<Subtype | ApiError> => {
         if (isEmpty(subtypeInfo.id)) {
-            TE("Subtype id not provided")
+            return CAE("Subtype id not provided")
         }
 
-        [err, subtype] = await TO(Subtype.findOne({ id: subtypeInfo.id }, { relations: ['type', 'attributes', 'attributes.values', 'optionAttribute', 'optionAttribute.values', 'skuAttributes', 'skuAttributes.values'] }))
-        if (err) {
-            TE(err)
+        let res = await TOG<Subtype | undefined>(Subtype.findOne({ id: subtypeInfo.id }, { relations: ['type', 'attributes', 'attributes.values', 'optionAttribute', 'optionAttribute.values', 'skuAttributes', 'skuAttributes.values'] }))
+        if (res instanceof ApiError) {
+            return res
         }
 
+        if (typeof res === 'undefined') {
+            return CAE("Subtype not found")
+        }
+
+        return res
+    }
+
+    static delete = async (subtypeInfo: any): Promise<Subtype | ApiError> => {
+        if (isEmpty(subtypeInfo.sku)) {
+            return CAE("Subtype sku not provided")
+        }
+        let subtype = await TOG<Subtype | undefined>(Subtype.findOne({ sku: subtypeInfo.sku }))
+        if (subtype instanceof ApiError) {
+            return subtype
+        }
         if (typeof subtype === 'undefined') {
-            TE("Subtype not found")
+            return CAE("Subtype not found")
+        }
+
+        subtype = await TOG<Subtype>(subtype.remove())
+
+        if (subtype instanceof ApiError) {
+            return subtype
         }
 
         return subtype
     }
 
-    static delete = async (subtypeInfo: any): Promise<SubtypeJSON> | never => {
-        let err: any, subtype: Subtype
-
+    static create = async (subtypeInfo: CreateSubtypeInfo): Promise<Subtype | ApiError> => {
         if (isEmpty(subtypeInfo.sku)) {
-            TE("Subtype sku not provided")
-        }
-        [err, subtype] = await TO(Subtype.findOne({ sku: subtypeInfo.sku }))
-        if (err) {
-            TE(err)
-        }
-        if (isEmpty(subtype)) {
-            TE("Subtype not found")
-        }
-        [err, subtype] = await TO(Subtype.remove(subtype as Subtype))
-
-        if (err) {
-            TE(err)
-        }
-
-        return subtype?.toJSON() as SubtypeJSON
-    }
-
-    static create = async (subtypeInfo: CreateSubtypeInfo): Promise<SubtypeJSON> | never => {
-        let err: any, subtype: Subtype
-
-        console.log(JSON.stringify(subtypeInfo))
-
-        if (isEmpty(subtypeInfo.sku)) {
-            TE("Subtype sku not provided")
+            return CAE("Subtype sku not provided")
         }
 
         if (isEmpty(subtypeInfo.name)) {
-            TE("Subtype name not provided")
+            return CAE("Subtype name not provided")
         }
 
         if (isEmpty(subtypeInfo.typeSku)) {
-            TE("Type sku not provided")
+            return CAE("Type sku not provided")
         }
 
-        subtype = new Subtype(subtypeInfo.sku, subtypeInfo.name)
+        let subtype = new Subtype(subtypeInfo.sku, subtypeInfo.name)
 
-        let type: Type
+        let type = await TOG<Type | undefined>(Type.findOne({ sku: subtypeInfo.typeSku }))
 
-        [err, type] = await TO(Type.findOne({ sku: subtypeInfo.typeSku }))
-
-        if (err) {
-            TE(err)
-        }
-
-        if (isEmpty(type)) {
-            TE("Type with given sku not found")
+        if (type instanceof ApiError) return type
+        if (typeof type === 'undefined') {
+            return CAE("Type with given sku not found")
         }
 
         subtype.type = type
 
-        let existingsubtype: Subtype
-
-        [err, existingsubtype] = await TO(Subtype.findOne({ sku: subtypeInfo.sku }))
+        let existingsubtype = await TOG<Subtype | undefined>(Subtype.findOne({ sku: subtypeInfo.sku }))
+        if (existingsubtype instanceof ApiError) return existingsubtype
         if (existingsubtype) {
-            TE("subtype with given sku already exists")
+            return CAE("subtype with given sku already exists")
         }
 
         if (!isEmpty(subtypeInfo.attributes)) {
@@ -148,13 +135,14 @@ export class SubtypeService {
             subtype.optionAttribute = attribute
         }
 
-        await VE(subtype);
+        let validationResult = await VE(subtype);
+        if (validationResult instanceof ApiError) return validationResult
 
-        [err, subtype] = await TO(subtype.save())
-        if (err) {
-            TE(err)
+        let res = await TOG<Subtype>(subtype.save())
+        if (res instanceof ApiError) {
+            return res
         }
 
-        return subtype.toJSON()
+        return res
     }
 }

@@ -1,39 +1,31 @@
 import { Request, Response } from "express";
-import { TO, ReS, ReE } from "../../utils";
+import { ReS, ReE, TOG } from "../../utils";
 import { CollectionService } from "../../services/catalogue/collection.service";
-import { Collection, CollectionJSON } from "../../entity/catalogue/collection";
-import { BulkCreateResult } from "entity/shared/BulkCreateResult";
 
 export class CollectionController {
     static get = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
 
-        let err: string, collection: Collection
+        let result = await TOG(CollectionService.get(query))
 
-        [err, collection] = await TO(CollectionService.get(query))
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
             message: "Collection found",
-            result: collection,
-            error: err
+            result: result.toJSON()
         }, 201)
 
     }
 
     static getAll = async (_: Request, res: Response): Promise<Response> => {
 
-        let err: string, collections: CollectionJSON[]
+        let result = await TOG(CollectionService.getAll())
 
-        [err, collections] = await TO(CollectionService.getAll())
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
             message: "Collections found",
-            result: collections,
-            error: err
+            result: result.map(col => col.toJSON())
         }, 201)
 
     }
@@ -41,16 +33,13 @@ export class CollectionController {
     static delete = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
 
-        let err: string, collection: Collection
+        let result = await TOG(CollectionService.delete(query))
 
-        [err, collection] = await TO(CollectionService.delete(query))
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
             message: "Collection deleted",
-            result: collection,
-            error: err
+            result: result.toJSON()
         }, 201)
 
     }
@@ -58,31 +47,26 @@ export class CollectionController {
     static create = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body
 
-        let err: string, collection: Collection
+        let result = await TOG(CollectionService.create(body))
 
-        [err, collection] = await TO(CollectionService.create(body))
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
             message: "Collection created",
-            result: collection,
-            error: err
+            result: result.toJSON()
         }, 201)
 
     }
 
     static bulkCreate = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body
-        let err: string, bulkCreateResult: BulkCreateResult<Collection>
+        let result = await TOG(CollectionService.bulkCreate(body))
 
-        [err, bulkCreateResult] = await TO(CollectionService.bulkCreate(body))
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
-            message: 'Collections created : ' + bulkCreateResult.entitiesCreated.length + ', Errors : ' + bulkCreateResult.errors.length,
-            result: bulkCreateResult
+            message: 'Collections created : ' + result.entitiesCreated.length + ', Errors : ' + result.errors.length,
+            result: result
         },
             201)
 
@@ -91,16 +75,13 @@ export class CollectionController {
     static update = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body
 
-        let err: string, collection: Collection
+        let result = await TOG(CollectionService.update(body))
 
-        [err, collection] = await TO(CollectionService.update(body))
-
-        if (err) return ReE(res, err, 422)
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
             message: "Collection updated",
-            result: collection,
-            error: err
+            result: result.toJSON()
         }, 201)
 
     }

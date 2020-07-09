@@ -1,75 +1,64 @@
-import { SupplierJSON, Supplier } from "../../entity/inventory/Supplier";
+import { Supplier } from "../../entity/inventory/Supplier";
 import { isEmpty } from "class-validator";
-import { TE, TO, VE } from "../../utils";
+import { VE, CAE, TOG } from "../../utils";
 
 export class SupplierService {
-    static get = async (supplierInfo: any): Promise<SupplierJSON | never> => {
-        let err, supplier: Supplier
-
+    static get = async (supplierInfo: any): Promise<Supplier | ApiError> => {
         if (isEmpty(supplierInfo.suid)) {
-            TE("suid not provided")
+            return CAE("suid not provided")
         }
 
-        [err, supplier] = await TO(Supplier.findOne({ suid: supplierInfo.suid }))
+        let res = await TOG(Supplier.findOne({ suid: supplierInfo.suid }))
 
-        if (err) TE(err)
+        if (res instanceof ApiError) return res
 
-        if (typeof supplier === 'undefined') {
-            TE("Supplier not found")
+        if (typeof res === 'undefined') {
+            return CAE("Supplier not found")
         }
 
-        return supplier.toJSON()
+        return res
     }
 
-    static getAll = async (): Promise<SupplierJSON[]> | never => {
-        let err, suppliers: Supplier[]
+    static getAll = async (): Promise<Supplier[] | ApiError> => {
+        let res = await TOG(Supplier.find())
 
-        [err, suppliers] = await TO(Supplier.find())
+        if (res instanceof ApiError) return res
 
-        if (err) TE(err)
-
-        if (typeof suppliers === 'undefined') {
-            TE("Suppliers not found")
-        }
-
-        return suppliers.map(s => s.toJSON())
+        return res
     }
 
-    static delete = async (supplierInfo: any): Promise<SupplierJSON> | never => {
-        let err, supplier: Supplier
-
+    static delete = async (supplierInfo: any): Promise<Supplier | ApiError> => {
         if (isEmpty(supplierInfo.suid)) {
-            TE("suid not provided")
+            return CAE("suid not provided")
         }
 
-        [err, supplier] = await TO(Supplier.findOne({ suid: supplierInfo.suid }))
-        if (err) TE(err)
+        let res = await TOG(Supplier.findOne({ suid: supplierInfo.suid }))
+        if (res instanceof ApiError) return res
 
-        if (typeof supplier === 'undefined') {
-            TE("Supplier not found")
+        if (typeof res === 'undefined') {
+            return CAE("Supplier not found")
         }
 
-        [err, supplier] = await TO(supplier.remove())
-        if (err) TE(err)
+        res = await TOG(res.remove())
+        if (res instanceof ApiError) return res
 
-        return supplier.toJSON()
+        return res
     }
 
-    static create = async (supplierInfo: any): Promise<SupplierJSON> | never => {
-        let err, supplier: Supplier
+    static create = async (supplierInfo: any): Promise<Supplier | ApiError> => {
+        let supplier = new Supplier(supplierInfo.sku, supplierInfo.firstName, supplierInfo.lastName, supplierInfo.email, supplierInfo.mobileCountryCode, supplierInfo.mobileNumber, supplierInfo.dob, supplierInfo.gender, supplierInfo.picUrl, supplierInfo.address);
 
-        supplier = new Supplier(supplierInfo.sku, supplierInfo.firstName, supplierInfo.lastName, supplierInfo.email, supplierInfo.mobileCountryCode, supplierInfo.mobileNumber, supplierInfo.dob, supplierInfo.gender, supplierInfo.picUrl, supplierInfo.address);
+        let validationResult = await VE(supplier);
+        if (validationResult instanceof ApiError) return validationResult
 
-        await VE(supplier);
+        let res = await TOG(supplier.save())
+        if (res instanceof ApiError) return res
 
-        [err, supplier] = await TO(supplier.save())
-        if (err) TE(err)
-
-        if (typeof supplier === 'undefined') {
-            TE("Some error occured while creating supplier")
+        if (typeof res === 'undefined') {
+            return CAE("Some error occured while creating supplier")
         }
 
-        return supplier.toJSON()
+        return res
     }
 
 

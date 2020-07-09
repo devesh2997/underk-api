@@ -1,51 +1,42 @@
 import { TOG } from './../../utils';
 import { Request, Response } from "express";
-import { TypeJSON, Type } from "../../entity/catalogue/Type";
-import { TO, ReE, ReS } from "../../utils";
+import { ReE, ReS } from "../../utils";
 import { TypeService } from "../../services/catalogue/type.service";
 
 export class TypeController {
     static get = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
-        let err: string, type: TypeJSON
+        let result = await TOG(TypeService.get(query))
 
-        [err, type] = await TO(TypeService.get(query))
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, { message: 'Type found', result: type }, 201)
+        return ReS(res, { message: 'Type found', result: result.toJSON() }, 201)
     }
 
     static getAll = async (_: Request, res: Response): Promise<Response> => {
-        let err: Error | undefined, types: Type[] | undefined
+        let result = await TOG(TypeService.getAll())
 
-        [err, types] = await TOG<Type[]>(TypeService.getAll())
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, { message: 'Types found', result: types?.map(type => type.toJSON()) }, 201)
+        return ReS(res, { message: 'Types found', result: result.map(type => type.toJSON()) }, 201)
     }
 
     static delete = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
-        let err: string, type: TypeJSON
+        let result = await TOG(TypeService.delete(query))
 
-        [err, type] = await TO(TypeService.delete(query))
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, { message: 'Type deleted', result: type }, 201)
+        return ReS(res, { message: 'Type deleted', result: result.toJSON() }, 201)
     }
 
     static create = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body
-        let err: string, type: TypeJSON
+        let result = await TOG(TypeService.create(body))
 
-        [err, type] = await TO(TypeService.create(body))
+        if (result instanceof ApiError) return ReE(res, result, 422)
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, { message: 'Type created', result: type }, 201)
+        return ReS(res, { message: 'Type created', result: result.toJSON() }, 201)
     }
 
 
