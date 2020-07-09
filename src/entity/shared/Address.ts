@@ -1,5 +1,6 @@
 import { PrimaryGeneratedColumn, Column, BaseEntity, Entity } from "typeorm"
 import { IsNotEmpty } from "class-validator"
+import { IsValidPincode } from "../../utils/custom-decorators/IsValidPinCode"
 
 export interface AddressJSON {
     id: number
@@ -59,6 +60,7 @@ export class Address extends BaseEntity {
 
     @Column()
     @IsNotEmpty()
+    @IsValidPincode()
     pincode: number
 
     toJSON = (): AddressJSON => {

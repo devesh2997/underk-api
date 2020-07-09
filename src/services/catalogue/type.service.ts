@@ -22,7 +22,7 @@ export class TypeService {
         return type.toJSON()
     }
 
-    static getAll = async (): Promise<TypeJSON[]> | never => {
+    static getAll = async (): Promise<Type[]> | never => {
         let err, types: Type[]
 
         [err, types] = await TO(Type.find({ relations: ['subtypes', 'subtypes.attributes', 'subtypes.attributes.values', 'subtypes.skuAttributes', 'subtypes.skuAttributes.values', 'subtypes.optionAttribute', 'subtypes.optionAttribute.values'] }))
@@ -34,7 +34,7 @@ export class TypeService {
             TE("Type not found")
         }
 
-        return types.map(t => t.toJSON())
+        return types
     }
 
     static delete = async (typeInfo: any): Promise<TypeJSON> | never => {

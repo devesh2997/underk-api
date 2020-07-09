@@ -1,5 +1,5 @@
 import { AdminJSON, Admin } from "../../entity/admin/Admin"
-import { TE, TO, VE } from "../../utils"
+import { VE, createApiError, TOG } from "../../utils"
 import { isNotEmpty, isEmpty } from "class-validator"
 import { Employee } from "../../entity/admin/Employee"
 import bcrypt from "bcryptjs"
@@ -29,74 +29,65 @@ export type AdminLoginSuccess = {
 
 export default class AdminService {
 
-    static get = async (adminGetInfo: any): Promise<AdminJSON> | never => {
-        let err: any, adm: Admin | undefined
+    static get = async (adminGetInfo: any): Promise<Admin | ApiError> => {
 
         if (isEmpty(adminGetInfo.auid) && isEmpty(adminGetInfo.alias)) {
-            TE("Please provide auid or alias")
+            return createApiError("Please provide auid or alias")
         }
+
+        let res: ApiError | Admin | undefined
         if (isNotEmpty(adminGetInfo.auid)) {
-            [err, adm] = await TO(Admin.findOne({ auid: adminGetInfo.auid }, { relations: ['employee', 'roles', 'policies'] }))
+            res = await TOG<Admin | undefined>(Admin.findOne({ auid: adminGetInfo.auid }, { relations: ['employee', 'roles', 'policies'] }))
         } else {
-            [err, adm] = await TO(Admin.findOne({ alias: adminGetInfo.alias }, { relations: ['employee', 'roles', 'policies'] }))
+            res = await TOG<Admin | undefined>(Admin.findOne({ alias: adminGetInfo.alias }, { relations: ['employee', 'roles', 'policies'] }))
         }
 
-        if (err) {
-            TE(err)
+        if (res instanceof ApiError) return res
+
+        if (typeof res === 'undefined') {
+            return createApiError("Admin not found")
         }
 
-        if (typeof adm === 'undefined') {
-            TE("Admin not found")
-        }
-
-        adm = adm as Admin
-
-        return adm.toJSON() as AdminJSON
+        return res
     }
 
-    static getAll = async (): Promise<AdminJSON[]> | never => {
-        let err: any, adms: Admin[]
+    static getAll = async (): Promise<Admin[] | ApiError> => {
+        let res = await TOG<Admin[]>(Admin.find({ relations: ['employee', 'roles', 'policies'] }))
 
-        [err, adms] = await TO(Admin.find({ relations: ['employee', 'roles', 'policies'] }))
-
-        if (err) {
-            TE(err)
+        if (res instanceof ApiError) {
+            return res
         }
 
-        if (typeof adms === 'undefined') {
-            TE("Admin not found")
-        }
-
-
-        return adms.map(adm => adm.toJSON())
+        return res
     }
 
-    static delete = async (adminCreateInfo: any): Promise<AdminJSON> | never => {
-        let err: any, adm: Admin | undefined
-
+    static delete = async (adminCreateInfo: any): Promise<Admin | ApiError> => {
         if (isEmpty(adminCreateInfo.auid) && isEmpty(adminCreateInfo.alias)) {
-            TE("Please provide auid or alias")
+            return createApiError("Please provide auid or alias")
         }
+        let res: Admin | undefined | ApiError
         if (isNotEmpty(adminCreateInfo.auid)) {
-            [err, adm] = await TO(Admin.findOne({ auid: adminCreateInfo.auid }, { relations: ['employee', 'roles', 'policies'] }))
+            res = await TOG<Admin | undefined>(Admin.findOne({ auid: adminCreateInfo.auid }, { relations: ['employee', 'roles', 'policies'] }))
         } else {
-            [err, adm] = await TO(Admin.findOne({ alias: adminCreateInfo.alias }, { relations: ['employee', 'roles', 'policies'] }))
+            res = await TOG<Admin | undefined>(Admin.findOne({ alias: adminCreateInfo.alias }, { relations: ['employee', 'roles', 'policies'] }))
         }
 
-        if (isEmpty(adm)) {
-            TE("Admin not found")
+        if (res instanceof ApiError) {
+            return res
         }
 
-        [err, adm] = await TO(Admin.remove(adm as Admin))
-
-        if (err) {
-            TE(err)
+        if (typeof res === 'undefined') {
+            return createApiError("Admin not found")
         }
-        adm = adm as Admin
-        return adm.toJSON()
+
+        res = await TOG<Admin>(res.remove())
+
+        if (res instanceof ApiError) return res
+
+        return res
     }
 
-    static create = async (adminCreateInfo: AdminCreateUpdateInfo): Promise<AdminJSON> | never => {
+    static create = async (adminCreateInfo: AdminCreateUpdateInfo): Promise<Admin | ApiError> => {
         let err: any, adm: Admin
 
         adm = new Admin()
@@ -107,10 +98,12 @@ export default class AdminService {
         await VE(adm)
 
         //check if given alias is available or not
-        let existingAdm: Admin
-        [err, existingAdm] = await TO(Admin.findOne({ alias: adminCreateInfo.alias }))
-        if (existingAdm) {
-            TE("Alias is already in use.")
+        let existingAdm = await TOG<Admin | undefined>(Admin.findOne({ alias: adminCreateInfo.alias }))
+        if (existingAdm instanceof ApiError) {
+            return existingAdm
+        }
+        if(typeof existingAdm !== 'undefined'){
+            return createApiError("Alias is already in use.")
         }
 
         //check if given employee id exists and it is not already linked with another account.

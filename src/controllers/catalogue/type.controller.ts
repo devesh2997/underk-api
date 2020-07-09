@@ -1,5 +1,6 @@
+import { TOG } from './../../utils';
 import { Request, Response } from "express";
-import { TypeJSON } from "../../entity/catalogue/Type";
+import { TypeJSON, Type } from "../../entity/catalogue/Type";
 import { TO, ReE, ReS } from "../../utils";
 import { TypeService } from "../../services/catalogue/type.service";
 
@@ -15,14 +16,14 @@ export class TypeController {
         return ReS(res, { message: 'Type found', result: type }, 201)
     }
 
-    static getAll = async (_:Request, res: Response): Promise<Response> => {
-        let err: string, types: TypeJSON[]
+    static getAll = async (_: Request, res: Response): Promise<Response> => {
+        let err: Error | undefined, types: Type[] | undefined
 
-        [err, types] = await TO(TypeService.getAll())
+        [err, types] = await TOG<Type[]>(TypeService.getAll())
 
         if (err) return ReE(res, err, 422)
 
-        return ReS(res, { message: 'Types found', result: types }, 201)
+        return ReS(res, { message: 'Types found', result: types?.map(type => type.toJSON()) }, 201)
     }
 
     static delete = async (req: Request, res: Response): Promise<Response> => {

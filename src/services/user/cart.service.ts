@@ -1,6 +1,5 @@
 import { Cart } from "../../entity/user/Cart";
 import { isEmpty, isNotEmpty } from "class-validator";
-import { TE, TO } from "../../utils";
 import { User } from "../../entity/user/User";
 import { CartItem } from "../../entity/user/CartItem";
 import { SKU } from "../../entity/inventory/SKU";

@@ -67,9 +67,9 @@ export class WarehouseService {
         await VE(address)
 
         warehouse = new Warehouse(warehouseInfo.code, warehouseInfo.name)
+        warehouse.address = address
 
         await VE(warehouse)
-        warehouse.address = address
 
         let existingWarehouse: Warehouse
 

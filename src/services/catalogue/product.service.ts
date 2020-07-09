@@ -1,7 +1,8 @@
+import { TypeService } from './type.service';
 import { OptionAttribute } from './../../entity/catalogue/OptionAttribute';
 import { Collection } from './../../entity/catalogue/collection';
 import { ProductJSON, Product } from "../../entity/catalogue/Product";
-import { TE, TO, VE } from "../../utils";
+import { TE, TO, VE, TOG } from "../../utils";
 import { Subtype } from "../../entity/catalogue/Subtype";
 import { isEmpty, isNotEmpty } from "class-validator";
 import { Price, PriceJSON } from "../../entity/catalogue/Price";
@@ -99,9 +100,9 @@ export class ProductService {
     static create = async (productInfo: ProductCreateInfo): Promise<Product> | never => {
         let err: any, product: Product
 
-        let types: Type[], categories: Category[], collections: Collection[], warehouses: Warehouse[];
+        let types: Type[] | undefined, categories: Category[] | undefined, collections: Collection[] | undefined, warehouses: Warehouse[] | undefined;
 
-        [err, types] = await TO(Type.find({ relations: ["subtypes", "subtypes.attributes", "subtypes.attributes.values", "subtypes.optionAttributes", "subtypes.optionAttributes.values", "subtypes.skuAttributes", "subtypes.skuAttributes.values"] }))
+        [err, types] = await TOG<Type[]>(TypeService.getAll())
         if (err) TE(err);
 
         [err, categories] = await TO(Category.find())
