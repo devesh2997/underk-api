@@ -22,7 +22,7 @@ import {
 import { IsGender } from "../../utils/custom-decorators/IsGender";
 import CONFIG from "../../config/config";
 import jwt from "jsonwebtoken";
-import { TE, TO } from "../../utils";
+import { CAE, TOG } from "../../utils";
 import bcrypt from "bcryptjs";
 import { Wishlist } from "./Wishlist";
 import { Cart } from "./Cart";
@@ -114,14 +114,13 @@ export class User extends BaseEntity {
     @UpdateDateColumn()
     public updated_at: Date;
 
-    comparePassword = async (pw: string): Promise<User> | never => {
-        let err, pass;
-        if (!this.password) TE("password not set");
+    comparePassword = async (pw: string): Promise<User | ApiError> => {
+        if (!this.password) return CAE("password not set");
 
-        [err, pass] = await TO(bcrypt.compare(pw, this.password));
-        if (err) TE(err);
+        let pass = await TOG<boolean>(bcrypt.compare(pw, this.password));
+        if (pass instanceof ApiError) return pass;
 
-        if (!pass) TE("invalid password");
+        if (!pass) return CAE("invalid password");
 
         return this;
     };
@@ -154,16 +153,19 @@ export class User extends BaseEntity {
     };
 
     static insertMockData = async () => {
-        let err: any, users: User[];
-        [err, users] = await TO(User.find());
+        let users = await TOG<User[]>(User.find());
+        if (users instanceof ApiError) {
+            console.log(users);
+            return;
+        }
         if (users.length > 0) {
             return;
         }
 
         let user = new User();
-        [err, user] = await TO(user.save());
-        if (err) {
-            console.log(err);
+        let result = await TOG<User>(user.save());
+        if (result instanceof ApiError) {
+            console.log(result);
         }
     };
 }

@@ -1,7 +1,19 @@
-import { Entity, Column, Generated, PrimaryColumn, OneToOne, BaseEntity, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm"
-import { Employee, EmployeeJSON } from "./Employee"
-import { MinLength, isNotEmpty } from "class-validator"
-import { TE, TO } from "../../utils"
+import {
+    Entity,
+    Column,
+    Generated,
+    PrimaryColumn,
+    OneToOne,
+    BaseEntity,
+    JoinColumn,
+    CreateDateColumn,
+    UpdateDateColumn,
+    ManyToMany,
+    JoinTable,
+} from "typeorm";
+import { Employee, EmployeeJSON } from "./Employee";
+import { MinLength, isNotEmpty } from "class-validator";
+import { CAE, TOG } from "../../utils";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import CONFIG from "../../config/config";
@@ -9,44 +21,43 @@ import { Policy, PolicyJSON } from "./Policy";
 import { Role, RoleJSON } from "./Role";
 
 export interface AdminJSON {
-    id: number
-    auid: string
-    alias: string
-    employee: EmployeeJSON | undefined,
-    roles: RoleJSON[],
-    policies: PolicyJSON[],
-    created_at: Date,
-    updated_at: Date
+    id: number;
+    auid: string;
+    alias: string;
+    employee: EmployeeJSON | undefined;
+    roles: RoleJSON[];
+    policies: PolicyJSON[];
+    created_at: Date;
+    updated_at: Date;
 }
 
 @Entity()
 export class Admin extends BaseEntity {
-
-    @Generated('increment')
+    @Generated("increment")
     @Column()
-    id: number
+    id: number;
 
     @PrimaryColumn({ type: "uuid" })
     @Generated("uuid")
-    auid: string
+    auid: string;
 
     @Column({ unique: true })
     @MinLength(3)
-    alias: string
+    alias: string;
 
-    @OneToOne(() => Employee, emp => emp.admin)
+    @OneToOne(() => Employee, (emp) => emp.admin)
     @JoinColumn()
-    employee: Employee
+    employee: Employee;
 
     @Column()
     @MinLength(6)
-    password: string
+    password: string;
 
-    @ManyToMany(_ => Policy)
+    @ManyToMany((_) => Policy)
     @JoinTable()
     policies: Policy[];
 
-    @ManyToMany(_ => Role)
+    @ManyToMany((_) => Role)
     @JoinTable()
     roles: Role[];
 
@@ -56,32 +67,33 @@ export class Admin extends BaseEntity {
     @UpdateDateColumn()
     public updated_at: Date;
 
-    comparePassword = async (pw: string): Promise<Admin> | never => {
-        let err, pass
-        if (!this.password) TE('password not set');
+    comparePassword = async (pw: string): Promise<Admin | ApiError> => {
+        if (!this.password) return CAE("password not set");
 
-        [err, pass] = await TO(bcrypt.compare(pw, this.password))
-        if (err) TE(err)
+        let pass = await TOG<boolean>(bcrypt.compare(pw, this.password));
+        if (pass instanceof ApiError) return pass;
 
-        if (!pass) TE('invalid password')
+        if (!pass) return CAE("invalid password");
 
-        return this
-    }
+        return this;
+    };
 
     getJWT = (): string => {
         let expiration_time = CONFIG.jwt_admin_expiration;
-        return jwt.sign({ auid: this.auid }, CONFIG.jwt_encryption, { expiresIn: expiration_time });
-    }
+        return jwt.sign({ auid: this.auid }, CONFIG.jwt_encryption, {
+            expiresIn: expiration_time,
+        });
+    };
 
     toJSON = (): AdminJSON => {
-        let emp = this.employee ? this.employee.toJSON() : undefined
-        let roles: RoleJSON[] = []
-        let policies: PolicyJSON[] = []
+        let emp = this.employee ? this.employee.toJSON() : undefined;
+        let roles: RoleJSON[] = [];
+        let policies: PolicyJSON[] = [];
         if (isNotEmpty(this.roles)) {
-            this.roles.forEach(role => roles.push(role.toJSON()))
+            this.roles.forEach((role) => roles.push(role.toJSON()));
         }
         if (isNotEmpty(this.policies)) {
-            this.policies.forEach(policy => policies.push(policy.toJSON()))
+            this.policies.forEach((policy) => policies.push(policy.toJSON()));
         }
         return {
             id: this.id,
@@ -91,8 +103,7 @@ export class Admin extends BaseEntity {
             roles: roles,
             policies: policies,
             created_at: this.created_at,
-            updated_at: this.updated_at
-        }
-    }
-
+            updated_at: this.updated_at,
+        };
+    };
 }

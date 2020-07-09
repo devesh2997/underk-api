@@ -1,116 +1,121 @@
 import { Wishlist } from "../../entity/user/Wishlist";
 import { isEmpty, isNotEmpty } from "class-validator";
-import { TE, TO } from "../../utils";
+import { CAE, TOG } from "../../utils";
 import { User } from "../../entity/user/User";
 import { Product } from "../../entity/catalogue/Product";
 
 export class WishlistService {
-    static get = async (req: { uuid?: string }): Promise<Wishlist> => {
+    static get = async (req: {
+        uuid?: string;
+    }): Promise<Wishlist | ApiError> => {
         if (isEmpty(req.uuid)) {
-            TE("uuid not provided");
+            return CAE("uuid not provided");
         }
 
-        let err: any, wishlist: Wishlist;
-        [err, wishlist] = await TO(
+        let wishlist = await TOG<Wishlist | undefined>(
             Wishlist.findOne(
                 { user: { uuid: req.uuid } },
                 { relations: ["user", "product"] }
             )
         );
-        if (err) TE(err);
+        if (wishlist instanceof ApiError) return wishlist;
 
         if (isEmpty(wishlist)) {
-            [err, wishlist] = await TO(
+            wishlist = await TOG<Wishlist | ApiError>(
                 WishlistService.create({ uuid: req.uuid })
             );
-            if (err) TE(err);
+            if (wishlist instanceof ApiError) return wishlist;
         }
 
-        [err, wishlist] = await TO(
+        wishlist = await TOG<Wishlist | undefined>(
             Wishlist.findOne(
                 { user: { uuid: req.uuid } },
                 { relations: ["user", "product"] }
             )
         );
-        if (err) TE(err);
+        if (wishlist instanceof ApiError) return wishlist;
+        else if (typeof wishlist === "undefined") {
+            return CAE("Wishlist not found");
+        }
 
         return wishlist;
     };
 
-    static create = async (req: { uuid?: string }): Promise<Wishlist> => {
+    static create = async (req: {
+        uuid?: string;
+    }): Promise<Wishlist | ApiError> => {
         if (isEmpty(req.uuid)) {
-            TE("uuid not provided");
+            return CAE("uuid not provided");
         }
 
-        let err: any, wishlist: Wishlist;
-
-        let user: User;
-        [err, user] = await TO(User.findOne({ uuid: req.uuid }));
-        if (err) TE(err);
-
-        if (isEmpty(user)) {
-            TE("User doesn't exist");
+        let user = await TOG<User | undefined>(
+            User.findOne({ uuid: req.uuid })
+        );
+        if (user instanceof ApiError) return user;
+        else if (typeof user === "undefined") {
+            return CAE("User doesn't exist");
         }
 
-        [err, wishlist] = await TO(
+        let wishlist = await TOG<Wishlist | undefined>(
             Wishlist.findOne(
                 { user: { uuid: req.uuid } },
                 { relations: ["user"] }
             )
         );
-        if (err) TE(err);
-
-        if (isNotEmpty(wishlist)) {
-            TE("Wishlist already exists");
+        if (wishlist instanceof ApiError) return wishlist;
+        else if (typeof user !== "undefined") {
+            return CAE("Wishlist already exists");
         }
 
         wishlist = new Wishlist();
         wishlist.user = user;
-        [err, wishlist] = await TO(wishlist.save());
-        if (err) {
-            TE("Some error occurred");
+        wishlist = await TOG<Wishlist>(wishlist.save());
+        if (wishlist instanceof ApiError) {
+            return wishlist;
         }
 
-        [err, wishlist] = await TO(
+        wishlist = await TOG<Wishlist | undefined>(
             Wishlist.findOne(
                 { user: { uuid: req.uuid } },
                 { relations: ["user"] }
             )
         );
-        if (err) TE(err);
+        if (wishlist instanceof Wishlist) return wishlist;
+        else if (typeof wishlist === "undefined") {
+            return CAE("Wishlist not found");
+        }
 
         return wishlist;
     };
 
-    static delete = async (req: { uuid?: string }): Promise<Wishlist> => {
+    static delete = async (req: {
+        uuid?: string;
+    }): Promise<Wishlist | ApiError> => {
         if (isEmpty(req.uuid)) {
-            TE("uuid not provided");
+            return CAE("uuid not provided");
         }
 
-        let err: any, wishlist: Wishlist;
-
-        let user: User;
-        [err, user] = await TO(User.findOne({ uuid: req.uuid }));
-        if (err) TE(err);
-
-        if (isEmpty(user)) {
-            TE("User doesn't exist");
+        let user = await TOG<User | undefined>(
+            User.findOne({ uuid: req.uuid })
+        );
+        if (user instanceof ApiError) return user;
+        else if (typeof user === "undefined") {
+            return CAE("User doesn't exist");
         }
 
-        [err, wishlist] = await TO(
+        let wishlist = await TOG<Wishlist | undefined>(
             Wishlist.findOne(
                 { user: { uuid: req.uuid } },
                 { relations: ["user"] }
             )
         );
-        if (err) TE(err);
-
-        if (isEmpty(wishlist)) {
-            TE("Wishlist not found");
+        if (wishlist instanceof ApiError) return wishlist;
+        else if (typeof wishlist === "undefined") {
+            return CAE("Wishlist not found");
         }
 
-        [err, wishlist] = await TO(Wishlist.remove(wishlist));
-        if (err) TE(err);
+        wishlist = await TOG<Wishlist>(Wishlist.remove(wishlist));
+        if (wishlist instanceof ApiError) return wishlist;
 
         return wishlist;
     };
@@ -118,14 +123,16 @@ export class WishlistService {
     static addProducts = async (req: {
         uuid?: string;
         productIds: string[];
-    }): Promise<Wishlist> => {
+    }): Promise<Wishlist | ApiError> => {
         if (isEmpty(req.uuid)) {
-            TE("uuid not provided");
+            return CAE("uuid not provided");
         }
 
-        let err: any, wishlist: Wishlist;
-        [err, wishlist] = await TO(WishlistService.get({ uuid: req.uuid }));
-        if (err) TE(err);
+        let wishlist: Wishlist | ApiError | undefined;
+        wishlist = await TOG<Wishlist | ApiError>(
+            WishlistService.get({ uuid: req.uuid })
+        );
+        if (wishlist instanceof ApiError) return wishlist;
 
         if (isNotEmpty(req.productIds)) {
             if (isEmpty(wishlist.products)) {
@@ -138,26 +145,33 @@ export class WishlistService {
                 const index = wishlist.products.findIndex((p) => p.pid === pid);
                 if (index >= 0) continue;
 
-                let product: Product;
-                [err, product] = await TO(Product.findOne({ pid }));
-                if (err) TE(err);
+                let product = await TOG<Product | undefined>(
+                    Product.findOne({ pid })
+                );
+                if (product instanceof ApiError) return product;
+                else if (typeof product === "undefined") {
+                    return CAE("Product not found");
+                }
 
                 wishlist.products.push(product);
             }
         }
 
-        [err, wishlist] = await TO(wishlist.save());
-        if (err) {
-            TE("Some error occurred");
+        wishlist = await TOG<Wishlist>(wishlist.save());
+        if (wishlist instanceof ApiError) {
+            return wishlist;
         }
 
-        [err, wishlist] = await TO(
+        wishlist = await TOG<Wishlist | undefined>(
             Wishlist.findOne(
                 { user: { uuid: req.uuid } },
                 { relations: ["user", "product"] }
             )
         );
-        if (err) TE(err);
+        if (wishlist instanceof ApiError) return wishlist;
+        else if (typeof wishlist === "undefined") {
+            return CAE("Wishlist not found");
+        }
 
         return wishlist;
     };
@@ -165,14 +179,16 @@ export class WishlistService {
     static deleteProducts = async (req: {
         uuid?: string;
         productIds: string[];
-    }): Promise<Wishlist> => {
+    }): Promise<Wishlist | ApiError> => {
         if (isEmpty(req.uuid)) {
-            TE("uuid not provided");
+            return CAE("uuid not provided");
         }
 
-        let err: any, wishlist: Wishlist;
-        [err, wishlist] = await TO(WishlistService.get({ uuid: req.uuid }));
-        if (err) TE(err);
+        let wishlist: Wishlist | ApiError | undefined;
+        wishlist = await TOG<Wishlist | ApiError>(
+            WishlistService.get({ uuid: req.uuid })
+        );
+        if (wishlist instanceof ApiError) return wishlist;
 
         if (isNotEmpty(req.productIds)) {
             if (isEmpty(wishlist.products)) {
@@ -189,18 +205,21 @@ export class WishlistService {
             }
         }
 
-        [err, wishlist] = await TO(wishlist.save());
-        if (err) {
-            TE("Some error occurred");
+        wishlist = await TOG<Wishlist>(wishlist.save());
+        if (wishlist instanceof ApiError) {
+            return wishlist;
         }
 
-        [err, wishlist] = await TO(
+        wishlist = await TOG<Wishlist | undefined>(
             Wishlist.findOne(
                 { user: { uuid: req.uuid } },
                 { relations: ["user", "product"] }
             )
         );
-        if (err) TE(err);
+        if (wishlist instanceof ApiError) return wishlist;
+        else if (typeof wishlist === "undefined") {
+            return CAE("Wishlist not found");
+        }
 
         return wishlist;
     };

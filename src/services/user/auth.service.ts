@@ -1,6 +1,6 @@
 import { User } from "../../entity/user/User";
 import { isEmpty, isNotEmpty } from "class-validator";
-import { TE, TO, VE } from "../../utils";
+import { CAE, TOG, VE } from "../../utils";
 import { SmsOtp } from "../../entity/shared/SmsOtp";
 import { SmsService } from "../shared/sms.service";
 import { EmailService } from "../shared/email.service";
@@ -32,39 +32,39 @@ export default class UserAuthService {
         mobileCountryCode?: string;
         mobileNumber?: number;
         email?: string;
-    }): Promise<User> => {
+    }): Promise<User | ApiError> => {
         if (
             (isEmpty(userInfo.mobileCountryCode) ||
                 isEmpty(userInfo.mobileNumber)) &&
             isEmpty(userInfo.email)
         ) {
-            TE("Mobile number or email not provided");
+            return CAE("Mobile number or email not provided");
         }
 
-        let err: any, users: User[];
+        let users: User[] | ApiError;
         if (isNotEmpty(userInfo.email)) {
-            [err, users] = await TO(
+            users = await TOG<User[]>(
                 User.find({
                     email: userInfo.email,
                 })
             );
         } else {
-            [err, users] = await TO(
+            users = await TOG<User[]>(
                 User.find({
                     mobileCountryCode: userInfo.mobileCountryCode,
                     mobileNumber: userInfo.mobileNumber,
                 })
             );
         }
-        if (err) TE(err);
+        if (users instanceof ApiError) return users;
 
         let user: User | undefined;
         if (users.length === 0) {
-            TE("User doesn't exist");
+            return CAE("User doesn't exist");
         } else if (users.length === 1) {
             user = users[0];
         } else {
-            TE("Critical error");
+            return CAE("Critical error");
         }
 
         return user!;
@@ -73,23 +73,24 @@ export default class UserAuthService {
     static sendOtptoPhoneNumber = async (
         mobileCountryCode?: string,
         mobileNumber?: number
-    ): Promise<SendOtpResponse> => {
+    ): Promise<SendOtpResponse | ApiError> => {
         if (isEmpty(mobileCountryCode) || isEmpty(mobileNumber)) {
-            TE("Mobile number not provided");
+            return CAE("Mobile number not provided");
         }
 
         const mobile = mobileCountryCode + "" + mobileNumber;
         const otp = generateOtp();
 
-        let err: any, smsOtp: SmsOtp;
-        [err, smsOtp] = await TO(SmsOtp.findOne({ mobile: mobile }));
-        if (err) TE(err);
+        let smsOtp = await TOG<SmsOtp | undefined>(
+            SmsOtp.findOne({ mobile: mobile })
+        );
+        if (smsOtp instanceof ApiError) return smsOtp;
 
-        if (isNotEmpty(smsOtp)) {
+        if (typeof smsOtp !== "undefined") {
             const timeDiffInSeconds =
                 (new Date().getTime() - smsOtp.updated_at.getTime()) / 1000;
             if (timeDiffInSeconds < 30) {
-                TE("Wait for 30 seconds and try again.");
+                return CAE("Wait for 30 seconds and try again.");
             }
             smsOtp.otp = otp;
             smsOtp.expiry = addMinutes(new Date(), 20);
@@ -98,12 +99,14 @@ export default class UserAuthService {
             smsOtp = new SmsOtp(mobile, otp, addMinutes(new Date(), 20), false);
         }
 
-        [err, smsOtp] = await TO(smsOtp.save());
-        if (err) TE(err);
+        smsOtp = await TOG<SmsOtp>(smsOtp.save());
+        if (smsOtp instanceof ApiError) return smsOtp;
 
         const otpMessage = "Your otp from underK is : " + otp;
-        [err] = await TO(SmsService.send([mobile], otpMessage));
-        if (err) TE(err);
+        let err = await TOG<void | ApiError>(
+            SmsService.send([mobile], otpMessage)
+        );
+        if (err instanceof ApiError) return err;
 
         return {
             mobileCountryCode,
@@ -115,22 +118,23 @@ export default class UserAuthService {
 
     static sendOtptoEmail = async (
         email?: string
-    ): Promise<SendOtpResponse> => {
+    ): Promise<SendOtpResponse | ApiError> => {
         if (isEmpty(email)) {
-            TE("Email not provided");
+            return CAE("Email not provided");
         }
 
         const otp = generateOtp();
 
-        let err: any, emailOtp: EmailOtp;
-        [err, emailOtp] = await TO(EmailOtp.findOne({ email: email }));
-        if (err) TE(err);
+        let emailOtp = await TOG<EmailOtp | undefined>(
+            EmailOtp.findOne({ email: email })
+        );
+        if (emailOtp instanceof ApiError) return emailOtp;
 
-        if (isNotEmpty(emailOtp)) {
+        if (typeof emailOtp !== "undefined") {
             const timeDiffInSeconds =
                 (new Date().getTime() - emailOtp.updated_at.getTime()) / 1000;
             if (timeDiffInSeconds < 30) {
-                TE("Wait for 30 seconds and try again.");
+                return CAE("Wait for 30 seconds and try again.");
             }
             emailOtp.otp = otp;
             emailOtp.expiry = addMinutes(new Date(), 20);
@@ -144,10 +148,10 @@ export default class UserAuthService {
             );
         }
 
-        [err, emailOtp] = await TO(emailOtp.save());
-        if (err) TE(err);
+        emailOtp = await TOG<EmailOtp>(emailOtp.save());
+        if (emailOtp instanceof ApiError) return emailOtp;
 
-        [err] = await TO(
+        let err = await TOG<void | ApiError>(
             EmailService.send({
                 from: "no-reply@underk.in",
                 to: email!,
@@ -155,7 +159,7 @@ export default class UserAuthService {
                 text: `Your OTP from underK is : ${otp}`,
             })
         );
-        if (err) TE(err);
+        if (err instanceof ApiError) return err;
 
         return {
             email,
@@ -168,29 +172,29 @@ export default class UserAuthService {
         mobileCountryCode?: string;
         mobileNumber?: number;
         email?: string;
-    }): Promise<SendOtpResponse> => {
+    }): Promise<SendOtpResponse | ApiError> => {
         if (
             (isEmpty(userInfo.mobileCountryCode) ||
                 isEmpty(userInfo.mobileNumber)) &&
             isEmpty(userInfo.email)
         ) {
-            TE("Mobile number or email not provided");
+            return CAE("Mobile number or email not provided");
         }
 
-        let err: any, res: SendOtpResponse;
+        let res: SendOtpResponse | ApiError;
         if (isNotEmpty(userInfo.email)) {
-            [err, res] = await TO(
+            res = await TOG<SendOtpResponse | ApiError>(
                 UserAuthService.sendOtptoEmail(userInfo.email)
             );
         } else {
-            [err, res] = await TO(
+            res = await TOG<SendOtpResponse | ApiError>(
                 UserAuthService.sendOtptoPhoneNumber(
                     userInfo.mobileCountryCode,
                     userInfo.mobileNumber
                 )
             );
         }
-        if (err) TE(err);
+        if (res instanceof ApiError) return res;
 
         return res;
     };
@@ -198,68 +202,70 @@ export default class UserAuthService {
     static verifyEmailOtp = async (
         email?: string,
         otp?: string
-    ): Promise<void> => {
+    ): Promise<void | ApiError> => {
         if (isEmpty(email)) {
-            TE("Email not provided");
+            return CAE("Email not provided");
         }
         if (isEmpty(otp)) {
-            TE("OTP not provided");
+            return CAE("OTP not provided");
         }
 
-        let err: any, emailOtp: EmailOtp;
-        [err, emailOtp] = await TO(EmailOtp.findOne({ email: email }));
-        if (err) TE(err);
+        let emailOtp = await TOG<EmailOtp | undefined>(
+            EmailOtp.findOne({ email: email })
+        );
+        if (emailOtp instanceof ApiError) return emailOtp;
 
-        if (isEmpty(emailOtp)) {
-            TE("Invalid request");
+        if (typeof emailOtp === "undefined") {
+            return CAE("Invalid request");
         }
         if (emailOtp.otp !== otp) {
-            TE("Invalid OTP");
+            return CAE("Invalid OTP");
         }
         if (emailOtp.expiry < new Date()) {
-            TE("OTP expired");
+            return CAE("OTP expired");
         }
 
         emailOtp.expiry = new Date();
         emailOtp.verified = true;
 
-        [err] = await TO(emailOtp.save());
-        if (err) TE(err);
+        emailOtp = await TOG<EmailOtp>(emailOtp.save());
+        if (emailOtp instanceof ApiError) return emailOtp;
     };
 
     static verifySmsOtp = async (
         mobileCountryCode?: string,
         mobileNumber?: number,
         otp?: string
-    ): Promise<void> => {
+    ): Promise<void | ApiError> => {
         if (isEmpty(mobileCountryCode) || isEmpty(mobileNumber)) {
-            TE("Mobile number not provided");
+            return CAE("Mobile number not provided");
         }
         if (isEmpty(otp)) {
-            TE("OTP not provided");
+            return CAE("OTP not provided");
         }
 
         const mobile = mobileCountryCode + "" + mobileNumber;
 
-        let err: any, smsOtp: SmsOtp;
-        [err, smsOtp] = await TO(SmsOtp.findOne({ mobile: mobile }));
-        if (err) TE(err);
+        let smsOtp = await TOG<SmsOtp | undefined>(
+            SmsOtp.findOne({ mobile: mobile })
+        );
+        if (smsOtp instanceof ApiError) return smsOtp;
 
-        if (isEmpty(smsOtp)) {
-            TE("Invalid request");
+        if (typeof smsOtp === "undefined") {
+            return CAE("Invalid request");
         }
         if (smsOtp.otp !== otp) {
-            TE("Invalid OTP");
+            return CAE("Invalid OTP");
         }
         if (smsOtp.expiry < new Date()) {
-            TE("OTP expired");
+            return CAE("OTP expired");
         }
 
         smsOtp.expiry = new Date();
         smsOtp.verified = true;
 
-        [err] = await TO(smsOtp.save());
-        if (err) TE(err);
+        smsOtp = await TOG<SmsOtp>(smsOtp.save());
+        if (smsOtp instanceof ApiError) return smsOtp;
     };
 
     static verifyOtp = async (userInfo: {
@@ -267,25 +273,25 @@ export default class UserAuthService {
         mobileNumber?: number;
         email?: string;
         otp?: string;
-    }): Promise<void> => {
+    }): Promise<void | ApiError> => {
         if (
             (isEmpty(userInfo.mobileCountryCode) ||
                 isEmpty(userInfo.mobileNumber)) &&
             isEmpty(userInfo.email)
         ) {
-            TE("Mobile number or email not provided");
+            return CAE("Mobile number or email not provided");
         }
         if (isEmpty(userInfo.otp)) {
-            TE("OTP not provided");
+            return CAE("OTP not provided");
         }
 
-        let err: any;
+        let err: void | ApiError;
         if (isNotEmpty(userInfo.email)) {
-            [err] = await TO(
+            err = await TOG<void | ApiError>(
                 UserAuthService.verifyEmailOtp(userInfo.email, userInfo.otp)
             );
         } else {
-            [err] = await TO(
+            err = await TOG<void | ApiError>(
                 UserAuthService.verifySmsOtp(
                     userInfo.mobileCountryCode,
                     userInfo.mobileNumber,
@@ -293,7 +299,7 @@ export default class UserAuthService {
                 )
             );
         }
-        if (err) TE(err);
+        if (err instanceof ApiError) return err;
     };
 
     static createUser = async (userInfo: {
@@ -302,65 +308,64 @@ export default class UserAuthService {
         email?: string;
         password?: string;
         idToken?: string;
-    }): Promise<User> => {
+    }): Promise<User | ApiError> => {
         if (
             isEmpty(userInfo.mobileCountryCode) ||
             isEmpty(userInfo.mobileNumber)
         ) {
-            TE("Mobile number not provided");
+            return CAE("Mobile number not provided");
         }
         if (isEmpty(userInfo.email) && isEmpty(userInfo.idToken)) {
-            TE("Email or id_token not provided");
+            return CAE("Email or id_token not provided");
         }
         if (isEmpty(userInfo.password)) {
-            TE("Password not provided");
+            return CAE("Password not provided");
         }
 
-        let err: any, payload: TokenPayload | undefined;
+        let payload: TokenPayload | undefined;
         if (isNotEmpty(userInfo.idToken)) {
             const client = new OAuth2Client(CLIENT_ID);
 
-            let err: any, ticket: LoginTicket;
-            [err, ticket] = await TO(
+            let ticket = await TOG<LoginTicket>(
                 client.verifyIdToken({
                     idToken: userInfo.idToken!,
                     audience: CLIENT_ID,
                 })
             );
-            if (err) TE(err);
+            if (ticket instanceof ApiError) return ticket;
 
             payload = ticket.getPayload();
             if (isEmpty(payload)) {
-                TE("Something went wrong");
+                return CAE("Something went wrong");
             }
             if (isEmpty(payload!.email)) {
-                TE("Email not provided by google");
+                return CAE("Email not provided by google");
             }
 
             userInfo.email = payload!.email;
         }
 
-        let users: User[];
-
-        [err, users] = await TO(
+        let users = await TOG<User[]>(
             User.find({
                 mobileCountryCode: userInfo.mobileCountryCode,
                 mobileNumber: userInfo.mobileNumber,
             })
         );
-        if (err) TE(err);
+        if (users instanceof ApiError) return users;
         if (users.length > 0) {
-            TE("Another user account is associated with this mobile number");
+            return CAE(
+                "Another user account is associated with this mobile number"
+            );
         }
 
-        [err, users] = await TO(
+        users = await TOG<User[]>(
             User.find({
                 email: userInfo.email,
             })
         );
-        if (err) TE(err);
+        if (users instanceof ApiError) return users;
         if (users.length > 0) {
-            TE("Another user account is associated with this email");
+            return CAE("Another user account is associated with this email");
         }
 
         let user = new User();
@@ -383,57 +388,58 @@ export default class UserAuthService {
         } else {
             const mobile =
                 userInfo.mobileCountryCode + "" + userInfo.mobileNumber;
-            let smsOtp: SmsOtp;
-            [err, smsOtp] = await TO(SmsOtp.findOne({ mobile: mobile }));
-            if (err) TE(err);
+            let smsOtp = await TOG<SmsOtp | undefined>(
+                SmsOtp.findOne({ mobile: mobile })
+            );
+            if (smsOtp instanceof ApiError) return smsOtp;
 
-            let emailOtp: EmailOtp;
-            [err, emailOtp] = await TO(
+            let emailOtp = await TOG<EmailOtp | undefined>(
                 EmailOtp.findOne({ email: userInfo.email })
             );
-            if (err) TE(err);
+            if (emailOtp instanceof ApiError) return emailOtp;
 
             if (
                 !(
-                    (isNotEmpty(smsOtp) && smsOtp.verified) ||
-                    (isNotEmpty(emailOtp) && emailOtp.verified)
+                    (typeof smsOtp !== "undefined" && smsOtp.verified) ||
+                    (typeof emailOtp !== "undefined" && emailOtp.verified)
                 )
             ) {
-                TE("None of the mobile number and email is verified");
+                return CAE("None of the mobile number and email is verified");
             }
 
-            user.mobileVerified = isNotEmpty(smsOtp) && smsOtp.verified;
-            user.emailVerified = isNotEmpty(emailOtp) && emailOtp.verified;
+            user.mobileVerified =
+                typeof smsOtp !== "undefined" && smsOtp.verified;
+            user.emailVerified =
+                typeof emailOtp !== "undefined" && emailOtp.verified;
         }
 
         await VE(user);
 
-        let salt, hash;
-        [err, salt] = await TO(bcrypt.genSalt(10));
-        if (err) TE(err.message, true);
+        let salt = await TOG<string>(bcrypt.genSalt(10));
+        if (salt instanceof ApiError) return salt;
 
-        [err, hash] = await TO(bcrypt.hash(user.password, salt));
-        if (err) TE(err.message, true);
+        let hash = await TOG<string>(bcrypt.hash(user.password, salt));
+        if (hash instanceof ApiError) return hash;
 
         user.password = hash;
 
-        [err] = await TO(User.save(user));
-        if (err) {
-            TE("Some error occurred");
+        let res = await TOG<User>(User.save(user));
+        if (res instanceof ApiError) {
+            return res;
         }
 
-        [err, user] = await TO(
+        res = await TOG<User | ApiError>(
             UserAuthService.findUser({
                 mobileCountryCode: userInfo.mobileCountryCode,
                 mobileNumber: userInfo.mobileNumber,
                 email: userInfo.email,
             })
         );
-        if (err) {
-            TE("Some error occurred");
+        if (res instanceof ApiError) {
+            return res;
         }
 
-        return user;
+        return res;
     };
 
     static login = async (userInfo: {
@@ -442,34 +448,38 @@ export default class UserAuthService {
         email?: string;
         otp?: string;
         password?: string;
-    }): Promise<UserLoginResponse> => {
+    }): Promise<UserLoginResponse | ApiError> => {
         if (
             (isEmpty(userInfo.mobileCountryCode) ||
                 isEmpty(userInfo.mobileNumber)) &&
             isEmpty(userInfo.email)
         ) {
-            TE("Mobile number or email not provided");
+            return CAE("Mobile number or email not provided");
         }
         if (isEmpty(userInfo.otp) && isEmpty(userInfo.password)) {
-            TE("Password or OTP not provided");
+            return CAE("Password or OTP not provided");
         }
 
-        let err: any, user: User;
-        [err, user] = await TO(
+        let user = await TOG<User | ApiError>(
             UserAuthService.findUser({
                 mobileCountryCode: userInfo.mobileCountryCode,
                 mobileNumber: userInfo.mobileNumber,
                 email: userInfo.email,
             })
         );
-        if (err) TE(err);
+        if (user instanceof ApiError) return user;
 
         if (isNotEmpty(userInfo.otp)) {
-            [err] = await TO(UserAuthService.verifyOtp(userInfo));
+            let err = await TOG<void | ApiError>(
+                UserAuthService.verifyOtp(userInfo)
+            );
+            if (err instanceof ApiError) return err;
         } else {
-            [err, user] = await TO(user.comparePassword(userInfo.password!));
+            user = await TOG<User | ApiError>(
+                user.comparePassword(userInfo.password!)
+            );
+            if (user instanceof ApiError) return user;
         }
-        if (err) TE(err);
 
         return {
             uuid: user.uuid,
@@ -482,35 +492,33 @@ export default class UserAuthService {
 
     static loginWithGoogle = async (userInfo: {
         idToken?: string;
-    }): Promise<UserLoginResponse> => {
+    }): Promise<UserLoginResponse | ApiError> => {
         if (isEmpty(userInfo.idToken)) {
-            TE("id_token not provided");
+            return CAE("id_token not provided");
         }
 
         const client = new OAuth2Client(CLIENT_ID);
 
-        let err: any, ticket: LoginTicket;
-        [err, ticket] = await TO(
+        let ticket = await TOG<LoginTicket>(
             client.verifyIdToken({
                 idToken: userInfo.idToken!,
                 audience: CLIENT_ID,
             })
         );
-        if (err) TE(err);
+        if (ticket instanceof ApiError) return ticket;
 
         const payload = ticket.getPayload();
         if (isEmpty(payload)) {
-            TE("Something went wrong");
+            return CAE("Something went wrong");
         }
         if (isEmpty(payload!.email)) {
-            TE("Email not provided by google");
+            return CAE("Email not provided by google");
         }
 
-        let user: User;
-        [err, user] = await TO(
+        let user = await TOG<User | ApiError>(
             UserAuthService.findUser({ email: payload!.email })
         );
-        if (err) TE(err);
+        if (user instanceof ApiError) return user;
 
         return {
             uuid: user.uuid,

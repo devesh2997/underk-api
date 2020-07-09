@@ -3,42 +3,43 @@ import { isEmpty, isNotEmpty } from "class-validator";
 import { User } from "../../entity/user/User";
 import { CartItem } from "../../entity/user/CartItem";
 import { SKU } from "../../entity/inventory/SKU";
+import { CAE, TOG } from "../../utils";
 
 export class CartService {
     static get = async (req: {
         uuid?: string;
         cid?: string;
-    }): Promise<Cart> => {
+    }): Promise<Cart | ApiError> => {
         if (isEmpty(req.uuid) || isEmpty(req.cid)) {
-            TE("uuid or cid not provided");
+            return CAE("uuid or cid not provided");
         }
 
-        let err: any, cart: Cart;
+        let cart: Cart | ApiError | undefined;
 
         if (isNotEmpty(req.uuid)) {
-            [err, cart] = await TO(
+            cart = await TOG<Cart | undefined>(
                 Cart.findOne(
                     { user: { uuid: req.uuid } },
                     { relations: ["user"] }
                 )
             );
-            if (err) TE(err);
+            if (cart instanceof ApiError) return cart;
         } else {
-            [err, cart] = await TO(
+            cart = await TOG<Cart | undefined>(
                 Cart.findOne({ cid: req.cid } /*, { relations: ["user"] }*/)
             );
-            if (err) TE(err);
+            if (cart instanceof ApiError) return cart;
 
-            if (isNotEmpty(cart) && isNotEmpty(cart.user)) {
-                TE("unauthorized access");
+            if (typeof cart !== "undefined" && isNotEmpty(cart.user)) {
+                return CAE("unauthorized access");
             }
         }
 
-        if (isEmpty(cart)) {
-            [err, cart] = await TO(
+        if (typeof cart === "undefined") {
+            cart = await TOG<Cart | ApiError>(
                 CartService.create({ uuid: req.uuid, cid: req.cid })
             );
-            if (err) TE(err);
+            if (cart instanceof ApiError) return cart;
         }
 
         return cart;
@@ -47,59 +48,57 @@ export class CartService {
     static create = async (req: {
         uuid?: string;
         cid?: string;
-    }): Promise<Cart> => {
+    }): Promise<Cart | ApiError> => {
         if (isEmpty(req.uuid) || isEmpty(req.cid)) {
-            TE("uuid or cid not provided");
+            return CAE("uuid or cid not provided");
         }
 
-        let err: any, cart: Cart;
+        let cart: Cart | ApiError | undefined;
 
         if (isNotEmpty(req.uuid)) {
-            let user: User;
-            [err, user] = await TO(User.findOne({ uuid: req.uuid }));
-            if (err) TE(err);
-
-            if (isEmpty(user)) {
-                TE("User doesn't exist");
+            let user = await TOG<User | undefined>(
+                User.findOne({ uuid: req.uuid })
+            );
+            if (user instanceof ApiError) return user;
+            else if (typeof user === "undefined") {
+                return CAE("User doesn't exist");
             }
 
-            [err, cart] = await TO(
+            cart = await TOG<Cart | undefined>(
                 Cart.findOne(
                     { user: { uuid: req.uuid } },
                     { relations: ["user"] }
                 )
             );
-            if (err) TE(err);
-
-            if (isNotEmpty(cart)) {
-                TE("Cart already exists");
+            if (cart instanceof ApiError) return cart;
+            else if (typeof cart !== "undefined") {
+                return CAE("Cart already exists");
             }
 
             cart = new Cart();
             cart.user = user;
         } else {
-            [err, cart] = await TO(
+            cart = await TOG<Cart | undefined>(
                 Cart.findOne({ cid: req.cid } /*, { relations: ["user"] }*/)
             );
-            if (err) TE(err);
-
-            if (isNotEmpty(cart)) {
-                TE("Cart already exists");
+            if (cart instanceof ApiError) return cart;
+            else if (typeof cart !== "undefined") {
+                return CAE("Cart already exists");
             }
 
             cart = new Cart();
             cart.cid = req.cid!;
         }
 
-        [err, cart] = await TO(cart.save());
-        if (err) {
-            TE("Some error occurred");
+        cart = await TOG<Cart>(cart.save());
+        if (cart instanceof ApiError) {
+            return cart;
         }
 
-        // [err, cart] = await TO(
+        // [err, cart] = await TOG<>(
         //     Cart.findOne({ user: { uuid: req.uuid } }, { relations: ["user"] })
         // );
-        // if (err) TE(err);
+        // if (err) return CAE(err);
 
         return cart;
     };
@@ -107,38 +106,38 @@ export class CartService {
     static delete = async (req: {
         uuid?: string;
         cid?: string;
-    }): Promise<Cart> => {
+    }): Promise<Cart | ApiError> => {
         if (isEmpty(req.uuid) || isEmpty(req.cid)) {
-            TE("uuid or cid not provided");
+            return CAE("uuid or cid not provided");
         }
 
-        let err: any, cart: Cart;
+        let cart: Cart | ApiError | undefined;
 
         if (isNotEmpty(req.uuid)) {
-            [err, cart] = await TO(
+            cart = await TOG<Cart | undefined>(
                 Cart.findOne(
                     { user: { uuid: req.uuid } },
                     { relations: ["user"] }
                 )
             );
-            if (err) TE(err);
+            if (cart instanceof ApiError) return cart;
         } else {
-            [err, cart] = await TO(
+            cart = await TOG<Cart | undefined>(
                 Cart.findOne({ cid: req.cid } /*, { relations: ["user"] }*/)
             );
-            if (err) TE(err);
+            if (cart instanceof ApiError) return cart;
 
-            if (isNotEmpty(cart) && isNotEmpty(cart.user)) {
-                TE("unauthorized access");
+            if (typeof cart !== "undefined" && isNotEmpty(cart.user)) {
+                return CAE("unauthorized access");
             }
         }
 
-        if (isEmpty(cart)) {
-            TE("Cart not found");
+        if (typeof cart === "undefined") {
+            return CAE("Cart not found");
         }
 
-        [err, cart] = await TO(Cart.remove(cart));
-        if (err) TE(err);
+        cart = await TOG<Cart>(Cart.remove(cart));
+        if (cart instanceof ApiError) return cart;
 
         return cart;
     };
@@ -148,33 +147,31 @@ export class CartService {
         cid?: string;
         sku?: string;
         quantity?: number;
-    }): Promise<Cart> => {
+    }): Promise<Cart | ApiError> => {
         if (isEmpty(req.uuid) || isEmpty(req.cid)) {
-            TE("uuid or cid not provided");
+            return CAE("uuid or cid not provided");
         }
         if (isEmpty(req.sku)) {
-            TE("sku not provided");
+            return CAE("sku not provided");
         }
         if (isEmpty(req.quantity)) {
-            TE("quantity not provided");
+            return CAE("quantity not provided");
         }
 
-        let err: any, cart: Cart;
-        [err, cart] = await TO(
+        let cart: Cart | ApiError | undefined;
+        cart = await TOG<Cart | ApiError>(
             CartService.get({ uuid: req.uuid, cid: req.cid })
         );
-        if (err) TE(err);
+        if (cart instanceof ApiError) return cart;
 
         if (isEmpty(cart.items)) {
             cart.items = [];
         }
 
-        let sku: SKU;
-        [err, sku] = await TO(SKU.findOne({ sku: req.sku }));
-        if (err) TE(err);
-
-        if (isEmpty(sku)) {
-            TE("sku not found");
+        let sku = await TOG<SKU | undefined>(SKU.findOne({ sku: req.sku }));
+        if (sku instanceof ApiError) return sku;
+        else if (typeof sku === "undefined") {
+            return CAE("sku not found");
         }
 
         let idx,
@@ -191,18 +188,18 @@ export class CartService {
             cart.items.push(new CartItem(sku, req.quantity!));
         }
 
-        [err, cart] = await TO(cart.save());
-        if (err) {
-            TE("Some error occurred");
+        cart = await TOG<Cart>(cart.save());
+        if (cart instanceof ApiError) {
+            return cart;
         }
 
-        // [err, cart] = await TO(
+        // [err, cart] = await TOG<>(
         //     Cart.findOne(
         //         { user: { uuid: req.uuid } },
         //         { relations: ["user", "product"] }
         //     )
         // );
-        // if (err) TE(err);
+        // if (err) return CAE(err);
 
         return cart;
     };
@@ -211,19 +208,19 @@ export class CartService {
         uuid?: string;
         cid?: string;
         sku?: string;
-    }): Promise<Cart> => {
+    }): Promise<Cart | ApiError> => {
         if (isEmpty(req.uuid) || isEmpty(req.cid)) {
-            TE("uuid or cid not provided");
+            return CAE("uuid or cid not provided");
         }
         if (isEmpty(req.sku)) {
-            TE("sku not provided");
+            return CAE("sku not provided");
         }
 
-        let err: any, cart: Cart;
-        [err, cart] = await TO(
+        let cart: Cart | ApiError | undefined;
+        cart = await TOG<Cart | ApiError>(
             CartService.get({ uuid: req.uuid, cid: req.cid })
         );
-        if (err) TE(err);
+        if (cart instanceof ApiError) return cart;
 
         if (isEmpty(cart.items)) {
             cart.items = [];
@@ -231,18 +228,18 @@ export class CartService {
 
         cart.items = cart.items.filter((it) => it.sku.sku !== req.sku);
 
-        [err, cart] = await TO(cart.save());
-        if (err) {
-            TE("Some error occurred");
+        cart = await TOG<Cart>(cart.save());
+        if (cart instanceof ApiError) {
+            return cart;
         }
 
-        // [err, cart] = await TO(
+        // [err, cart] = await TOG<>(
         //     Cart.findOne(
         //         { user: { uuid: req.uuid } },
         //         { relations: ["user", "product"] }
         //     )
         // );
-        // if (err) TE(err);
+        // if (err) return CAE(err);
 
         return cart;
     };

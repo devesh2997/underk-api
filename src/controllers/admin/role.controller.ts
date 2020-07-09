@@ -1,73 +1,93 @@
 import { Request, Response } from "express";
-import { RoleJSON } from "../../entity/admin/Role";
-import { TO, ReE, ReS } from "../../utils";
+import { Role } from "../../entity/admin/Role";
+import { TOG, ReE, ReS } from "../../utils";
 import { RoleService } from "../../services/admin/role.service";
 
 export class RoleController {
     static get = async (req: Request, res: Response): Promise<Response> => {
-        const query = req.query
-        let err: string, role: RoleJSON
+        const query = req.query;
 
-        [err, role] = await TO(RoleService.get(query))
+        let result = await TOG<Role | ApiError>(RoleService.get(query));
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, { message: 'Role found', result: role }, 201)
-    }
+        return ReS(
+            res,
+            { message: "Role found", result: result.toJSON() },
+            201
+        );
+    };
 
     static getAll = async (_: Request, res: Response): Promise<Response> => {
-        let err: string, roles: RoleJSON[]
+        let result = await TOG<Role[] | ApiError>(RoleService.getAll());
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        [err, roles] = await TO(RoleService.getAll())
-
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, { message: 'Roles found: ' + roles.length, result: roles }, 201)
-    }
+        return ReS(
+            res,
+            {
+                message: "Roles found: " + result.length,
+                result: result.map((role) => role.toJSON()),
+            },
+            201
+        );
+    };
 
     static delete = async (req: Request, res: Response): Promise<Response> => {
-        const query = req.query
-        let err: string, role: RoleJSON
+        const query = req.query;
 
-        [err, role] = await TO(RoleService.delete(query))
+        let result = await TOG<Role | ApiError>(RoleService.delete(query));
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, { message: 'Role deleted', result: role }, 201)
-    }
+        return ReS(
+            res,
+            { message: "Role deleted", result: result.toJSON() },
+            201
+        );
+    };
 
     static create = async (req: Request, res: Response): Promise<Response> => {
-        const body = req.body
-        let err: string, role: RoleJSON
+        const body = req.body;
 
-        [err, role] = await TO(RoleService.create(body))
+        let result = await TOG<Role | ApiError>(RoleService.create(body));
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        if (err) return ReE(res, err, 422)
+        return ReS(
+            res,
+            { message: "Role created", result: result.toJSON() },
+            201
+        );
+    };
 
-        return ReS(res, { message: 'Role created', result: role }, 201)
-    }
+    static addPolicies = async (
+        req: Request,
+        res: Response
+    ): Promise<Response> => {
+        const body = req.body;
 
-    static addPolicies = async (req: Request, res: Response): Promise<Response> => {
-        const body = req.body
-        let err: string, role: RoleJSON
+        let result = await TOG<Role | ApiError>(RoleService.addPolicies(body));
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        [err, role] = await TO(RoleService.addPolicies(body))
+        return ReS(
+            res,
+            { message: "Policies added", result: result.toJSON() },
+            201
+        );
+    };
 
-        if (err) return ReE(res, err, 422)
+    static deletePolicies = async (
+        req: Request,
+        res: Response
+    ): Promise<Response> => {
+        const body = req.body;
 
-        return ReS(res, { message: 'Policies added', result: role }, 201)
-    }
+        let result = await TOG<Role | ApiError>(
+            RoleService.deletePolicies(body)
+        );
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-    static deletePolicies = async (req: Request, res: Response): Promise<Response> => {
-        const body = req.body
-        let err: string, role: RoleJSON
-
-        [err, role] = await TO(RoleService.deletePolicies(body))
-
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, { message: 'Policies deleted', result: role }, 201)
-    }
-
-
+        return ReS(
+            res,
+            { message: "Policies deleted", result: result.toJSON() },
+            201
+        );
+    };
 }

@@ -1,126 +1,137 @@
-import { User, UserJSON } from "../../entity/user/User"
-import { isEmpty, isNotEmpty, isEmail } from "class-validator"
-import { TE, TO, isNotEmptyString } from "../../utils"
+import { User } from "../../entity/user/User";
+import { isEmpty, isNotEmpty, isEmail } from "class-validator";
+import { CAE, TOG } from "../../utils";
 
 export default class UserService {
-    static get = async (userGetInfo: any): Promise<UserJSON> => {
-        let err: any, user: User
-
+    static get = async (userGetInfo: any): Promise<User | ApiError> => {
         if (isEmpty(userGetInfo.uuid)) {
-            TE("user id not provided")
+            return CAE("user id not provided");
         }
 
-        [err, user] = await TO(User.findOne({ uuid: userGetInfo.uuid }))
-
-        if (err) {
-            TE(err)
+        let user = await TOG<User | undefined>(
+            User.findOne({ uuid: userGetInfo.uuid })
+        );
+        if (user instanceof ApiError) {
+            return user;
+        } else if (typeof user === "undefined") {
+            return CAE("user not found");
         }
 
-        return user.toJSON()
-    }
+        return user;
+    };
 
-    static getAll = async (): Promise<UserJSON[]> => {
-        let err: any, users: User[]
-
-        [err, users] = await TO(User.find())
-
-        if (err) {
-            TE(err)
+    static getAll = async (): Promise<User[] | ApiError> => {
+        let users = await TOG<User[]>(User.find());
+        if (users instanceof ApiError) {
+            return users;
         }
 
-        return users.map(u => u.toJSON())
-    }
+        return users;
+    };
 
-    static create = async (userInfo: any): Promise<UserJSON> => {
-        let err: any, user: User
-
-        console.log(userInfo)
-
-        if ((isEmpty(userInfo.mobileCountryCode) || isEmpty(userInfo.mobileNumber)) && isEmpty(userInfo.email)) {
-            TE("Provide mobile number or email")
+    static create = async (userInfo: any): Promise<User | ApiError> => {
+        if (
+            (isEmpty(userInfo.mobileCountryCode) ||
+                isEmpty(userInfo.mobileNumber)) &&
+            isEmpty(userInfo.email)
+        ) {
+            return CAE("Provide mobile number or email");
         }
 
-        if (isNotEmpty(userInfo.mobileNumber) && isEmpty(userInfo.mobileCountryCode)) {
-            TE("Provide mobile country code ")
+        if (
+            isNotEmpty(userInfo.mobileNumber) &&
+            isEmpty(userInfo.mobileCountryCode)
+        ) {
+            return CAE("Provide mobile country code ");
         }
 
-        if (isNotEmpty(userInfo.mobileCountryCode) && isEmpty(userInfo.mobileNumber)) {
-            TE("Provide mobile number ")
+        if (
+            isNotEmpty(userInfo.mobileCountryCode) &&
+            isEmpty(userInfo.mobileNumber)
+        ) {
+            return CAE("Provide mobile number ");
         }
 
-        user = new User()
-        if (isNotEmptyString(userInfo.mobileCountryCode)) {
-            user.mobileCountryCode = userInfo.mobileCountryCode
+        let user = new User();
+        if (isNotEmpty(userInfo.mobileCountryCode)) {
+            user.mobileCountryCode = userInfo.mobileCountryCode;
         }
         if (isNotEmpty(userInfo.mobileNumber)) {
             if (isNaN(userInfo.mobileNumber)) {
-                userInfo.mobileNumber = Number(userInfo.mobileNumber)
+                userInfo.mobileNumber = Number(userInfo.mobileNumber);
             }
             if (isNaN(userInfo.mobileNumber)) {
-                TE("Invalid mobile number")
+                return CAE("Invalid mobile number");
             }
-            user.mobileNumber = userInfo.mobileNumber
+            user.mobileNumber = userInfo.mobileNumber;
         }
-        if (isNotEmptyString(userInfo.email)) {
+        if (isNotEmpty(userInfo.email)) {
             if (!isEmail(userInfo.email)) {
-                TE("Invalid email")
+                return CAE("Invalid email");
             }
-            user.email = userInfo.email
+            user.email = userInfo.email;
         }
-        if (isNotEmptyString(userInfo.firstName)) {
-            user.firstName = userInfo.firstName
+        if (isNotEmpty(userInfo.firstName)) {
+            user.firstName = userInfo.firstName;
         }
-        if (isNotEmptyString(userInfo.lastName)) {
-            user.lastName = userInfo.lastName
-        } if (isNotEmptyString(userInfo.dob)) {
-            user.dob = new Date(userInfo.dob)
+        if (isNotEmpty(userInfo.lastName)) {
+            user.lastName = userInfo.lastName;
         }
-        if (isNotEmptyString(userInfo.gender)) {
-            user.gender = userInfo.gender
+        if (isNotEmpty(userInfo.dob)) {
+            user.dob = new Date(userInfo.dob);
         }
-        if (isNotEmptyString(userInfo.picUrl)) {
-            user.picUrl = userInfo.picUrl
+        if (isNotEmpty(userInfo.gender)) {
+            user.gender = userInfo.gender;
+        }
+        if (isNotEmpty(userInfo.picUrl)) {
+            user.picUrl = userInfo.picUrl;
         }
         if (isNotEmpty(userInfo.emailVerified)) {
-            user.emailVerified = userInfo.emailVerified
+            user.emailVerified = userInfo.emailVerified;
         }
         if (isNotEmpty(userInfo.mobileVerified)) {
-            user.mobileVerified = userInfo.mobileVerified
+            user.mobileVerified = userInfo.mobileVerified;
         }
 
         if (isEmpty(user.mobileCountryCode) || isEmpty(user.mobileNumber)) {
             if (isNotEmpty(user.mobileVerified)) {
                 if (user.mobileVerified)
-                    TE("Mobile number is empty, cannot be verified")
+                    return CAE("Mobile number is empty, cannot be verified");
             }
         }
 
         if (isEmpty(user.email)) {
             if (isNotEmpty(user.emailVerified)) {
                 if (user.emailVerified)
-                    TE("Email is empty, cannot be verified")
+                    return CAE("Email is empty, cannot be verified");
             }
         }
 
-        let existingUser: User
         if (isNotEmpty(user.mobileNumber) && isNotEmpty(user.mobileNumber)) {
-            [err, existingUser] = await TO(User.findOne({ mobileCountryCode: user.mobileCountryCode, mobileNumber: user.mobileNumber }))
-            if (err) TE(err)
-            if (isNotEmpty(existingUser)) {
-                TE("Mobile number is already in use.")
+            let existingUser = await TOG<User | undefined>(
+                User.findOne({
+                    mobileCountryCode: user.mobileCountryCode,
+                    mobileNumber: user.mobileNumber,
+                })
+            );
+            if (existingUser instanceof ApiError) return existingUser;
+            else if (typeof existingUser !== "undefined") {
+                return CAE("Mobile number is already in use.");
             }
         }
         if (isNotEmpty(user.email)) {
-            [err, existingUser] = await TO(User.findOne({ email: user.email }))
-            if (err) TE(err)
-            if (isNotEmpty(existingUser)) {
-                TE("Email is already in use.")
+            let existingUser = await TOG<User | undefined>(
+                User.findOne({ email: user.email })
+            );
+            if (existingUser instanceof ApiError) return existingUser;
+            else if (typeof existingUser !== "undefined") {
+                return CAE("Email is already in use.");
             }
         }
 
-        [err, user] = await TO(user.save())
-        if (err) TE(err)
+        let res = await TOG<User>(user.save());
+        if (res instanceof ApiError) return res;
 
-        return user.toJSON()
-    }
+        return res;
+    };
 }

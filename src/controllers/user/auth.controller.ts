@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { TO, ReE, ReS } from "../../utils";
+import { TOG, ReE, ReS } from "../../utils";
 import UserAuthService, {
     SendOtpResponse,
     UserLoginResponse,
@@ -12,11 +12,9 @@ export class UserAuthController {
         res: Response
     ): Promise<Response> => {
         const body = req.body;
-        let err: string;
 
-        [err] = await TO(UserAuthService.findUser(body));
-
-        if (err) return ReE(res, err, 422);
+        let result = await TOG<User | ApiError>(UserAuthService.findUser(body));
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
         return ReS(
             res,
@@ -29,11 +27,11 @@ export class UserAuthController {
 
     static sendOtp = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body;
-        let err: string, result: SendOtpResponse;
 
-        [err, result] = await TO(UserAuthService.sendOtp(body));
-
-        if (err) return ReE(res, err, 422);
+        let result = await TOG<SendOtpResponse | ApiError>(
+            UserAuthService.sendOtp(body)
+        );
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
         return ReS(
             res,
@@ -50,11 +48,9 @@ export class UserAuthController {
         res: Response
     ): Promise<Response> => {
         const body = req.body;
-        let err: string;
 
-        [err] = await TO(UserAuthService.verifyOtp(body));
-
-        if (err) return ReE(res, err, 422);
+        let err = await TOG<void | ApiError>(UserAuthService.verifyOtp(body));
+        if (err instanceof ApiError) return ReE(res, err, 422);
 
         return ReS(
             res,
@@ -70,17 +66,17 @@ export class UserAuthController {
         res: Response
     ): Promise<Response> => {
         const body = req.body;
-        let err: string, user: User;
 
-        [err, user] = await TO(UserAuthService.createUser(body));
-
-        if (err) return ReE(res, err, 422);
+        let result = await TOG<User | ApiError>(
+            UserAuthService.createUser(body)
+        );
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
         return ReS(
             res,
             {
                 message: "User created successfully",
-                result: user.toJSON(),
+                result: result.toJSON(),
             },
             201
         );
@@ -88,11 +84,11 @@ export class UserAuthController {
 
     static login = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body;
-        let err: string, result: UserLoginResponse;
 
-        [err, result] = await TO(UserAuthService.login(body));
-
-        if (err) return ReE(res, err, 422);
+        let result = await TOG<UserLoginResponse | ApiError>(
+            UserAuthService.login(body)
+        );
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
         return ReS(
             res,
@@ -109,11 +105,11 @@ export class UserAuthController {
         res: Response
     ): Promise<Response> => {
         const body = req.body;
-        let err: string, result: UserLoginResponse;
 
-        [err, result] = await TO(UserAuthService.loginWithGoogle(body));
-
-        if (err) return ReE(res, err, 422);
+        let result = await TOG<UserLoginResponse | ApiError>(
+            UserAuthService.loginWithGoogle(body)
+        );
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
         return ReS(
             res,

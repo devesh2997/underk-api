@@ -1,73 +1,97 @@
-import { PolicyJSON, Policy } from "../../entity/admin/Policy";
-import { TE, TO, VE } from "../../utils";
-import { isEmpty, isNotEmpty } from "class-validator";
+import { Policy } from "../../entity/admin/Policy";
+import { CAE, TOG, VE } from "../../utils";
+import { isEmpty } from "class-validator";
 
 export type PolicyRequestInfo = {
-    name: string,
-    description: string
-}
+    name: string;
+    description: string;
+};
 
 export class PolicyService {
-    static get = async (policyInfo: any): Promise<PolicyJSON> | never => {
-        let err: any, policy: Policy
+    static get = async (policyInfo: any): Promise<Policy | ApiError> => {
+        let policy: Policy;
+
         if (isEmpty(policyInfo.name)) {
-            TE("Please provid policy id or policy name")
+            return CAE("Please provid policy id or policy name");
         }
-        [err, policy] = await TO(Policy.findOne({ name: policyInfo.name }))
 
-        if (err) TE(err)
+        let res = await TOG<Policy | undefined>(
+            Policy.findOne({ name: policyInfo.name })
+        );
+        if (res instanceof ApiError) {
+            return res;
+        } else if (typeof res === "undefined") {
+            return CAE("Policy not found");
+        }
 
-        if (isEmpty(policy)) TE("Policy not found")
+        policy = res;
 
-        console.log(policy.toJSON())
-        return policy.toJSON()
-    }
+        return policy;
+    };
 
-    static getAll = async (): Promise<PolicyJSON[]> => {
-        let err: any, policies: Policy[]
+    static getAll = async (): Promise<Policy[] | ApiError> => {
+        let policies: Policy[];
 
-        [err, policies] = await TO(Policy.find())
+        let res = await TOG<Policy[]>(Policy.find());
+        if (res instanceof ApiError) {
+            return res;
+        }
 
-        if (err) TE(err)
+        policies = res;
 
-        return policies.map(policy => policy.toJSON())
-    }
+        return policies;
+    };
 
-    static delete = async (policyInfo: any): Promise<PolicyJSON> | never => {
-        let err: any, policy: Policy
+    static delete = async (policyInfo: any): Promise<Policy | ApiError> => {
+        let policy: Policy;
         if (isEmpty(policyInfo.id)) {
-            TE("Policy id not provided")
+            return CAE("Policy id not provided");
         }
 
-        [err, policy] = await TO(Policy.findOne({ id: policyInfo.id }))
-
-        if (err) TE(err)
-
-        if (isEmpty(policy)) TE("Policy not found")
-
-            ;[err, policy] = await TO(Policy.remove(policy))
-
-        if (err) TE(err)
-
-        return policy.toJSON()
-    }
-
-    static create = async (policyInfo: PolicyRequestInfo): Promise<PolicyJSON> => {
-        let err: any, policy: Policy, existingPolicy: Policy
-
-        policy = new Policy(policyInfo.name, policyInfo.description)
-        VE(policy);
-
-        [err, existingPolicy] = await TO(Policy.findOne({ name: policyInfo.name }))
-        if (err) TE(err)
-        if (isNotEmpty(existingPolicy)) {
-            TE("Policy with given name already exists")
+        let res = await TOG<Policy | undefined>(
+            Policy.findOne({ id: policyInfo.id })
+        );
+        if (res instanceof ApiError) {
+            return res;
+        } else if (typeof res === "undefined") {
+            return CAE("Policy not found");
         }
 
-        [err] = await TO(Policy.insert(policy))
+        policy = res;
 
-        if (err) TE(err)
+        res = await TOG<Policy>(Policy.remove(policy));
+        if (res instanceof ApiError) {
+            return res;
+        }
 
-        return policy.toJSON()
-    }
+        policy = res;
+
+        return policy;
+    };
+
+    static create = async (
+        policyInfo: PolicyRequestInfo
+    ): Promise<Policy | ApiError> => {
+        let policy: Policy;
+        policy = new Policy(policyInfo.name, policyInfo.description);
+
+        const validationResult = await VE(policy);
+        if (validationResult instanceof ApiError) return validationResult;
+
+        let res = await TOG<Policy | undefined>(
+            Policy.findOne({ name: policyInfo.name })
+        );
+        if (res instanceof ApiError) {
+            return res;
+        } else if (typeof res !== "undefined") {
+            return CAE("Policy with given name already exists");
+        }
+
+        res = await TOG<Policy>(Policy.save(policy));
+        if (res instanceof ApiError) {
+            return res;
+        }
+
+        return policy;
+    };
 }

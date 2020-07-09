@@ -1,102 +1,107 @@
-import AdminService, { AdminLoginSuccess } from "../../services/admin/admin.service"
-import { Admin } from "../../entity/admin/Admin"
+import AdminService, {
+    AdminLoginSuccess,
+} from "../../services/admin/admin.service";
+import { Admin } from "../../entity/admin/Admin";
 import { Request, Response } from "express";
-import { TO, ReS, ReE } from "../../utils";
+import { TOG, ReS, ReE } from "../../utils";
 
 export class AdminController {
     static get = async (req: Request, res: Response): Promise<Response> => {
-        const query = req.query
-        let err: string, admin: Admin
+        const query = req.query;
 
-        [err, admin] = await TO(AdminService.get(query))
+        let result = await TOG<Admin | ApiError>(AdminService.get(query));
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, {
-            message: 'Admin found',
-            result: admin
-        },
-            201)
-
-    }
+        return ReS(
+            res,
+            {
+                message: "Admin found",
+                result: result.toJSON(),
+            },
+            201
+        );
+    };
 
     static getAll = async (_: Request, res: Response): Promise<Response> => {
-        let err: string, admins: Admin[]
+        let result = await TOG<Admin[] | ApiError>(AdminService.getAll());
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        [err, admins] = await TO(AdminService.getAll())
-
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, {
-            message: 'Admins found :' + admins.length,
-            result: admins
-        },
-            201)
-
-    }
+        return ReS(
+            res,
+            {
+                message: "Admins found :" + result.length,
+                result: result.map((admin) => admin.toJSON()),
+            },
+            201
+        );
+    };
 
     static delete = async (req: Request, res: Response): Promise<Response> => {
-        const query = req.query
-        let err: string, admin: Admin
+        const query = req.query;
 
-        [err, admin] = await TO(AdminService.delete(query))
+        let result = await TOG<Admin | ApiError>(AdminService.delete(query));
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, {
-            message: 'Admin deleted',
-            result: admin
-        },
-            201)
-
-    }
+        return ReS(
+            res,
+            {
+                message: "Admin deleted",
+                result: result.toJSON(),
+            },
+            201
+        );
+    };
 
     static create = async (req: Request, res: Response): Promise<Response> => {
-        const body = req.body
-        let err: string, admin: Admin
+        const body = req.body;
 
-        [err, admin] = await TO(AdminService.create(body))
+        let result = await TOG<Admin | ApiError>(AdminService.create(body));
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, {
-            message: 'Successfully created new admin.',
-            result: admin
-        },
-            201)
-
-    }
+        return ReS(
+            res,
+            {
+                message: "Successfully created new admin.",
+                result: result.toJSON(),
+            },
+            201
+        );
+    };
 
     static update = async (req: Request, res: Response): Promise<Response> => {
-        const user: any = req.user
-        const body = req.body
-        let err: string, admin: Admin
+        const user: any = req.user;
+        const body = req.body;
 
-        [err, admin] = await TO(AdminService.update(user.auid as string, body))
+        let result = await TOG<Admin | ApiError>(
+            AdminService.update(user.auid as string, body)
+        );
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, {
-            message: 'Successfully update admin.',
-            result: admin
-        },
-            201)
-
-    }
+        return ReS(
+            res,
+            {
+                message: "Successfully update admin.",
+                result: result.toJSON(),
+            },
+            201
+        );
+    };
 
     static login = async (req: Request, res: Response): Promise<Response> => {
-        const body = req.body
-        let err: string, admin: AdminLoginSuccess
+        const body = req.body;
 
-        [err, admin] = await TO(AdminService.login(body))
+        let result = await TOG<AdminLoginSuccess | ApiError>(
+            AdminService.login(body)
+        );
+        if (result instanceof ApiError) return ReE(res, result, 422);
 
-        if (err) return ReE(res, err, 422)
-
-        return ReS(res, {
-            message: 'Successfully logged in.',
-            result: admin
-        },
-            201)
-
-    }
+        return ReS(
+            res,
+            {
+                message: "Successfully logged in.",
+                result: result,
+            },
+            201
+        );
+    };
 }
