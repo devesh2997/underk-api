@@ -2,7 +2,7 @@ import { Category, CategoryJSON } from "../../entity/catalogue/category"
 import { isNotEmpty, isEmpty } from "class-validator"
 import { getManager } from "typeorm"
 import { BulkCreateResult } from "entity/shared/BulkCreateResult"
-import { createApiError, TOG } from "utils"
+import { CAE, TOG } from "utils"
 
 type CategoryCreateInfo = {
     slug: string,
@@ -23,7 +23,7 @@ export class CategoryService {
         let category: Category
 
         if (isEmpty(categoryInfo.slug)) {
-            return createApiError("Category slug not provided")
+            return CAE("Category slug not provided")
         }
 
         let res = await TOG<Category | undefined>(Category.findOne({ slug: categoryInfo.slug }))
@@ -31,7 +31,7 @@ export class CategoryService {
         if (res instanceof ApiError) {
             return res
         } else if (typeof res === 'undefined') {
-            return createApiError("Category not found")
+            return CAE("Category not found")
         }
 
         category = res
@@ -74,7 +74,7 @@ export class CategoryService {
 
     static delete = async (categoryInfo: any): Promise<Category | ApiError> => {
         if (isEmpty(categoryInfo.slug)) {
-            return createApiError("Category slug not provided")
+            return CAE("Category slug not provided")
         }
 
         let res = await TOG<Category | undefined>(Category.findOne({ slug: categoryInfo.slug }))
@@ -83,7 +83,7 @@ export class CategoryService {
         }
 
         if (typeof res === 'undefined') {
-            return createApiError("Category not found")
+            return CAE("Category not found")
         }
 
         res = await TOG<Category>(Category.remove(res))
@@ -100,14 +100,14 @@ export class CategoryService {
     static create = async (categoryInfo: CategoryCreateInfo): Promise<Category | ApiError> => {
         let category: Category
         if (isEmpty(categoryInfo.slug) || isEmpty(categoryInfo.name)) {
-            return createApiError("Missing fields")
+            return CAE("Missing fields")
         }
 
         category = new Category(categoryInfo.slug, categoryInfo.name)
         if (isNotEmpty(categoryInfo.parentSlug) && categoryInfo.parentSlug.length > 0) {
             let parent = await TOG<Category | undefined>(Category.findOne({ slug: categoryInfo.parentSlug }))
             if (parent instanceof ApiError || typeof parent === 'undefined') {
-                return createApiError(`Parent with given slug ${categoryInfo.parentSlug} not found`)
+                return CAE(`Parent with given slug ${categoryInfo.parentSlug} not found`)
             }
             console.log(parent)
             category.parent = parent
@@ -122,7 +122,7 @@ export class CategoryService {
 
     static bulkCreate = async (categoriesInfo: CategoryCreateInfo[]): Promise<BulkCreateResult<CategoryJSON> | ApiError> => {
         if (typeof categoriesInfo !== 'object') {
-            return createApiError("Invalid request data format")
+            return CAE("Invalid request data format")
         }
         let errors: any[] = []
         let categoriesJSON: CategoryJSON[] = []

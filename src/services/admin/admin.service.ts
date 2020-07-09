@@ -1,5 +1,5 @@
 import { AdminJSON, Admin } from "../../entity/admin/Admin"
-import { VE, createApiError, TOG } from "../../utils"
+import { VE, CAE, TOG } from "../../utils"
 import { isNotEmpty, isEmpty } from "class-validator"
 import { Employee } from "../../entity/admin/Employee"
 import bcrypt from "bcryptjs"
@@ -32,7 +32,7 @@ export default class AdminService {
     static get = async (adminGetInfo: any): Promise<Admin | ApiError> => {
 
         if (isEmpty(adminGetInfo.auid) && isEmpty(adminGetInfo.alias)) {
-            return createApiError("Please provide auid or alias")
+            return CAE("Please provide auid or alias")
         }
 
         let res: ApiError | Admin | undefined
@@ -45,7 +45,7 @@ export default class AdminService {
         if (res instanceof ApiError) return res
 
         if (typeof res === 'undefined') {
-            return createApiError("Admin not found")
+            return CAE("Admin not found")
         }
 
         return res
@@ -63,7 +63,7 @@ export default class AdminService {
 
     static delete = async (adminCreateInfo: any): Promise<Admin | ApiError> => {
         if (isEmpty(adminCreateInfo.auid) && isEmpty(adminCreateInfo.alias)) {
-            return createApiError("Please provide auid or alias")
+            return CAE("Please provide auid or alias")
         }
         let res: Admin | undefined | ApiError
         if (isNotEmpty(adminCreateInfo.auid)) {
@@ -77,7 +77,7 @@ export default class AdminService {
         }
 
         if (typeof res === 'undefined') {
-            return createApiError("Admin not found")
+            return CAE("Admin not found")
         }
 
         res = await TOG<Admin>(res.remove())
@@ -103,7 +103,7 @@ export default class AdminService {
             return existingAdm
         }
         if(typeof existingAdm !== 'undefined'){
-            return createApiError("Alias is already in use.")
+            return CAE("Alias is already in use.")
         }
 
         //check if given employee id exists and it is not already linked with another account.

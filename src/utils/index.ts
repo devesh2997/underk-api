@@ -56,7 +56,7 @@ export const VE = async (obj: any) => {
     }
     return
   } catch (e) {
-    return createApiError(e)
+    return CAE(e)
   }
 }
 
@@ -69,7 +69,7 @@ export const VE = async (obj: any) => {
 //   return [null, res]
 // }
 
-export const createApiError = (err: string | Error, errorCode?: number | undefined, statusCode?: number | undefined): ApiError => {
+export const CAE = (err: string | Error, errorCode?: number | undefined, statusCode?: number | undefined): ApiError => {
   let apiError: ApiError
   if (typeof err === 'undefined') {
     apiError = new ApiError(err, undefined, undefined, errorCode, statusCode)

@@ -1,15 +1,15 @@
 import { Collection, CollectionJSON } from "../../entity/catalogue/collection"
-import { TE, TO, VE } from "../../utils"
 import { isEmpty } from "class-validator"
 import { BulkCreateResult } from "entity/shared/BulkCreateResult"
+import { CAE } from "utils"
 
 export class CollectionService {
 
-    static get = async (collectionInfo: any): Promise<CollectionJSON> | never => {
+    static get = async (collectionInfo: any): Promise<Collection | ApiError> => {
         let err, collection: Collection
 
         if (isEmpty(collectionInfo.slug)) {
-            TE("Collection slug not provided")
+            return CAE("Collection slug not provided")
         }
 
         [err, collection] = await TO(Collection.findOne({ slug: collectionInfo.slug }))
