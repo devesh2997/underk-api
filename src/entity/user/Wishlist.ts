@@ -15,7 +15,7 @@ import { IsBoolean, isNotEmpty } from "class-validator";
 
 export interface WishlistJSON {
     wid: string;
-    products: string[] | ProductJSON[];
+    products: ProductJSON[];
     isPublic: boolean;
 }
 
