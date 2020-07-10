@@ -1,10 +1,11 @@
-import { AdminJSON, Admin } from "../../entity/admin/Admin";
+import { Admin } from "../../entity/admin/Admin";
 import { VE, CAE, TOG } from "../../utils";
 import { isNotEmpty, isEmpty } from "class-validator";
 import { Employee } from "../../entity/admin/Employee";
 import bcrypt from "bcryptjs";
 import { Policy } from "../../entity/admin/Policy";
 import { Role } from "../../entity/admin/Role";
+import ApiError from "../../core/errors";
 
 type AdminCreateUpdateInfo = {
     auid?: string;

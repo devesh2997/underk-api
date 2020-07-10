@@ -2,6 +2,7 @@ import { TOG } from './../../utils';
 import { Request, Response } from "express";
 import { ReE, ReS } from "../../utils";
 import { TypeService } from "../../services/catalogue/type.service";
+import ApiError from '../../core/errors';
 
 export class TypeController {
     static get = async (req: Request, res: Response): Promise<Response> => {

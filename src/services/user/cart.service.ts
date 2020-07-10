@@ -4,6 +4,7 @@ import { User } from "../../entity/user/User";
 import { CartItem } from "../../entity/user/CartItem";
 import { SKU } from "../../entity/inventory/SKU";
 import { CAE, TOG } from "../../utils";
+import ApiError from "../../core/errors";
 
 export class CartService {
     static get = async (req: {

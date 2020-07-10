@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Employee } from "../../entity/admin/Employee";
 import { TOG, ReE, ReS } from "../../utils";
 import { EmployeeService } from "../../services/admin/employee.service";
+import ApiError from "../../core/errors";
 
 export class EmployeeController {
     static get = async (req: Request, res: Response): Promise<Response> => {

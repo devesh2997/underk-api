@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Role } from "../../entity/admin/Role";
 import { TOG, ReE, ReS } from "../../utils";
 import { RoleService } from "../../services/admin/role.service";
+import ApiError from "../../core/errors";
 
 export class RoleController {
     static get = async (req: Request, res: Response): Promise<Response> => {

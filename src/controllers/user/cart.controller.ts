@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ReE, ReS, TOG } from "../../utils";
 import { Cart } from "../../entity/user/Cart";
 import { CartService } from "../../services/user/cart.service";
+import ApiError from "../../core/errors";
 
 export class CartController {
     static get = async (req: Request, res: Response): Promise<Response> => {

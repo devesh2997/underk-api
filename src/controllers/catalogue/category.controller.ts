@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ReS, ReE, TOG } from "../../utils";
 import { CategoryService } from "../../services/catalogue/category.service";
 import { Category } from "../../entity/catalogue/category";
+import ApiError from "../../core/errors";
 
 export class CategoryController {
     static get = async (req: Request, res: Response): Promise<Response> => {

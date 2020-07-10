@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ReS, ReE, TOG } from "../../utils";
 import { CollectionService } from "../../services/catalogue/collection.service";
+import ApiError from "../../core/errors";
 
 export class CollectionController {
     static get = async (req: Request, res: Response): Promise<Response> => {

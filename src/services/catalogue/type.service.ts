@@ -2,6 +2,7 @@ import { InsertResult } from 'typeorm';
 import { Type } from "../../entity/catalogue/Type";
 import { VE, CAE, TOG } from "../../utils";
 import { isEmpty } from "class-validator";
+import ApiError from '../../core/errors';
 
 export class TypeService {
     static get = async (typeInfo: any): Promise<Type | ApiError> => {

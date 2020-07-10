@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { TOG, ReE, ReS } from "../../utils";
 import { SupplierService } from "../../services/inventory/supplier.service";
+import ApiError from "../../core/errors";
 
 export class SupplierController {
     static get = async (req: Request, res: Response): Promise<Response> => {

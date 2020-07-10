@@ -2,6 +2,7 @@ import { Role } from "../../entity/admin/Role";
 import { isEmpty, isNotEmpty } from "class-validator";
 import { CAE, TOG, VE } from "../../utils";
 import { Policy } from "../../entity/admin/Policy";
+import ApiError from "../../core/errors";
 
 type RoleRequestInfo = {
     id: number;

@@ -5,6 +5,7 @@ import UserAuthService, {
     UserLoginResponse,
 } from "../../services/user/auth.service";
 import { User } from "entity/user/User";
+import ApiError from "../../core/errors";
 
 export class UserAuthController {
     static findUser = async (

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Policy } from "../../entity/admin/Policy";
 import { TOG, ReE, ReS } from "../../utils";
 import { PolicyService } from "../../services/admin/policy.service";
+import ApiError from "../../core/errors";
 
 export class PolicyController {
     static get = async (req: Request, res: Response): Promise<Response> => {

@@ -1,6 +1,7 @@
 import { Employee, EmployeeJSON } from "../../entity/admin/Employee";
 import { TOG, CAE, VE } from "../../utils/index";
 import { isNotEmpty, isEmpty } from "class-validator";
+import ApiError from "../../core/errors";
 
 export class EmployeeService {
     static get = async (employeeInfo: any): Promise<Employee | ApiError> => {

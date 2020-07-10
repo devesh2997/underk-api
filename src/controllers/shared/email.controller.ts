@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { TOG, ReE, ReS } from "../../utils";
 import { EmailService } from "../../services/shared/email.service";
+import ApiError from "../../core/errors";
 
 export class EmailController {
     static send = async (req: Request, res: Response): Promise<Response> => {

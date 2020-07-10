@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ReE, ReS, TOG } from "../../utils";
 import { SubtypeService } from "../../services/catalogue/subtype.service";
+import ApiError from "../../core/errors";
 
 export class SubtypeController {
     static get = async (req: Request, res: Response): Promise<Response> => {

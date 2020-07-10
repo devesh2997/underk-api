@@ -1,8 +1,9 @@
 import { Collection, CollectionJSON } from "../../entity/catalogue/collection"
 import { isEmpty } from "class-validator"
-import { BulkCreateResult } from "entity/shared/BulkCreateResult"
-import { CAE, TOG, VE } from "utils"
+import { BulkCreateResult } from "../../entity/shared/BulkCreateResult"
+import { CAE, TOG, VE } from "../../utils"
 import { InsertResult, UpdateResult } from "typeorm"
+import ApiError from "../../core/errors"
 
 export class CollectionService {
 

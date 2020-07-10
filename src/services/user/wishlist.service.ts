@@ -3,6 +3,7 @@ import { isEmpty, isNotEmpty } from "class-validator";
 import { CAE, TOG } from "../../utils";
 import { User } from "../../entity/user/User";
 import { Product } from "../../entity/catalogue/Product";
+import ApiError from "../../core/errors";
 
 export class WishlistService {
     static get = async (req: {

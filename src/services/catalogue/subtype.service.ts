@@ -7,7 +7,8 @@ import { OptionAttribute, OptionAttributeJSON } from "../../entity/catalogue/Opt
 import { AttributeValue } from "../../entity/catalogue/AttributeValue";
 import { SKUAttributeValue } from "../../entity/catalogue/SKUAttributeValue";
 import { OptionAttributeValue } from "../../entity/catalogue/OptionAttributeValue";
-import { Subtype } from "entity/catalogue/Subtype";
+import { Subtype } from "../../entity/catalogue/Subtype";
+import ApiError from "../../core/errors";
 
 export interface CreateSubtypeInfo {
     sku: string

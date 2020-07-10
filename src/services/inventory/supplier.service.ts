@@ -1,6 +1,7 @@
 import { Supplier } from "../../entity/inventory/Supplier";
 import { isEmpty } from "class-validator";
 import { VE, CAE, TOG } from "../../utils";
+import ApiError from "../../core/errors";
 
 export class SupplierService {
     static get = async (supplierInfo: any): Promise<Supplier | ApiError> => {

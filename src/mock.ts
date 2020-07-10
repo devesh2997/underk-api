@@ -1,10 +1,9 @@
-import { TO } from "./utils"
-import { Admin } from "./entity/admin/Admin";
-import { isNotEmpty, isEmpty } from "class-validator";
+import { TOG } from "./utils"
+import { isNotEmpty } from "class-validator";
 import AdminService from "./services/admin/admin.service";
 import * as POLICIES from "underk-policies";
 import { PolicyService } from "./services/admin/policy.service";
-import { PolicyJSON } from "./entity/admin/Policy";
+import ApiError from "./core/errors";
 
 const policies = [
     POLICIES.SUPER,
@@ -24,22 +23,24 @@ export const insertMockData = async (): Promise<void> => {
     let err: any
 
     for (let i = 0; i < policies.length; i++) {
-        let policy: PolicyJSON
-        [err, policy] = await TO(PolicyService.get({ name: policies[i].name }))
-        if (isEmpty(policy)) {
-            [err, policy] = await TO(PolicyService.create({ name: policies[i].name, description: policies[i].description }))
+        let policy = await TOG(PolicyService.get({ name: policies[i].name }))
+        if (policy instanceof ApiError) {
+            console.log(err)
+        } else {
+            policy = await TOG(PolicyService.create({ name: policies[i].name, description: policies[i].description }))
         }
         if (err) console.log(err)
     }
 
-    let superAdmin: Admin
-    [err, superAdmin] = await TO(AdminService.get({ alias: 'superuser' }))
+    let superAdmin = await TOG(AdminService.get({ alias: 'superuser' }))
     if (isNotEmpty(superAdmin)) {
         console.log(superAdmin)
         return
     }
-    [err, superAdmin] = await TO(AdminService.delete({ alias: 'superuser' }));
-    [err, superAdmin] = await TO(AdminService.create({ alias: 'superuser', password: 'superuser', roleIds: '[]', policyNames: '["SUPER"]', euid: undefined }))
+
+    superAdmin = await TOG(AdminService.delete({ alias: 'superuser' }));
+
+    superAdmin = await TOG(AdminService.create({ alias: 'superuser', password: 'superuser', roleIds: '[]', policyNames: '["SUPER"]', euid: undefined }))
     if (err) {
         console.log(err)
     }

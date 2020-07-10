@@ -1,6 +1,7 @@
 import { isEmpty, isNotEmpty } from "class-validator";
 import { CAE, TOG, doRequest } from "../../utils";
 import { Sms } from "../../entity/shared/Sms";
+import ApiError from "../../core/errors";
 
 const TEXT_LOCAL_API_KEY = "Bcw1ZQcdduc-lKzbGpgxa9OxpF98MVdFm3OmruznQo";
 

@@ -4,6 +4,7 @@ import AdminService, {
 import { Admin } from "../../entity/admin/Admin";
 import { Request, Response } from "express";
 import { TOG, ReS, ReE } from "../../utils";
+import ApiError from "../../core/errors";
 
 export class AdminController {
     static get = async (req: Request, res: Response): Promise<Response> => {

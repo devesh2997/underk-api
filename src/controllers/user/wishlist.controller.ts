@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ReE, ReS, TOG } from "../../utils";
 import { WishlistService } from "../../services/user/wishlist.service";
 import { Wishlist } from "../../entity/user/Wishlist";
+import ApiError from "../../core/errors";
 
 export class WishlistController {
     static get = async (req: Request, res: Response): Promise<Response> => {

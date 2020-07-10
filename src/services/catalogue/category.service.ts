@@ -3,6 +3,7 @@ import { isNotEmpty, isEmpty } from "class-validator"
 import { getManager } from "typeorm"
 import { BulkCreateResult } from "../../entity/shared/BulkCreateResult"
 import { CAE, TOG } from "../../utils"
+import ApiError from "../../core/errors"
 
 type CategoryCreateInfo = {
     slug: string,

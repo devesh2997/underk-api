@@ -3,6 +3,7 @@ import { Warehouse } from "../../entity/inventory/Warehouse";
 import { isEmpty } from "class-validator";
 import { VE } from "../../utils";
 import { Address } from "../../entity/shared/Address";
+import ApiError from '../../core/errors';
 
 export class WarehouseService {
     static get = async (warehouseInfo: any): Promise<Warehouse | ApiError> => {

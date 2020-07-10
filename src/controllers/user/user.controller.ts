@@ -2,12 +2,13 @@ import { User } from "../../entity/user/User"
 import { TOG, ReE, ReS } from "../../utils"
 import UserService from "../../services/user/user.service"
 import { Request, Response } from "express";
+import ApiError from "../../core/errors";
 
 export class UserController {
     static get = async (req: Request, res: Response): Promise<Response> => {
         const query = req.query
 
-        let result = await TOG<User|ApiError>(UserService.get(query))
+        let result = await TOG<User | ApiError>(UserService.get(query))
         if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
@@ -17,7 +18,7 @@ export class UserController {
             201)
     }
     static getAll = async (_: Request, res: Response): Promise<Response> => {
-        let result = await TOG<>(UserService.getAll())
+        let result = await TOG(UserService.getAll())
         if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
@@ -30,12 +31,12 @@ export class UserController {
     static create = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body
 
-        let result = await TOG<User|ApiError>(UserService.create(body))
+        let result = await TOG<User | ApiError>(UserService.create(body))
         if (result instanceof ApiError) return ReE(res, result, 422)
 
         return ReS(res, {
             message: 'User created.',
-            result: result.toJSON();
+            result: result.toJSON()
         },
             201)
     }

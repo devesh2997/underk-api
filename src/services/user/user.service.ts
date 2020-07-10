@@ -1,6 +1,7 @@
 import { User } from "../../entity/user/User";
 import { isEmpty, isNotEmpty, isEmail } from "class-validator";
 import { CAE, TOG } from "../../utils";
+import ApiError from "../../core/errors";
 
 export default class UserService {
     static get = async (userGetInfo: any): Promise<User | ApiError> => {

@@ -8,6 +8,7 @@ import { EmailOtp } from "../../entity/shared/EmailOtp";
 import { addMinutes, generateOtp } from "underk-utils";
 import bcrypt from "bcryptjs";
 import { OAuth2Client, LoginTicket, TokenPayload } from "google-auth-library";
+import ApiError from "../../core/errors";
 
 export type SendOtpResponse = {
     mobileCountryCode?: string;

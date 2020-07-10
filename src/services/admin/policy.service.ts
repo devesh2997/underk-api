@@ -1,6 +1,7 @@
 import { Policy } from "../../entity/admin/Policy";
 import { CAE, TOG, VE } from "../../utils";
 import { isEmpty } from "class-validator";
+import ApiError from "../../core/errors";
 
 export type PolicyRequestInfo = {
     name: string;
