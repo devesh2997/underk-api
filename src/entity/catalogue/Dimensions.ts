@@ -11,6 +11,13 @@ export interface DimensionsJSON {
 
 @Entity()
 export class Dimensions extends BaseEntity {
+    constructor(length: number, breadth: number, height: number, weight: number) {
+        super()
+        this.length = length
+        this.breadth = breadth
+        this.height = height
+        this.weight = weight
+    }
     @PrimaryGeneratedColumn('increment')
     id: number
 

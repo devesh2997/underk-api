@@ -2530,14 +2530,15 @@ typescript@^3.8.3:
 
 "underk-types@https://github.com/devesh2997/underk-types#new":
   version "1.0.0"
-  resolved "https://github.com/devesh2997/underk-types#de6a7caff5cf98ae316c9af83cc2a01c5bf560d5"
+  resolved "https://github.com/devesh2997/underk-types#24fcd73aa262b30aa314f87f7627cb238d2d95d6"
 
 "underk-utils@git+https://github.com/devesh2997/underk-utils.git#master":
   version "1.0.0"
-  resolved "git+https://github.com/devesh2997/underk-utils.git#d342354efe098fa2588cf91ff75a9dab19c4f5b6"
+  resolved "git+https://github.com/devesh2997/underk-utils.git#6c3c04ecaab209044544fbf3fda14cd2d975eddd"
   dependencies:
     "@types/lodash" "^4.14.157"
     lodash "^4.17.19"
+    underk-types "https://github.com/devesh2997/underk-types#new"
 
 unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"

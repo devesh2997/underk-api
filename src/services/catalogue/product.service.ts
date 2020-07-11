@@ -1,20 +1,23 @@
+import { Warehouse } from 'entity/inventory/Warehouse';
+import { WarehouseService } from './../inventory/warehouse.service';
+import { CollectionService } from './collection.service';
+import { CategoryService } from './category.service';
 import { TypeService } from './type.service';
-import { OptionAttribute } from './../../entity/catalogue/OptionAttribute';
 import { Collection } from './../../entity/catalogue/collection';
-import { ProductJSON, Product } from "../../entity/catalogue/Product";
-import { TE, TO, VE, TOG } from "../../utils";
-import { Subtype } from "../../entity/catalogue/Subtype";
+import { TOG, VE, CAE } from "../../utils";
 import { isEmpty, isNotEmpty } from "class-validator";
 import { Price, PriceJSON } from "../../entity/catalogue/Price";
-import { Type } from "../../entity/catalogue/Type";
-import { Category } from "../../entity/catalogue/category";
 import { SKUAttributeValue } from "../../entity/catalogue/SKUAttributeValue";
 import { AttributeValue } from "../../entity/catalogue/AttributeValue";
 import { OptionAttributeValue } from "../../entity/catalogue/OptionAttributeValue";
 import { DimensionsJSON, Dimensions } from "../../entity/catalogue/Dimensions";
-import { Warehouse } from 'entity/inventory/Warehouse';
-import { Attribute } from 'entity/catalogue/Attribute';
-import { SKUAttribute } from 'entity/catalogue/SKUAttribute';
+import ApiError from '../../core/errors';
+import { SKU } from '../../entity/inventory/SKU';
+import { ProductInventory } from '../../entity/inventory/ProductInventory';
+import { Product } from '../../entity/catalogue/Product';
+import { validateProductCreateInfo } from 'underk-utils';
+import { Type } from '../../entity/catalogue/Type';
+import { Category } from '../../entity/catalogue/category';
 
 export type ProductCreateInfo = {
     title: string
@@ -51,114 +54,219 @@ export type ProductCreateInfo = {
 }
 
 export class ProductService {
-    static get = async (productInfo: any): Promise<Product> | never => {
-        let err: any, product: Product
-
-        if (isEmpty(productInfo.pid)) {
-            TE("Product id not provided")
+    static get = async (productInfo: any): Promise<Product | ApiError> => {
+        if (isEmpty(productInfo.pid) && isEmpty(productInfo.slug)) {
+            return CAE("Product id or slug not provided")
+        }
+        let res
+        if (isNotEmpty(productInfo.pid)) {
+            res = await TOG(Product.findOne({ pid: productInfo.pid }, { relations: ['type', 'subtype', 'category', 'collections', 'variants', 'attributes'] }))
+        } else {
+            res = await TOG(Product.findOne({ slug: productInfo.slug }, { relations: ['type', 'subtype', 'category', 'collections', 'variants', 'attributes'] }))
         }
 
-        [err, product] = await TO(Product.findOne({ pid: productInfo.pid }, { relations: ['type', 'subtype', 'category', 'collections', 'variants', 'attributes'] }))
 
-        if (err) {
-            TE(err)
+
+        if (res instanceof ApiError) {
+            return res
         }
 
-        if (typeof product === 'undefined') {
-            TE("Product not found")
+        if (typeof res === 'undefined') {
+            return CAE("Product not found")
         }
 
-        return product
+        return res
     }
 
-    static delete = async (productInfo: any): Promise<Product> | never => {
-        let err: any, product: Product
-
+    static delete = async (productInfo: any): Promise<Product | ApiError> => {
         if (isEmpty(productInfo.pid)) {
-            TE("Product pid not provided")
+            return CAE("Product pid not provided")
         }
 
-        [err, product] = await TO(Product.findOne({ pid: productInfo.pid }))
+        let res = await TOG(Product.findOne({ pid: productInfo.pid }))
 
-        if (err) {
-            TE(err)
+        if (res instanceof ApiError) {
+            return res
         }
 
-        if (typeof product === 'undefined') {
-            TE("Product not found")
+        if (typeof res === 'undefined') {
+            return CAE("Product not found")
         }
 
-        [err] = await TO(Product.remove(product))
+        res = await TOG(res.remove())
 
-        if (err) {
-            TE(err)
+        if (res instanceof ApiError) {
+            return res
         }
 
-        return product
+        return res
     }
 
-    static create = async (productInfo: ProductCreateInfo): Promise<Product> | never => {
-        let err: any, product: Product
+    static create = async (productInfo: ProductCreateInfo): Promise<Product | ApiError> => {
 
-        let types: Type[] | undefined, categories: Category[] | undefined, collections: Collection[] | undefined, warehouses: Warehouse[] | undefined;
+        const types = await TOG(TypeService.getAll())
+        if (types instanceof ApiError) return types
 
-        [err, types] = await TOG<Type[]>(TypeService.getAll())
-        if (err) TE(err);
+        const categories = await TOG(CategoryService.getAll())
+        if (categories instanceof ApiError) return categories;
 
-        [err, categories] = await TO(Category.find())
-        if (err) TE(err);
+        const collections = await TOG(CollectionService.getAll())
+        if (collections instanceof ApiError) return collections;
 
-        [err, collections] = await TO(Collection.find())
-        if (err) TE(err);
+        const warehouses = await TOG(WarehouseService.getAll())
+        if (warehouses instanceof ApiError) return warehouses;
 
-        [err, warehouses] = await TO(Warehouse.find())
-        if (err) TE(err);
+        return validateAndCreateProduct(productInfo, types, categories, collections, warehouses);
 
-        let productValidationResult = validateProductCreateInfo(productInfo, types, categories, collections, warehouses)
+    }
 
-        if (!productValidationResult.isValid) {
-            if (typeof productValidationResult.error === undefined) {
-                productValidationResult.error = "Some error occurred"
+    static bulkCreate = async (productsInfo: ProductCreateInfo[]): Promise<{ products: Product[], errors: ApiError[] } | ApiError[]> => {
+        const types = await TOG(TypeService.getAll())
+        if (types instanceof ApiError) return [types]
+
+        const categories = await TOG(CategoryService.getAll())
+        if (categories instanceof ApiError) return [categories];
+
+        const collections = await TOG(CollectionService.getAll())
+        if (collections instanceof ApiError) return [collections];
+
+        const warehouses = await TOG(WarehouseService.getAll())
+        if (warehouses instanceof ApiError) return [warehouses];
+
+        let products: Product[] = []
+        let errors: ApiError[] = []
+
+        for (let i = 0; i < productsInfo.length; i++) {
+            let result = await TOG(validateAndCreateProduct(productsInfo[i], types, categories, collections, warehouses))
+
+            if (result instanceof ApiError) errors.push(result)
+            else products.push(result)
+        }
+
+        return { products, errors }
+    }
+
+}
+
+const validateAndCreateProduct = async (productInfo: ProductCreateInfo, types: Type[], categories: Category[], collections: Collection[], warehouses: Warehouse[]): Promise<Product | ApiError> => {
+
+    const productValidationResult = validateProductCreateInfo(productInfo, types, categories, collections, warehouses)
+
+    if (!productValidationResult.isValid) {
+        if (typeof productValidationResult.error === undefined) {
+            productValidationResult.error = "Some error occurred"
+        }
+        return CAE(productValidationResult.error as string)
+    }
+
+    //check for uniqueness of slug
+    const productWithSameSlug = await TOG(Product.findOne({ slug: productInfo.slug }))
+    if (productWithSameSlug instanceof ApiError) return productWithSameSlug
+    if (typeof productWithSameSlug !== 'undefined') {
+        return CAE("Product with same slug already exits")
+    }
+
+    const validatedProduct = productValidationResult.product;
+
+    if (typeof validatedProduct === 'undefined') return CAE("Product obj not returned after validation.")
+
+    const productType = types.find((type) => type.id === validatedProduct.type.id)
+    if (typeof productType === 'undefined') return CAE("Some error occurred while resolving type")
+
+    const productSubtype = productType.subtypes.find((subtype) => subtype.id === validatedProduct.subtype.id)
+    if (typeof productSubtype === 'undefined') return CAE("Some error occurred while resolving subtype")
+
+    const productCategory = categories.find((cat) => cat.id === validatedProduct.category.id)
+    if (typeof productCategory === 'undefined') return CAE("Some error occurred while resolving category")
+
+    const productCollections: Collection[] = []
+    validatedProduct.collections.forEach(col => productCollections.push(collections.find(c => c.id === col.id)!))
+
+
+    const skus: SKU[] = []
+    for (let i = 0; i < validatedProduct.skus.length; i++) {
+        const vps = validatedProduct.skus[i]
+        const sku = new SKU(vps.sku)
+        sku.price = new Price(vps.price.currency, vps.price.listPrice, vps.price.salePrice, vps.price.taxPercent, vps.price.isInclusiveTax)
+        sku.dimensions = new Dimensions(vps.dimensions.length, vps.dimensions.breadth, vps.dimensions.height, vps.dimensions.weight)
+        const inventory: ProductInventory[] = [];
+        for (let j = 0; j < vps.inventory.length; j++) {
+            const vpsi = vps.inventory[j]
+            const warehouse = warehouses.find(war => war.id === vpsi.warehouse.id)!
+            inventory.push(new ProductInventory(warehouse, vpsi.stock, vpsi.reserved))
+        }
+        sku.inventory = inventory
+        skus.push(sku)
+    }
+
+    const productAttributes: AttributeValue[] = []
+    if (validatedProduct.attributes.length > 0) {
+        if (typeof productInfo.productAttributeValues !== 'undefined') {
+            for (let i = 0; i < productInfo.productAttributeValues.length!; i++) {
+                const pai = productInfo.productAttributeValues[i]
+                const productAttribute = productSubtype.attributes.find(attr => attr.name === pai.attributeName)!
+                if (productAttribute.isMultiValued) {
+                    const pAttributeValueNames = pai.attributeValueNames
+                    if (typeof pAttributeValueNames !== 'undefined') {
+                        for (let j = 0; j < pAttributeValueNames.length; j++) {
+                            const productAttributeValue = productAttribute.values.find(attrv => attrv.name === pAttributeValueNames[j])!
+                            productAttributes.push(productAttributeValue)
+                        }
+                    }
+
+                } else {
+                    const pAttributeValueName = pai.attributeValueName
+                    const productAttributeValue = productAttribute.values.find(attrv => attrv.name === pAttributeValueName)!
+                    productAttributes.push(productAttributeValue)
+                }
             }
-            TE(productValidationResult.error as string)
-        }
 
-        //check for uniqueness of slug
-        let productWithSameSlug: Product
-        [err, productWithSameSlug] = await TO(Product.findOne({ slug: productInfo.slug }))
-        if (err) TE(err)
-        if (typeof productWithSameSlug !== 'undefined') {
-            TE("Product with same slug already exits")
         }
     }
-}
 
+    const productSkuattributes: SKUAttributeValue[] = []
+    for (let i = 0; i < productInfo.productSKUAttributeValues.length; i++) {
+        if (typeof productInfo.productSKUAttributeValues !== 'undefined') {
+            for (let i = 0; i < productInfo.productSKUAttributeValues.length!; i++) {
+                const pai = productInfo.productSKUAttributeValues[i]
+                const productSkuAttribute = productSubtype.skuAttributes.find(attr => attr.name === pai.skuAttributeName)!
+                const pSkuAttributeValueName = pai.skuAttributeValueName
+                const productSkuAttributeValue = productSkuAttribute.values.find(attrv => attrv.name === pSkuAttributeValueName)!
+                productSkuattributes.push(productSkuAttributeValue)
 
-const findSKUOrderforSKUAttributeValue = (skuAttributes: SKUAttribute[], skuAttributeValue: SKUAttributeValue): number => {
-    const skuAttribute = skuAttributes.find(sa => typeof sa.values.find(val => val == skuAttributeValue) !== 'undefined')
-    if (typeof skuAttribute === 'undefined') {
-        TE(`No skuAttribute found which has value ${skuAttributeValue.name}`)
-    } return skuAttribute?.skuOrdering as number
-}
-const createProductBaseSKU = (type: Type, subtype: Subtype, skuAttributeValues: SKUAttributeValue[]): string => {
-    if (typeof type === 'undefined' || typeof subtype === 'undefined' || typeof skuAttributeValues === 'undefined') {
-        TE("type, subtype or skuAttributeValues not provided")
+            }
+        }
     }
-    if (typeof subtype.skuAttributes === 'undefined') {
-        TE("subtype must contain skuAttributes")
+
+    const productOptionAttributes: OptionAttributeValue[] = []
+    if (typeof productSubtype.optionAttribute !== 'undefined') {
+        if (typeof productInfo.productOptionAttributeValues !== 'undefined') {
+            for (let i = 0; i < productInfo.productOptionAttributeValues.length; i++) {
+                if (typeof productInfo.productOptionAttributeValues !== 'undefined') {
+                    for (let i = 0; i < productInfo.productOptionAttributeValues.length!; i++) {
+                        const pai = productInfo.productOptionAttributeValues[i]
+                        const productOptionAttributeValue = productSubtype.optionAttribute.values.find(attrv => attrv.name === pai.optionAttributeValueName)!
+                        productOptionAttributes.push(productOptionAttributeValue)
+                    }
+                }
+            }
+        }
+
     }
-    let baseSKU = ""
-    baseSKU += type.sku
-    baseSKU += `-${subtype.sku}`
-    skuAttributeValues.sort((a, b) => findSKUOrderforSKUAttributeValue(subtype.skuAttributes, a) - findSKUOrderforSKUAttributeValue(subtype.skuAttributes, b))
-    for (let i = 0; i < skuAttributeValues.length; i++) {
-        baseSKU += `-${skuAttributeValues[i].sku}`
-    }
-    return baseSKU
+    const product = new Product(validatedProduct.title, validatedProduct.slug, validatedProduct.status, productType, productSubtype, productCategory,)
+    product.collections = productCollections
+    product.attributes = productAttributes
+    product.skuAttributes = productSkuattributes
+    product.optionAttributes = productOptionAttributes
+
+    let validationResult = await VE(product)
+    if (validationResult instanceof ApiError) return validationResult
+
+    let productSaveResult = await TOG(product.save())
+    if (productSaveResult instanceof ApiError) return productSaveResult
+
+    return productSaveResult
 }
-
-
-
 
 
 

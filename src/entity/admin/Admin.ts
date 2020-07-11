@@ -19,6 +19,7 @@ import jwt from "jsonwebtoken";
 import CONFIG from "../../config/config";
 import { Policy, PolicyJSON } from "./Policy";
 import { Role, RoleJSON } from "./Role";
+import ApiError from "../../core/errors";
 
 export interface AdminJSON {
     id: number;

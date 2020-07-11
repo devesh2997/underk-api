@@ -114,7 +114,7 @@ export const TOG = async <T>(promise: Promise<T>): Promise<T | ApiError> => {
 // }
 
 export const ReE = (res: Response, err: ApiError, code: number) => {
-  console.log("Responding with error" + err);
+  console.log("Responding with error " + err);
   // Error Web Response
   if (typeof code !== "undefined") res.statusCode = code;
 

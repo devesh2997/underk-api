@@ -3,28 +3,36 @@ import { Product } from "../catalogue/Product";
 import { ProductInventory } from "./ProductInventory";
 import { Dimensions } from "../catalogue/Dimensions";
 import { Price } from "../catalogue/Price";
+import { IsNotEmpty } from "class-validator";
 
 @Entity()
-export class SKU extends BaseEntity{
+export class SKU extends BaseEntity {
+    constructor(sku: string) {
+        super()
+        this.sku = sku
+    }
     @Column()
     @Generated('increment')
     id: number
 
     @PrimaryColumn()
+    @IsNotEmpty()
     sku: string
-    
+
     @OneToOne(() => Price, price => price.sku)
+    @IsNotEmpty()
     @JoinColumn()
     price: Price
 
     @OneToOne(() => Dimensions)
+    @IsNotEmpty()
     @JoinColumn()
     dimensions: Dimensions
 
-    @ManyToOne(()=>Product, product=>product.skus)
+    @ManyToOne(() => Product, product => product.skus)
     product: Product
 
-    @OneToMany(()=>ProductInventory, inventory=>inventory.sku)
+    @OneToMany(() => ProductInventory, inventory => inventory.sku)
     inventory: ProductInventory[]
 
     @CreateDateColumn()
@@ -32,5 +40,5 @@ export class SKU extends BaseEntity{
 
     @UpdateDateColumn()
     updated_at: Date
-    
+
 }

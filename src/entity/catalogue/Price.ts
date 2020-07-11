@@ -15,6 +15,14 @@ export interface PriceJSON {
 
 @Entity()
 export class Price extends BaseEntity {
+    constructor(currency: string, listPrice: number, salePrice: number, taxPercent: number, isInclusiveTax: boolean) {
+        super()
+        this.currency = currency
+        this.listPrice = listPrice
+        this.salePrice = salePrice
+        this.taxPercent = taxPercent
+        this.isInclusiveTax = isInclusiveTax
+    }
     @PrimaryGeneratedColumn('increment')
     id: number
 

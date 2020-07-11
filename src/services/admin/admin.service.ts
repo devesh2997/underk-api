@@ -384,7 +384,7 @@ export default class AdminService {
             return CAE("Admin not found");
         }
 
-        adm = await TOG<Admin>(adm.comparePassword(loginInfo.password));
+        adm = await TOG(adm.comparePassword(loginInfo.password));
         if (adm instanceof ApiError) {
             return adm;
         }
