@@ -1,8 +1,8 @@
 import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, BeforeInsert, CreateDateColumn, UpdateDateColumn, OneToOne } from "typeorm";
 import { IsNotEmpty } from "class-validator";
 import { isValidCurrency } from "../../utils/custom-decorators/IsValidCurrency";
-import { TE } from "../../utils";
 import { SKU } from "../../entity/inventory/SKU";
+import { CAE } from "../../utils";
 
 export interface PriceJSON {
     id: number
@@ -50,7 +50,7 @@ export class Price extends BaseEntity {
 
     @BeforeInsert()
     beforeInsert = () => {
-        if (!isValidCurrency(this.currency)) TE("Invalid currency")
+        if (!isValidCurrency(this.currency)) CAE("Invalid currency")
     }
 
     @CreateDateColumn()

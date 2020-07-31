@@ -62,5 +62,7 @@ export class SmsService {
         if (res instanceof ApiError) {
             return res;
         }
+
+        return null;
     };
 }

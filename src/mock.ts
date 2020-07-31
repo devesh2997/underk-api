@@ -1,5 +1,4 @@
 import { TOG } from "./utils"
-import { isNotEmpty } from "class-validator";
 import AdminService from "./services/admin/admin.service";
 import * as POLICIES from "underk-policies";
 import { PolicyService } from "./services/admin/policy.service";
@@ -20,32 +19,28 @@ const policies = [
 ]
 
 export const insertMockData = async (): Promise<void> => {
-    let err: any
 
     for (let i = 0; i < policies.length; i++) {
         let policy = await TOG(PolicyService.get({ name: policies[i].name }))
         if (policy instanceof ApiError) {
-            console.log(err)
-        } else {
             policy = await TOG(PolicyService.create({ name: policies[i].name, description: policies[i].description }))
         }
-        if (err) console.log(err)
+        console.log('2' + policy)
     }
 
     let superAdmin = await TOG(AdminService.get({ alias: 'superuser' }))
-    if (isNotEmpty(superAdmin)) {
+
+    if (superAdmin instanceof ApiError) {
+        superAdmin = await TOG(AdminService.create({ alias: 'superuser', password: 'superuser', roleIds: '[]', policyNames: '["SUPER"]', euid: undefined }))
+    }
+
+    if (superAdmin instanceof ApiError) {
+        console.log('4' + superAdmin)
+    } else {
         console.log(superAdmin)
-        return
     }
 
-    superAdmin = await TOG(AdminService.delete({ alias: 'superuser' }));
 
-    superAdmin = await TOG(AdminService.create({ alias: 'superuser', password: 'superuser', roleIds: '[]', policyNames: '["SUPER"]', euid: undefined }))
-    if (err) {
-        console.log(err)
-    }
-
-    console.log(superAdmin)
 
 
 }

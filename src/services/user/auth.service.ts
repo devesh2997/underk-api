@@ -104,7 +104,7 @@ export default class UserAuthService {
         if (smsOtp instanceof ApiError) return smsOtp;
 
         const otpMessage = "Your otp from underK is : " + otp;
-        let err = await TOG<void | ApiError>(
+        let err = await TOG<null | ApiError>(
             SmsService.send([mobile], otpMessage)
         );
         if (err instanceof ApiError) return err;

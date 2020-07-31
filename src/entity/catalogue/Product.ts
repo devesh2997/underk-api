@@ -1,5 +1,5 @@
 import { Chart } from './Chart';
-import { BaseEntity, Entity, Column, Generated, ManyToOne, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable, } from "typeorm";
+import { BaseEntity, Entity, Column, Generated, ManyToOne, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable, OneToOne, } from "typeorm";
 import { Type, TypeJSON } from "./Type";
 import { Subtype, SubtypeJSON } from "./Subtype";
 import { AttributeValue, AttributeValueJSON } from "./AttributeValue";
@@ -65,7 +65,7 @@ export class Product extends BaseEntity {
     @IsNotEmpty()
     returnPeriod: number
 
-    @Column({ nullable: true })
+    @OneToOne(() => Chart, { nullable: true })
     chart: Chart
 
     @Column({ nullable: true })
