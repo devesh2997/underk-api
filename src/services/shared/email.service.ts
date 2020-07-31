@@ -1,6 +1,7 @@
 import { TOG, doRequest, CAE } from "../../utils";
 import { isEmpty, isNotEmpty } from "class-validator";
 import { Email } from "../../entity/shared/Email";
+import ApiError from "../../core/errors";
 
 type EmailParameters = {
     from: string;
@@ -75,5 +76,7 @@ export class EmailService {
 
         res = await TOG<Email>(email.save());
         if (res instanceof ApiError) return res;
+
+        return null;
     };
 }

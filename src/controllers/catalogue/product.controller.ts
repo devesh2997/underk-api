@@ -34,14 +34,16 @@ export class ProductController {
         return ReS(res, { message: 'Product created', result: result.toJSON() }, 201)
     }
 
-    static builCreate = async (req: Request, res: Response): Promise<Response> => {
+    static bulkCreate = async (req: Request, res: Response): Promise<Response> => {
         const body = req.body
 
         let result = await TOG(ProductService.bulkCreate(body))
 
         if (result instanceof ApiError) return ReE(res, result, 422)
 
-        return ReS(res, { message: 'Products created', result: result }, 201)
+        let errorsJson = result.errors.map(err => err.toResponseJSON())
+
+        return ReS(res, { message: 'Products created', result: { products: result.products, errors: errorsJson } }, 201)
     }
 
 

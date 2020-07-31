@@ -1,8 +1,7 @@
 import { BaseEntity, PrimaryGeneratedColumn, Column, Entity, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm";
-import { IsInt } from "class-validator";
+import { IsInt, IsNotEmpty } from "class-validator";
 import { IsValidAssetType } from "../../utils/custom-decorators/IsValidAssetType";
 import { IsValidContentType } from "../../utils/custom-decorators/IsValidContentType";
-import { IsValidContentFormat } from "../../utils/custom-decorators/IsValidContentFormat";
 import { Product } from "./Product";
 
 @Entity()
@@ -18,6 +17,7 @@ export class ProductAsset extends BaseEntity {
     name: number
 
     @Column()
+    @IsNotEmpty()
     downloadUrl: string
 
     @Column({ nullable: true })
@@ -27,18 +27,17 @@ export class ProductAsset extends BaseEntity {
     shortUrl: string
 
     @Column()
+    @IsNotEmpty()
     @IsValidAssetType()
     assetType: string
 
     @Column()
     @IsValidContentType()
+    @IsNotEmpty()
     contentType: string
 
-    @Column()
-    @IsValidContentFormat()
-    contentFormat: string
-
-    @ManyToOne(()=>Product,product=>product.assets)
+    @ManyToOne(() => Product, product => product.assets)
+    @IsNotEmpty()
     product: Product
 
     @CreateDateColumn()

@@ -129,7 +129,7 @@ export class SubtypeService {
             attribute.values = []
             for (let j = 0; j < attr.values.length; j++) {
                 const attrValue = attr.values[j]
-                const attributeValue = new OptionAttributeValue(attrValue.sku, attrValue.name, attrValue.valueType, attrValue.value)
+                const attributeValue = new OptionAttributeValue(attrValue.sku, attrValue.name, attrValue.order, attrValue.valueType, attrValue.value)
                 await VE(attributeValue)
                 attribute.values.push(attributeValue)
             }

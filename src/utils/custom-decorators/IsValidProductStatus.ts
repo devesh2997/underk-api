@@ -1,7 +1,7 @@
 import { registerDecorator, ValidationOptions } from "class-validator";
 import * as TYPES from "underk-types";
 
-const validTypes = [TYPES.PRODUCT_STATUS_ACTIVE, TYPES.PRODUCT_STATUS_UNAVAILABLE, TYPES.PRODUCT_STATUS_UNAVAILABLE]
+const validTypes = [TYPES.PRODUCT_STATUS_ACTIVE, TYPES.PRODUCT_STATUS_UNAVAILABLE, TYPES.PRODUCT_STATUS_UNAVAILABLE, TYPES.PRODUCT_STATUS_STAGED]
 
 export function IsValidProductStatus(validationOptions?: ValidationOptions) {
     return function (object: Object, propertyName: string) {

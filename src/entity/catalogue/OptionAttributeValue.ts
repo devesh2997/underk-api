@@ -1,11 +1,13 @@
 import { BaseEntity, Column, ManyToOne, Entity, Unique, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { OptionAttribute } from "./OptionAttribute";
 import { IsValidAttributeValueType } from "../../utils/custom-decorators/IsValidAttributeValueType";
+import { IsNotEmpty } from "class-validator";
 
 export interface OptionAttributeValueJSON {
     id: number,
     sku: string,
     name: string,
+    order: number,
     valueType: string,
     value: string
 }
@@ -15,10 +17,11 @@ export interface OptionAttributeValueJSON {
 @Unique(["optionAttribute", "name"])
 export class OptionAttributeValue extends BaseEntity {
 
-    constructor(sku: string, name: string, valueType: string, value: string) {
+    constructor(sku: string, name: string, order: number, valueType: string, value: string) {
         super()
         this.sku = sku
         this.name = name
+        this.order = order
         this.valueType = valueType
         this.value = value
     }
@@ -26,11 +29,20 @@ export class OptionAttributeValue extends BaseEntity {
     @PrimaryGeneratedColumn('increment')
     id: number
 
-    @Column({ nullable: true })
+    @Column()
+    @IsNotEmpty()
     sku: string
 
     @Column()
+    @IsNotEmpty()
     name: string
+
+    @Column()
+    @IsNotEmpty()
+    order: number
+
+    @Column({ nullable: true })
+    helpText: string
 
     @ManyToOne(() => OptionAttribute, optionAttribute => optionAttribute.values)
     optionAttribute: OptionAttribute
@@ -53,6 +65,7 @@ export class OptionAttributeValue extends BaseEntity {
             id: this.id,
             sku: this.sku,
             name: this.name,
+            order: this.order,
             valueType: this.valueType,
             value: this.value,
         }

@@ -120,28 +120,33 @@ export class ProductService {
 
     }
 
-    static bulkCreate = async (productsInfo: ProductCreateInfo[]): Promise<{ products: Product[], errors: ApiError[] } | ApiError[]> => {
+    static bulkCreate = async (productsInfo: ProductCreateInfo[]): Promise<{ products: Product[], errors: ApiError[] } | ApiError> => {
         const types = await TOG(TypeService.getAll())
-        if (types instanceof ApiError) return [types]
+        if (types instanceof ApiError) return types
 
         const categories = await TOG(CategoryService.getAll())
-        if (categories instanceof ApiError) return [categories];
+        if (categories instanceof ApiError) return categories;
 
         const collections = await TOG(CollectionService.getAll())
-        if (collections instanceof ApiError) return [collections];
+        if (collections instanceof ApiError) return collections;
 
         const warehouses = await TOG(WarehouseService.getAll())
-        if (warehouses instanceof ApiError) return [warehouses];
+        if (warehouses instanceof ApiError) return warehouses;
 
         let products: Product[] = []
         let errors: ApiError[] = []
 
+        // console.log(productsInfo)
         for (let i = 0; i < productsInfo.length; i++) {
             let result = await TOG(validateAndCreateProduct(productsInfo[i], types, categories, collections, warehouses))
 
-            if (result instanceof ApiError) errors.push(result)
+            if (result instanceof ApiError) {
+                errors.push(result)
+            }
             else products.push(result)
         }
+
+        // console.log(errors)
 
         return { products, errors }
     }
@@ -159,11 +164,12 @@ const validateAndCreateProduct = async (productInfo: ProductCreateInfo, types: T
         return CAE(productValidationResult.error as string)
     }
 
+
     //check for uniqueness of slug
     const productWithSameSlug = await TOG(Product.findOne({ slug: productInfo.slug }))
     if (productWithSameSlug instanceof ApiError) return productWithSameSlug
     if (typeof productWithSameSlug !== 'undefined') {
-        return CAE("Product with same slug already exits")
+        return CAE(`Product with slug ${productInfo.slug} already exits`)
     }
 
     const validatedProduct = productValidationResult.product;
@@ -226,34 +232,27 @@ const validateAndCreateProduct = async (productInfo: ProductCreateInfo, types: T
 
     const productSkuattributes: SKUAttributeValue[] = []
     for (let i = 0; i < productInfo.productSKUAttributeValues.length; i++) {
-        if (typeof productInfo.productSKUAttributeValues !== 'undefined') {
-            for (let i = 0; i < productInfo.productSKUAttributeValues.length!; i++) {
-                const pai = productInfo.productSKUAttributeValues[i]
-                const productSkuAttribute = productSubtype.skuAttributes.find(attr => attr.name === pai.skuAttributeName)!
-                const pSkuAttributeValueName = pai.skuAttributeValueName
-                const productSkuAttributeValue = productSkuAttribute.values.find(attrv => attrv.name === pSkuAttributeValueName)!
-                productSkuattributes.push(productSkuAttributeValue)
-
-            }
-        }
+        const pai = productInfo.productSKUAttributeValues[i]
+        const productSkuAttribute = productSubtype.skuAttributes.find(attr => attr.name === pai.skuAttributeName)!
+        const pSkuAttributeValueName = pai.skuAttributeValueName
+        const productSkuAttributeValue = productSkuAttribute.values.find(attrv => attrv.name === pSkuAttributeValueName)!
+        productSkuattributes.push(productSkuAttributeValue)
     }
 
     const productOptionAttributes: OptionAttributeValue[] = []
     if (typeof productSubtype.optionAttribute !== 'undefined') {
         if (typeof productInfo.productOptionAttributeValues !== 'undefined') {
-            for (let i = 0; i < productInfo.productOptionAttributeValues.length; i++) {
-                if (typeof productInfo.productOptionAttributeValues !== 'undefined') {
-                    for (let i = 0; i < productInfo.productOptionAttributeValues.length!; i++) {
-                        const pai = productInfo.productOptionAttributeValues[i]
-                        const productOptionAttributeValue = productSubtype.optionAttribute.values.find(attrv => attrv.name === pai.optionAttributeValueName)!
-                        productOptionAttributes.push(productOptionAttributeValue)
-                    }
-                }
+            for (let i = 0; i < productInfo.productOptionAttributeValues.length!; i++) {
+                const pai = productInfo.productOptionAttributeValues[i]
+                const productOptionAttributeValue = productSubtype.optionAttribute.values.find(attrv => attrv.name === pai.optionAttributeValueName)!
+                productOptionAttributes.push(productOptionAttributeValue)
             }
         }
 
     }
     const product = new Product(validatedProduct.title, validatedProduct.slug, validatedProduct.status, productType, productSubtype, productCategory,)
+    product.baseSKU = validatedProduct.baseSKU
+    product.status = validatedProduct.status
     product.collections = productCollections
     product.attributes = productAttributes
     product.skuAttributes = productSkuattributes
@@ -261,6 +260,8 @@ const validateAndCreateProduct = async (productInfo: ProductCreateInfo, types: T
 
     let validationResult = await VE(product)
     if (validationResult instanceof ApiError) return validationResult
+
+    console.log(product.skuAttributes)
 
     let productSaveResult = await TOG(product.save())
     if (productSaveResult instanceof ApiError) return productSaveResult

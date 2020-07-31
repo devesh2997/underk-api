@@ -1,3 +1,4 @@
+import { ProductController } from './../../../controllers/catalogue/product.controller';
 import { Router } from "express";
 import POLICIES from "underk-policies";
 import { EmployeeController } from "../../../controllers/employee/employee.controller";
@@ -45,6 +46,8 @@ router.get('/emp/all', EmployeeController.getAll)
 router.post('/emp', EmployeeController.create)
 router.put('/emp', EmployeeController.update)
 router.delete('/emp', EmployeeController.delete)
+
+router.post('/products/bulk', ProductController.bulkCreate)
 
 router.get('/category', CategoryController.get)
 router.get('/categories', CategoryController.getAll)

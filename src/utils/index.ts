@@ -69,7 +69,7 @@ export const CAE = (
   statusCode?: number | undefined
 ): ApiError => {
   let apiError: ApiError;
-  if (typeof err === "undefined") {
+  if (typeof err === "string") {
     apiError = new ApiError(
       err,
       undefined,

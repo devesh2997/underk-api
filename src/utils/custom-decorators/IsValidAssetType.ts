@@ -12,7 +12,7 @@ export function IsValidAssetType(validationOptions?: ValidationOptions) {
                 validate(value: string) {
                     value = value.toLowerCase()
                     return typeof value === "string" &&
-                        (value === 'preview' || value === 'thumbnail' || value === 'placeholder' || value === 'original')
+                        (value === 'preview' || value === 'thumbnail' || value === 'original')
                 }
             }
         });

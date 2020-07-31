@@ -152,7 +152,7 @@ export default class UserAuthService {
         emailOtp = await TOG<EmailOtp>(emailOtp.save());
         if (emailOtp instanceof ApiError) return emailOtp;
 
-        let err = await TOG<void | ApiError>(
+        let err = await TOG<null | ApiError>(
             EmailService.send({
                 from: "no-reply@underk.in",
                 to: email!,

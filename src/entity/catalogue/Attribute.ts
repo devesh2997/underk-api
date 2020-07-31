@@ -39,6 +39,10 @@ export class Attribute extends BaseEntity {
 
     @Column("bool", { default: false })
     @IsNotEmpty()
+    visibility: boolean
+
+    @Column("bool", { default: false })
+    @IsNotEmpty()
     isMultiValued: boolean
 
     @Column("bool", { default: false })

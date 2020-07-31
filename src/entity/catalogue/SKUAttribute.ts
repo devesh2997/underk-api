@@ -43,9 +43,15 @@ export class SKUAttribute extends BaseEntity {
     skuOrdering: number
 
     @Column("bool", { default: false })
+    @IsNotEmpty()
+    visibility: boolean
+
+    @Column("bool", { default: false })
+    @IsNotEmpty()
     variantsBasis: boolean
 
     @Column("bool", { default: false })
+    @IsNotEmpty()
     isFilterable: boolean
 
     @CreateDateColumn()

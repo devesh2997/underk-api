@@ -12,7 +12,7 @@ export function IsValidContentType(validationOptions?: ValidationOptions) {
                 validate(value: string) {
                     value = value.toLowerCase()
                     return typeof value === "string" &&
-                        (value === 'image' || value === 'video' || value === 'gif')
+                        (value === 'image/jpg' || value === 'image/jpeg' || value === 'image/png' || value === 'image/gif' || value === 'image/webp')
                 }
             }
         });

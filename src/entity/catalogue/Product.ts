@@ -1,3 +1,4 @@
+import { Chart } from './Chart';
 import { BaseEntity, Entity, Column, Generated, ManyToOne, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable, } from "typeorm";
 import { Type, TypeJSON } from "./Type";
 import { Subtype, SubtypeJSON } from "./Subtype";
@@ -56,8 +57,19 @@ export class Product extends BaseEntity {
 
     @Column()
     @IsNotEmpty()
-    @IsValidProductStatus({ message: "Product Status cannot be empty" })
+    @IsValidProductStatus({ message: "Invalid product status" })
     status: string
+
+    //return period of the product after delivery in minutes.
+    @Column()
+    @IsNotEmpty()
+    returnPeriod: number
+
+    @Column({ nullable: true })
+    chart: Chart
+
+    @Column({ nullable: true })
+    helpText: string
 
     @Column()
     @IsNotEmpty({ message: "Base SKU cannot be empty" })
