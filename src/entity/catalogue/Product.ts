@@ -11,6 +11,7 @@ import { IsValidProductStatus } from "../../utils/custom-decorators/IsValidProdu
 import { SKU } from "../../entity/inventory/SKU";
 import { OptionAttributeValue, OptionAttributeValueJSON } from "./OptionAttributeValue";
 import { SKUAttributeValue, SKUAttributeValueJSON } from "./SKUAttributeValue";
+import Description from './Description';
 
 export interface ProductJSON {
     id: number,
@@ -112,6 +113,10 @@ export class Product extends BaseEntity {
     @ManyToMany(() => Product)
     @JoinTable()
     variants: Product[]
+
+    @ManyToMany(() => Description)
+    @JoinTable()
+    descriptions: Description[]
 
     toJSON = (): ProductJSON => {
         let collections: CollectionJSON[] = []

@@ -4,6 +4,7 @@ import { ProductInventory } from "./ProductInventory";
 import { Dimensions } from "../catalogue/Dimensions";
 import { Price } from "../catalogue/Price";
 import { IsNotEmpty } from "class-validator";
+import { OrderItem } from "../order/OrderItem";
 
 @Entity()
 export class SKU extends BaseEntity {
@@ -30,7 +31,11 @@ export class SKU extends BaseEntity {
     dimensions: Dimensions
 
     @ManyToOne(() => Product, product => product.skus)
+    @IsNotEmpty()
     product: Product
+
+    @OneToMany(() => OrderItem, orderItem => orderItem.sku)
+    orderItems: OrderItem[]
 
     @OneToMany(() => ProductInventory, inventory => inventory.sku)
     inventory: ProductInventory[]

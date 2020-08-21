@@ -261,8 +261,6 @@ const validateAndCreateProduct = async (productInfo: ProductCreateInfo, types: T
     let validationResult = await VE(product)
     if (validationResult instanceof ApiError) return validationResult
 
-    console.log(product.skuAttributes)
-
     let productSaveResult = await TOG(product.save())
     if (productSaveResult instanceof ApiError) return productSaveResult
 

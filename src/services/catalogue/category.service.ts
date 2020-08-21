@@ -110,9 +110,7 @@ export class CategoryService {
             if (parent instanceof ApiError || typeof parent === 'undefined') {
                 return CAE(`Parent with given slug ${categoryInfo.parentSlug} not found`)
             }
-            console.log(parent)
             category.parent = parent
-            console.log(category)
         }
 
         let res = await TOG<Category>(Category.save(category))

@@ -9,6 +9,8 @@ import { SKUAttributeValue } from "../../entity/catalogue/SKUAttributeValue";
 import { OptionAttributeValue } from "../../entity/catalogue/OptionAttributeValue";
 import { Subtype } from "../../entity/catalogue/Subtype";
 import ApiError from "../../core/errors";
+import Description from "../../entity/catalogue/Description";
+import DescriptionAsset from "../../entity/catalogue/DescriptionAsset";
 
 export interface CreateSubtypeInfo {
     sku: string
@@ -16,7 +18,8 @@ export interface CreateSubtypeInfo {
     typeSku: string
     attributes: AttributeJSON[]
     skuAttributes: SKUAttributeJSON[],
-    optionAttribute: OptionAttributeJSON
+    optionAttribute: OptionAttributeJSON,
+    descriptions: Description[]
 }
 
 export class SubtypeService {
@@ -88,17 +91,74 @@ export class SubtypeService {
             return CAE("subtype with given sku already exists")
         }
 
+        existingsubtype = await TOG<Subtype | undefined>(Subtype.findOne({ name: subtypeInfo.name }))
+        if (existingsubtype instanceof ApiError) return existingsubtype
+        if (existingsubtype) {
+            return CAE("subtype with given name already exists")
+        }
+
+        if (!isEmpty(subtypeInfo.descriptions)) {
+            subtype.descriptions = []
+            for (let i = 0; i < subtypeInfo.descriptions.length; i++) {
+                const desc = subtypeInfo.descriptions[i]
+                const description = new Description(desc.order, desc.style)
+                let validationResult = await VE(description);
+                if (validationResult instanceof ApiError) return validationResult
+                if (!isEmpty(desc.linkButtonHyperlink)) {
+                    description.linkButtonHyperlink = desc.linkButtonHyperlink
+                }
+                if (!isEmpty(desc.linkButtonText)) {
+                    description.linkButtonText = desc.linkButtonText
+                }
+                if (!isEmpty(desc.primaryButtonHyperLink)) {
+                    description.primaryButtonHyperLink = desc.primaryButtonHyperLink
+                }
+                if (!isEmpty(desc.primaryButtonText)) {
+                    description.primaryButtonText = desc.primaryButtonText
+                }
+                if (!isEmpty(desc.body)) {
+                    description.body = desc.body
+                }
+                if (!isEmpty(desc.assets)) {
+                    for (let j = 0; j < desc.assets.length; j++) {
+                        const dasset = desc.assets[j]
+                        const asset = new DescriptionAsset(dasset.order, dasset.fullScreenImageUrl)
+                        let validationResult = await VE(asset);
+                        if (validationResult instanceof ApiError) return validationResult
+                        if (!isEmpty(dasset.fullScreenImageWebpUrl)) {
+                            asset.fullScreenImageWebpUrl = dasset.fullScreenImageWebpUrl
+                        }
+                        if (!isEmpty(dasset.smallScreenImageUrl)) {
+                            asset.smallScreenImageUrl = dasset.smallScreenImageUrl
+                        }
+                        if (!isEmpty(dasset.smallScreenImageWebpUrl)) {
+                            asset.smallScreenImageWebpUrl = dasset.smallScreenImageWebpUrl
+                        }
+                        if (isEmpty(description.assets)) {
+                            description.assets = []
+                        }
+                        description.assets.push(asset)
+                    }
+                }
+
+                subtype.descriptions.push(description)
+
+            }
+        }
+
         if (!isEmpty(subtypeInfo.attributes)) {
             subtype.attributes = []
             for (let i = 0; i < subtypeInfo.attributes.length; i++) {
                 const attr = subtypeInfo.attributes[i]
-                const attribute = new Attribute(attr.name, attr.isMultiValued, attr.isCompulsory, attr.isFilterable)
-                await VE(attribute)
+                const attribute = new Attribute(attr.name, attr.isMultiValued, attr.isCompulsory, attr.isFilterable, attr.isVisible)
+                let validationResult = await VE(attribute);
+                if (validationResult instanceof ApiError) return validationResult
                 attribute.values = []
                 for (let j = 0; j < attr.values.length; j++) {
                     const attrValue = attr.values[j]
                     const attributeValue = new AttributeValue(attrValue.name, attrValue.valueType, attrValue.value)
-                    await VE(attributeValue)
+                    let validationResult = await VE(attributeValue);
+                    if (validationResult instanceof ApiError) return validationResult
                     attribute.values.push(attributeValue)
                 }
                 subtype.attributes.push(attribute)
@@ -109,13 +169,15 @@ export class SubtypeService {
             subtype.skuAttributes = []
             for (let i = 0; i < subtypeInfo.skuAttributes.length; i++) {
                 const attr = subtypeInfo.skuAttributes[i]
-                const attribute = new SKUAttribute(attr.name, attr.skuOrdering, attr.variantsBasis, attr.isFilterable)
-                await VE(attribute)
+                const attribute = new SKUAttribute(attr.name, attr.skuOrdering, attr.variantsBasis, attr.isFilterable, attr.isVisible)
+                let validationResult = await VE(attribute);
+                if (validationResult instanceof ApiError) return validationResult
                 attribute.values = []
                 for (let j = 0; j < attr.values.length; j++) {
                     const attrValue = attr.values[j]
                     const attributeValue = new SKUAttributeValue(attrValue.sku, attrValue.name, attrValue.valueType, attrValue.value)
-                    await VE(attributeValue)
+                    let validationResult = await VE(attributeValue);
+                    if (validationResult instanceof ApiError) return validationResult
                     attribute.values.push(attributeValue)
                 }
                 subtype.skuAttributes.push(attribute)
@@ -125,12 +187,14 @@ export class SubtypeService {
         if (!isEmpty(subtypeInfo.optionAttribute)) {
             const attr = subtypeInfo.optionAttribute
             const attribute = new OptionAttribute(attr.name)
-            await VE(attribute)
+            let validationResult = await VE(attribute);
+            if (validationResult instanceof ApiError) return validationResult
             attribute.values = []
             for (let j = 0; j < attr.values.length; j++) {
                 const attrValue = attr.values[j]
                 const attributeValue = new OptionAttributeValue(attrValue.sku, attrValue.name, attrValue.order, attrValue.valueType, attrValue.value)
-                await VE(attributeValue)
+                let validationResult = await VE(attributeValue);
+                if (validationResult instanceof ApiError) return validationResult
                 attribute.values.push(attributeValue)
             }
             subtype.optionAttribute = attribute

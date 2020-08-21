@@ -1,10 +1,11 @@
-import { BaseEntity, Column, ManyToOne, OneToMany, Entity, CreateDateColumn, UpdateDateColumn, Unique, PrimaryGeneratedColumn, OneToOne } from "typeorm";
+import { BaseEntity, Column, ManyToOne, OneToMany, Entity, CreateDateColumn, UpdateDateColumn, Unique, PrimaryGeneratedColumn, OneToOne, JoinTable, ManyToMany } from "typeorm";
 import { Type } from "./Type";
 import { Attribute, AttributeJSON } from "./Attribute";
 import { SKUAttribute, SKUAttributeJSON } from "./SKUAttribute";
 import { Product } from "./Product";
 import { isNotEmpty, IsNotEmpty } from "class-validator";
 import { OptionAttribute, OptionAttributeJSON } from "./OptionAttribute";
+import Description from "./Description";
 
 export interface SubtypeJSON {
     id: number,
@@ -51,6 +52,10 @@ export class Subtype extends BaseEntity {
 
     @OneToMany(() => Product, product => product.subtype)
     products: Product[]
+
+    @ManyToMany(() => Description, { cascade: true })
+    @JoinTable()
+    descriptions: Description[]
 
     @CreateDateColumn()
     public created_at: Date;

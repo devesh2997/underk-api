@@ -10,6 +10,7 @@ export interface AttributeJSON {
     isMultiValued: boolean,
     isCompulsory: boolean,
     isFilterable: boolean,
+    isVisible: boolean,
     values: AttributeValueJSON[]
 }
 
@@ -17,12 +18,13 @@ export interface AttributeJSON {
 @Unique(["subtype", "name"])
 export class Attribute extends BaseEntity {
 
-    constructor(name: string, isMultiValued: boolean, isCompulsory: boolean, isFilterable: boolean) {
+    constructor(name: string, isMultiValued: boolean = false, isCompulsory: boolean = false, isFilterable: boolean = false, isVisible: boolean = false) {
         super()
         this.name = name
         this.isMultiValued = isMultiValued
         this.isCompulsory = isCompulsory
         this.isFilterable = isFilterable
+        this.isVisible = isVisible
     }
     @PrimaryGeneratedColumn()
     id: number
@@ -39,7 +41,7 @@ export class Attribute extends BaseEntity {
 
     @Column("bool", { default: false })
     @IsNotEmpty()
-    visibility: boolean
+    isVisible: boolean
 
     @Column("bool", { default: false })
     @IsNotEmpty()
@@ -70,6 +72,7 @@ export class Attribute extends BaseEntity {
             isMultiValued: this.isMultiValued,
             isCompulsory: this.isCompulsory,
             isFilterable: this.isFilterable,
+            isVisible: this.isVisible,
             values: values
         }
     }

@@ -10,6 +10,7 @@ export interface SKUAttributeJSON {
     skuOrdering: number,
     variantsBasis: boolean,
     isFilterable: boolean,
+    isVisible: boolean,
     values: SKUAttributeValueJSON[]
 }
 
@@ -19,12 +20,13 @@ export interface SKUAttributeJSON {
 @Unique(["subtype", "skuOrdering"])
 export class SKUAttribute extends BaseEntity {
 
-    constructor(name: string, skuOrdering: number, variantsBasis: boolean, isFilterable: boolean) {
+    constructor(name: string, skuOrdering: number, variantsBasis: boolean = false, isFilterable: boolean = false, isVisible: boolean = false) {
         super()
         this.name = name
         this.skuOrdering = skuOrdering
         this.variantsBasis = variantsBasis
         this.isFilterable = isFilterable
+        this.isVisible = isVisible
     }
     @PrimaryGeneratedColumn()
     id: number
@@ -44,7 +46,7 @@ export class SKUAttribute extends BaseEntity {
 
     @Column("bool", { default: false })
     @IsNotEmpty()
-    visibility: boolean
+    isVisible: boolean
 
     @Column("bool", { default: false })
     @IsNotEmpty()
@@ -71,6 +73,7 @@ export class SKUAttribute extends BaseEntity {
             skuOrdering: this.skuOrdering,
             variantsBasis: this.variantsBasis,
             isFilterable: this.isFilterable,
+            isVisible: this.isVisible,
             values: values
         }
     }
