@@ -5,7 +5,9 @@ class ApiError extends Error {
             this.name = name
         this.errorCode = errorCode
         this.statusCode = statusCode
-        this.stack = stackTrack
+        if (stackTrack) {
+            this.stack = stackTrack
+        }
     }
     errorCode?: number
     statusCode?: number

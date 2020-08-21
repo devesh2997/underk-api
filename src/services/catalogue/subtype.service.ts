@@ -1,3 +1,4 @@
+import { DescriptionJSON } from './../../entity/catalogue/Description';
 import { VE, CAE, TOG } from "../../utils";
 import { Type } from "../../entity/catalogue/Type";
 import { isEmpty } from "class-validator";
@@ -10,7 +11,6 @@ import { OptionAttributeValue } from "../../entity/catalogue/OptionAttributeValu
 import { Subtype } from "../../entity/catalogue/Subtype";
 import ApiError from "../../core/errors";
 import Description from "../../entity/catalogue/Description";
-import DescriptionAsset from "../../entity/catalogue/DescriptionAsset";
 
 export interface CreateSubtypeInfo {
     sku: string
@@ -19,7 +19,7 @@ export interface CreateSubtypeInfo {
     attributes: AttributeJSON[]
     skuAttributes: SKUAttributeJSON[],
     optionAttribute: OptionAttributeJSON,
-    descriptions: Description[]
+    descriptions: DescriptionJSON[]
 }
 
 export class SubtypeService {
@@ -101,45 +101,9 @@ export class SubtypeService {
             subtype.descriptions = []
             for (let i = 0; i < subtypeInfo.descriptions.length; i++) {
                 const desc = subtypeInfo.descriptions[i]
-                const description = new Description(desc.order, desc.style)
-                let validationResult = await VE(description);
-                if (validationResult instanceof ApiError) return validationResult
-                if (!isEmpty(desc.linkButtonHyperlink)) {
-                    description.linkButtonHyperlink = desc.linkButtonHyperlink
-                }
-                if (!isEmpty(desc.linkButtonText)) {
-                    description.linkButtonText = desc.linkButtonText
-                }
-                if (!isEmpty(desc.primaryButtonHyperLink)) {
-                    description.primaryButtonHyperLink = desc.primaryButtonHyperLink
-                }
-                if (!isEmpty(desc.primaryButtonText)) {
-                    description.primaryButtonText = desc.primaryButtonText
-                }
-                if (!isEmpty(desc.body)) {
-                    description.body = desc.body
-                }
-                if (!isEmpty(desc.assets)) {
-                    for (let j = 0; j < desc.assets.length; j++) {
-                        const dasset = desc.assets[j]
-                        const asset = new DescriptionAsset(dasset.order, dasset.fullScreenImageUrl)
-                        let validationResult = await VE(asset);
-                        if (validationResult instanceof ApiError) return validationResult
-                        if (!isEmpty(dasset.fullScreenImageWebpUrl)) {
-                            asset.fullScreenImageWebpUrl = dasset.fullScreenImageWebpUrl
-                        }
-                        if (!isEmpty(dasset.smallScreenImageUrl)) {
-                            asset.smallScreenImageUrl = dasset.smallScreenImageUrl
-                        }
-                        if (!isEmpty(dasset.smallScreenImageWebpUrl)) {
-                            asset.smallScreenImageWebpUrl = dasset.smallScreenImageWebpUrl
-                        }
-                        if (isEmpty(description.assets)) {
-                            description.assets = []
-                        }
-                        description.assets.push(asset)
-                    }
-                }
+                const description = await Description.fromJSON(desc)
+
+                if (description instanceof ApiError) return description
 
                 subtype.descriptions.push(description)
 
