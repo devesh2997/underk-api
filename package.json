@@ -14,7 +14,7 @@
     "dependencies": {
         "@types/cors": "^2.8.6",
         "await-to-ts": "^1.0.6",
-        "axios": "^0.19.2",
+        "axios": "^0.21.1",
         "bcryptjs": "^2.4.3",
         "class-validator": "^0.12.2",
         "cors": "^2.8.5",
