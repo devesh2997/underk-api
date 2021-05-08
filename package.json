@@ -27,7 +27,7 @@
         "passport-jwt": "^4.0.0",
         "pg": "^8.0.3",
         "reflect-metadata": "^0.1.13",
-        "typeorm": "^0.2.24",
+        "typeorm": "^0.2.25",
         "underk-policies": "https://github.com/devesh2997/underk-policies#master",
         "underk-types": "https://github.com/devesh2997/underk-types#new",
         "underk-utils": "git+https://github.com/devesh2997/underk-utils.git#master"
